@@ -97,9 +97,13 @@ function parseStatus(statusObj) {
   if (type === 'STATUS_IN_PROGRESS' || type === 'STATUS_HALFTIME' || type === 'STATUS_END_PERIOD') {
     return { status: 'in', isLive: true };
   }
-  if (type === 'STATUS_FINAL' || type === 'STATUS_FINAL_OT') {
+  if (type === 'STATUS_FINAL' || type === 'STATUS_FINAL_OT' || type === 'STATUS_FULL_TIME') {
     return { status: 'post', isLive: false };
   }
+  // Fallback: use ESPN's own state classification
+  const state = statusObj.type?.state;
+  if (state === 'post') return { status: 'post', isLive: false };
+  if (state === 'in') return { status: 'in', isLive: true };
   return { status: 'pre', isLive: false };
 }
 
