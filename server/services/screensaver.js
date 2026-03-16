@@ -11,6 +11,11 @@ let broadcastFn = null;
 
 const POOL_STALE_MS = 30 * 60 * 1000; // 30 minutes
 
+const PROTECTED_MODES = ['nowplaying', 'nowplaying-tv', 'youtube', 'app'];
+function isProtectedMode(mode) {
+  return mode && (PROTECTED_MODES.includes(mode) || mode.startsWith('sports-'));
+}
+
 function init(callback) {
   broadcastFn = callback;
   console.log('[screensaver] Initialized with broadcast callback');
@@ -95,6 +100,13 @@ function advanceSlide(slug) {
   const pool = roomPools[slug];
   if (!pool || pool.items.length === 0) return;
 
+  const currentState = getState(slug);
+  if (isProtectedMode(currentState?.mode)) {
+    console.log(`[screensaver] advanceSlide skipped for "${slug}" — room is in "${currentState.mode}" mode`);
+    if (pool.timer) { clearInterval(pool.timer); pool.timer = null; }
+    return;
+  }
+
   // Advance index (wrap around)
   pool.currentIndex = (pool.currentIndex + 1) % pool.items.length;
 
@@ -148,6 +160,12 @@ async function startRotation(slug) {
   // Build pool if missing or stale
   if (!roomPools[slug] || Date.now() - roomPools[slug].lastRefresh > POOL_STALE_MS) {
     await buildPool(slug);
+  }
+
+  const currentState = getState(slug);
+  if (isProtectedMode(currentState?.mode)) {
+    console.log(`[screensaver] startRotation aborted for "${slug}" — room is in "${currentState.mode}" mode`);
+    return;
   }
 
   const pool = roomPools[slug];
