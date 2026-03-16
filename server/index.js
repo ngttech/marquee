@@ -162,11 +162,11 @@ server.listen(PORT, () => {
     if (payload) broadcastToRoom(slug, payload);
   });
 
-  // Start ESPN polling for rooms with auto-switch enabled
+  // Resume ESPN polling for rooms that were showing a live game before restart
   for (const slug of slugs) {
-    const roomCfg = getRoomConfig(slug);
-    if (roomCfg?.autoSwitchSports && roomCfg?.trackedTeams?.length > 0) {
-      espn.startPolling(slug);
+    const state = getState(slug);
+    if (state?.mode?.startsWith('sports-') && state?.gameId) {
+      espn.startGamePolling(slug, state.gameId);
     }
   }
 

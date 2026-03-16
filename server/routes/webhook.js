@@ -147,12 +147,6 @@ router.post('/plex', upload.none(), async (req, res) => {
         console.error(`[webhook] Failed to start screensaver for ${room}:`, err.message)
       );
 
-      // Restart ESPN polling if room has auto-switch enabled
-      const { getRoomConfig: getRoomCfg } = require('../config');
-      const roomCfg = getRoomCfg(room);
-      if (roomCfg?.autoSwitchSports && roomCfg?.trackedTeams?.length > 0) {
-        espn.startPolling(room);
-      }
     }
   } catch (err) {
     console.error('[webhook] Error processing payload:', err);
@@ -215,12 +209,6 @@ router.post('/ha', express.json(), async (req, res) => {
         console.error(`[webhook/ha] Failed to start screensaver for ${room}:`, err.message)
       );
 
-      // Restart ESPN polling if applicable
-      const { getRoomConfig: getRoomCfg } = require('../config');
-      const roomCfg = getRoomCfg(room);
-      if (roomCfg?.autoSwitchSports && roomCfg?.trackedTeams?.length > 0) {
-        espn.startPolling(room);
-      }
     } else {
       // youtube or app mode — don't override Plex/sports
       if (currentMode === 'nowplaying' || currentMode === 'nowplaying-tv' || currentMode.startsWith('sports-')) {

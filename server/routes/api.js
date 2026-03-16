@@ -184,13 +184,6 @@ router.put('/rooms/:slug', (req, res) => {
     console.error(`[api] Failed to rebuild screensaver pool for ${slug}:`, err.message)
   );
 
-  // Start/stop ESPN polling when sports settings change
-  if (updated.autoSwitchSports && updated.trackedTeams?.length > 0) {
-    espn.startPolling(slug);
-  } else {
-    espn.stopPolling(slug);
-  }
-
   // Start/stop HA polling when haEntity changes
   if (updated.haEntity) {
     ha.startPolling(slug);

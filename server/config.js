@@ -42,8 +42,6 @@ const DEFAULT_ROOM = {
   screensaverInterval: 15,
   screensaverSources: ['recently_added', 'coming_soon'],
   screensaverElements: ['runtime', 'rating', 'contentRating', 'overview', 'credits'],
-  autoSwitchSports: false,
-  trackedTeams: [],
 };
 
 let config = null;

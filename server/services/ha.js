@@ -129,7 +129,8 @@ function startPolling(slug) {
 
   async function poll() {
     try {
-      if (getClientCount(slug) === 0) return;
+      const clientCount = getClientCount(slug);
+      const shouldBroadcast = clientCount > 0;
 
       const cfg = getConfig().global;
       if (!cfg.haUrl || !cfg.haToken) return;
@@ -168,16 +169,7 @@ function startPolling(slug) {
             screensaver.startRotation(slug).catch(() => {});
           } catch (e) { /* ignore */ }
 
-          // Restart ESPN polling if applicable
-          try {
-            const espn = require('./espn');
-            const roomCfg2 = getRoomConfig(slug);
-            if (roomCfg2?.autoSwitchSports && roomCfg2?.trackedTeams?.length > 0) {
-              espn.startPolling(slug);
-            }
-          } catch (e) { /* ignore */ }
-
-          if (broadcastFn) broadcastFn(slug);
+          if (shouldBroadcast && broadcastFn) broadcastFn(slug);
         }
       } else {
         // youtube or app mode — stop screensaver + ESPN
@@ -191,12 +183,13 @@ function startPolling(slug) {
           espn.stopPolling(slug);
         } catch (e) { /* ignore */ }
 
+        // Always update state so reconnecting clients get fresh data
         setState(slug, {
           ...current,
           ...mapped,
         });
 
-        if (broadcastFn) broadcastFn(slug);
+        if (shouldBroadcast && broadcastFn) broadcastFn(slug);
       }
     } catch (err) {
       console.warn(`[ha] Poll error for ${slug}:`, err.message);

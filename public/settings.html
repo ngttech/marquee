@@ -162,19 +162,6 @@ h2:first-of-type { margin-top: 16px; }
 .sport-tab:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.2); }
 .sport-tab.active { color: #c9a84c; border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.08); }
 .sport-tab .tab-count { font-size: 10px; opacity: 0.6; margin-left: 4px; }
-.team-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.3);
-  padding: 4px 10px; margin: 3px; font-size: 12px; font-weight: 600;
-  letter-spacing: 1px; color: #c9a84c;
-}
-.team-pill .remove-team {
-  cursor: pointer; color: rgba(255,255,255,0.3); font-size: 14px;
-  margin-left: 2px; transition: color 0.2s;
-}
-.team-pill .remove-team:hover { color: #e05050; }
-.team-pills { display: flex; flex-wrap: wrap; gap: 2px; margin-bottom: 6px; }
-
 /* ═══ CHECKBOX GROUP ═══ */
 .checkbox-group {
   display: flex; flex-direction: column; gap: 8px; margin-top: 4px;
@@ -418,23 +405,6 @@ function populateRooms() {
               </label>
             </div>
           </div>
-          <div class="field">
-            <label>Auto-Switch to Sports</label>
-            <select id="r-${slug}-autoSwitchSports">
-              <option value="off"${!r.autoSwitchSports ? ' selected' : ''}>Off</option>
-              <option value="on"${r.autoSwitchSports ? ' selected' : ''}>On</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Tracked Teams</label>
-            <div class="team-pills" id="r-${slug}-team-pills">
-              ${(r.trackedTeams || []).map(t => `<span class="team-pill">${t}<span class="remove-team" onclick="removeTrackedTeam('${slug}','${t}')">&times;</span></span>`).join('')}
-            </div>
-            <div style="display:flex;gap:6px">
-              <input type="text" id="r-${slug}-addTeam" placeholder="Team name (e.g. Lakers, Eagles)" style="flex:1">
-              <button class="btn btn-sm" onclick="addTrackedTeam('${slug}')">Add</button>
-            </div>
-          </div>
           <div class="btn-row">
             <button class="btn btn-sm" onclick="saveRoom('${slug}')">Save Room</button>
             ${slugs.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="deleteRoom('${slug}')">Delete</button>` : ''}
@@ -503,16 +473,6 @@ async function saveRoom(slug) {
     const cb = document.getElementById(`r-${slug}-el-${key}`);
     return cb && cb.checked;
   });
-  // Sports settings
-  const autoSwitchEl = document.getElementById(`r-${slug}-autoSwitchSports`);
-  if (autoSwitchEl) data.autoSwitchSports = autoSwitchEl.value === 'on';
-  // Tracked teams from pills
-  const pillsContainer = document.getElementById(`r-${slug}-team-pills`);
-  if (pillsContainer) {
-    data.trackedTeams = Array.from(pillsContainer.querySelectorAll('.team-pill')).map(p =>
-      p.textContent.replace('×', '').trim()
-    );
-  }
   try {
     const res = await fetch(`/api/rooms/${slug}`, {
       method: 'PUT',
@@ -655,29 +615,6 @@ async function testHaConnection() {
     result.textContent = '\u2717 ' + (err.message || 'Network error');
   }
   btn.disabled = false; btn.textContent = 'Test';
-}
-
-function addTrackedTeam(slug) {
-  const input = document.getElementById(`r-${slug}-addTeam`);
-  const team = input.value.trim();
-  if (!team) return;
-  const pills = document.getElementById(`r-${slug}-team-pills`);
-  const pill = document.createElement('span');
-  pill.className = 'team-pill';
-  pill.innerHTML = `${team}<span class="remove-team" onclick="removeTrackedTeam('${slug}','${team}')">&times;</span>`;
-  pills.appendChild(pill);
-  input.value = '';
-}
-
-function removeTrackedTeam(slug, team) {
-  const pills = document.getElementById(`r-${slug}-team-pills`);
-  if (!pills) return;
-  for (const pill of pills.querySelectorAll('.team-pill')) {
-    if (pill.textContent.replace('×', '').trim() === team) {
-      pill.remove();
-      break;
-    }
-  }
 }
 
 function populateSportsRoomSelect() {

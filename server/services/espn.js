@@ -7,12 +7,8 @@ let broadcastFn = null;
 // Per-room polling state
 const roomPollers = {};
 
-// Manual hold — rooms where a game was manually pushed (skip auto-revert)
-const manualHolds = {};
-
-// In-memory cache for ESPN responses (15 second TTL)
-let gamesCache = null;
-let gamesCacheTime = 0;
+// Per-sport cache — each sport's data cached independently so a single failure doesn't wipe others
+const sportCaches = {}; // { mlb: { games: [], time: 0 }, nba: { ... }, ... }
 const CACHE_TTL = 15000;
 
 const ESPN_BASE = 'https://site.api.espn.com/apis/site/v2/sports';
@@ -222,104 +218,89 @@ function normalizeGame(sportKey, event) {
 }
 
 async function fetchAllLiveGames() {
-  // Return cache if fresh
-  if (gamesCache && Date.now() - gamesCacheTime < CACHE_TTL) {
-    return gamesCache;
+  const now = Date.now();
+
+  // Check if all sport caches are fresh
+  const allFresh = Object.keys(SPORT_ENDPOINTS).every(k =>
+    sportCaches[k] && now - sportCaches[k].time < CACHE_TTL
+  );
+  if (allFresh) {
+    return getAllCachedGames();
   }
 
-  const keys = Object.keys(SPORT_ENDPOINTS);
-  const results = await Promise.allSettled(keys.map(k => fetchScoreboard(k)));
+  // Always fetch all sports — per-sport cache with TTL prevents redundant fetches
+  const keysToFetch = Object.keys(SPORT_ENDPOINTS).filter(k =>
+    !sportCaches[k] || now - sportCaches[k].time >= CACHE_TTL
+  );
 
-  let games = [];
+  if (keysToFetch.length === 0) return getAllCachedGames();
+
+  const results = await Promise.allSettled(keysToFetch.map(k => fetchScoreboard(k)));
+
   for (let i = 0; i < results.length; i++) {
+    const sportKey = keysToFetch[i];
     const r = results[i];
-    if (r.status !== 'fulfilled' || !r.value?.events) continue;
-    for (const event of r.value.events) {
-      const game = normalizeGame(keys[i], event);
-      if (game) games.push(game);
+    if (r.status === 'fulfilled' && r.value?.events) {
+      const games = [];
+      for (const event of r.value.events) {
+        const game = normalizeGame(sportKey, event);
+        if (game) games.push(game);
+      }
+      sportCaches[sportKey] = { games, time: now };
+    } else {
+      // On failure, keep previous cached games instead of dropping them
+      if (!sportCaches[sportKey]) {
+        sportCaches[sportKey] = { games: [], time: now };
+      }
+      console.warn(`[espn] Failed to fetch ${sportKey}, keeping ${sportCaches[sportKey].games.length} cached games`);
     }
   }
 
-  gamesCache = games;
-  gamesCacheTime = Date.now();
+  return getAllCachedGames();
+}
+
+function getAllCachedGames() {
+  let games = [];
+  for (const cache of Object.values(sportCaches)) {
+    games = games.concat(cache.games);
+  }
   return games;
 }
 
-function getTrackedGameForRoom(slug) {
-  const roomCfg = getRoomConfig(slug);
-  if (!roomCfg?.trackedTeams?.length) return null;
-  if (!gamesCache) return null;
-
-  const tracked = roomCfg.trackedTeams;
-
-  // Find a live game matching tracked teams first, then pre-game, then post-game
-  const priority = { in: 0, pre: 1, post: 2 };
-  const matches = gamesCache.filter(g => {
-    const names = [
-      g.homeTeam.name, g.homeTeam.abbreviation,
-      g.awayTeam.name, g.awayTeam.abbreviation,
-    ].map(n => n.toLowerCase());
-    return tracked.some(t => names.includes(t.toLowerCase()));
-  });
-
-  matches.sort((a, b) => (priority[a.status] || 9) - (priority[b.status] || 9));
-  return matches[0] || null;
-}
-
-function startPolling(slug) {
+function startGamePolling(slug, gameId) {
   stopPolling(slug);
-
-  const roomCfg = getRoomConfig(slug);
-  if (!roomCfg?.autoSwitchSports || !roomCfg?.trackedTeams?.length) return;
-
-  const pollInterval = 30000; // 30 seconds default
 
   async function poll() {
     try {
-      if (getClientCount(slug) === 0) return;
+      const clientCount = getClientCount(slug);
+      const allGames = await fetchAllLiveGames();
+      const game = allGames.find(g => g.gameId === gameId);
 
-      await fetchAllLiveGames();
-      const game = getTrackedGameForRoom(slug);
+      console.log(`[espn] Poll for "${slug}" gameId=${gameId} — ${allGames.length} games cached, match: ${game ? game.competition + ' (' + game.status + ')' : 'not found'}, clients: ${clientCount}`);
 
-      if (game && (game.status === 'in' || game.status === 'pre')) {
+      if (!game) return; // Game not found in cache, keep trying
+
+      if (game.status === 'post') {
+        // Game ended — revert to screensaver
+        console.log(`[espn] Game ${gameId} ended for "${slug}" — reverting to screensaver`);
         const { getState, setState } = require('../state');
-        const current = getState(slug);
-        const mode = `sports-${game.sport}`;
-
-        // Set sports state
-        setState(slug, {
-          ...current,
-          mode,
-          ...game,
-        });
-
-        // Stop screensaver if running
+        const current = getState(slug) || {};
+        setState(slug, { ...current, mode: 'screensaver' });
         try {
           const screensaver = require('./screensaver');
-          screensaver.stopRotation(slug);
+          screensaver.startRotation(slug).catch(() => {});
         } catch (e) { /* ignore */ }
-
-        if (broadcastFn) broadcastFn(slug);
-
-        // Speed up polling when game is live
-        if (game.isLive && roomPollers[slug]?.intervalMs !== 15000) {
-          roomPollers[slug].intervalMs = 15000;
-          clearInterval(roomPollers[slug].timer);
-          roomPollers[slug].timer = setInterval(poll, 15000);
-        }
-      } else if (!game && !manualHolds[slug]) {
-        // No tracked game active — check if room is in sports mode and revert
-        const { getState, setState } = require('../state');
-        const current = getState(slug);
-        if (current?.mode?.startsWith('sports-')) {
-          setState(slug, { ...current, mode: 'screensaver' });
-          try {
-            const screensaver = require('./screensaver');
-            screensaver.startRotation(slug).catch(() => {});
-          } catch (e) { /* ignore */ }
-          if (broadcastFn) broadcastFn(slug);
-        }
+        if (clientCount > 0 && broadcastFn) broadcastFn(slug);
+        stopPolling(slug);
+        return;
       }
+
+      // Game still active — update state with fresh data
+      const { getState, setState } = require('../state');
+      const current = getState(slug) || {};
+      const mode = `sports-${game.sport}`;
+      setState(slug, { ...current, mode, ...game });
+      if (clientCount > 0 && broadcastFn) broadcastFn(slug);
     } catch (err) {
       console.warn(`[espn] Poll error for ${slug}:`, err.message);
     }
@@ -328,10 +309,10 @@ function startPolling(slug) {
   // Initial poll
   poll();
 
-  // Start interval
-  const timer = setInterval(poll, pollInterval);
-  roomPollers[slug] = { timer, intervalMs: pollInterval };
-  console.log(`[espn] Polling started for "${slug}" (${pollInterval / 1000}s interval)`);
+  // 15s interval for live game updates
+  const timer = setInterval(poll, 15000);
+  roomPollers[slug] = { timer, gameId };
+  console.log(`[espn] Game polling started for "${slug}" gameId=${gameId} (15s interval)`);
 }
 
 function stopPolling(slug) {
@@ -340,17 +321,12 @@ function stopPolling(slug) {
     delete roomPollers[slug];
     console.log(`[espn] Polling stopped for "${slug}"`);
   }
-  // Always clear manual hold when stopping
-  delete manualHolds[slug];
 }
 
 function pushGameToRoom(slug, gameData) {
   const { getState, setState } = require('../state');
   const current = getState(slug) || {};
   const mode = `sports-${gameData.sport}`;
-
-  // Set manual hold so polling won't revert this
-  manualHolds[slug] = true;
 
   setState(slug, {
     ...current,
@@ -365,10 +341,11 @@ function pushGameToRoom(slug, gameData) {
   } catch (e) { /* ignore */ }
 
   if (broadcastFn) broadcastFn(slug);
+
+  // Start polling to keep score live and auto-revert when game ends
+  if (gameData.gameId) {
+    startGamePolling(slug, gameData.gameId);
+  }
 }
 
-function clearManualHold(slug) {
-  delete manualHolds[slug];
-}
-
-module.exports = { init, fetchAllLiveGames, pushGameToRoom, startPolling, stopPolling, getTrackedGameForRoom, clearManualHold };
+module.exports = { init, fetchAllLiveGames, pushGameToRoom, startGamePolling, stopPolling };
