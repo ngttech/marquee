@@ -887,6 +887,11 @@ function render(state) {
   if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
   if (_ytProgressInterval) { clearInterval(_ytProgressInterval); _ytProgressInterval = null; }
   if (trailerTimer) { clearTimeout(trailerTimer); trailerTimer = null; }
+  // Don't close trailer on screensaver slide advances — only close on mode change
+  const trailerActive = document.getElementById('trailer-overlay');
+  if (trailerActive && state.mode === 'screensaver') {
+    return; // Skip re-render entirely while trailer is playing over screensaver
+  }
   closeTrailer();
 
   // Apply theme from state

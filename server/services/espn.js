@@ -7,6 +7,9 @@ let broadcastFn = null;
 // Per-room polling state
 const roomPollers = {};
 
+// Manual hold — rooms where a game was manually pushed (skip auto-revert)
+const manualHolds = {};
+
 // In-memory cache for ESPN responses (15 second TTL)
 let gamesCache = null;
 let gamesCacheTime = 0;
@@ -304,7 +307,7 @@ function startPolling(slug) {
           clearInterval(roomPollers[slug].timer);
           roomPollers[slug].timer = setInterval(poll, 15000);
         }
-      } else if (!game) {
+      } else if (!game && !manualHolds[slug]) {
         // No tracked game active — check if room is in sports mode and revert
         const { getState, setState } = require('../state');
         const current = getState(slug);
@@ -337,12 +340,17 @@ function stopPolling(slug) {
     delete roomPollers[slug];
     console.log(`[espn] Polling stopped for "${slug}"`);
   }
+  // Always clear manual hold when stopping
+  delete manualHolds[slug];
 }
 
 function pushGameToRoom(slug, gameData) {
   const { getState, setState } = require('../state');
   const current = getState(slug) || {};
   const mode = `sports-${gameData.sport}`;
+
+  // Set manual hold so polling won't revert this
+  manualHolds[slug] = true;
 
   setState(slug, {
     ...current,
@@ -359,4 +367,8 @@ function pushGameToRoom(slug, gameData) {
   if (broadcastFn) broadcastFn(slug);
 }
 
-module.exports = { init, fetchAllLiveGames, pushGameToRoom, startPolling, stopPolling, getTrackedGameForRoom };
+function clearManualHold(slug) {
+  delete manualHolds[slug];
+}
+
+module.exports = { init, fetchAllLiveGames, pushGameToRoom, startPolling, stopPolling, getTrackedGameForRoom, clearManualHold };

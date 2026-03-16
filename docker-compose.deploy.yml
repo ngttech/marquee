@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   marquee:
     image: ghcr.io/ngttech/marquee:latest
@@ -7,10 +5,5 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - marquee-data:/app/data
-    env_file:
-      - .env
+      - /volume2/apps/marquee:/app/data
     restart: unless-stopped
-
-volumes:
-  marquee-data:
