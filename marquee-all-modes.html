@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marquee — All Modes Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Bebas+Neue&family=Black+Ops+One&family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani', sans-serif; overflow: hidden; }
+
+/* ════════════════════════════════════════════════
+   NAV SWITCHER
+════════════════════════════════════════════════ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  display: flex; align-items: center; gap: 4px;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  overflow-x: auto; scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-label { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px; color: rgba(255,255,255,0.25); white-space: nowrap; margin-right: 8px; flex-shrink: 0; }
+.nav-btn {
+  flex-shrink: 0; padding: 6px 14px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.45); font-family: 'Rajdhani', sans-serif;
+  font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  cursor: pointer; border-radius: 2px; white-space: nowrap;
+  transition: all 0.2s;
+}
+.nav-btn:hover { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.25); }
+.nav-btn.active { color: #fff; border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); }
+
+/* ════════════════════════════════════════════════
+   SCREEN WRAPPER
+════════════════════════════════════════════════ */
+.screen {
+  display: none; position: fixed;
+  top: 48px; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+.screen.active { display: block; }
+
+/* ════════════════════════════════════════════════
+   SHARED BANNER COMPONENT
+════════════════════════════════════════════════ */
+.banner {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px 40px 11px;
+  border-bottom: 1px solid var(--b-color, #c9a84c);
+  background: var(--b-bg, linear-gradient(135deg,#1a1200,#0d0a00,#1a1200));
+  overflow: hidden;
+}
+.banner-text {
+  font-family: 'Cinzel', serif; font-size: clamp(16px,2.2vw,28px);
+  font-weight: 700; letter-spacing: clamp(6px,1vw,14px);
+  text-transform: uppercase; color: var(--b-color, #c9a84c);
+  text-shadow: 0 0 20px var(--b-glow, rgba(201,168,76,0.4));
+  white-space: nowrap;
+}
+.banner-orn { color: var(--b-color, #c9a84c); opacity: 0.6; margin: 0 16px; font-size: 14px; letter-spacing: 3px; }
+
+/* ════════════════════════════════════════════════
+   1. PLEX — MOVIE NOW PLAYING
+════════════════════════════════════════════════ */
+#mode-movie {
+  --b-color: #c9a84c;
+  --b-glow: rgba(201,168,76,0.4);
+  --b-bg: linear-gradient(135deg,#1a1200,#0d0a00,#1a1200);
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, #0d0d0d, #000);
+}
+.movie-ambient {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 55% 65% at 50% 50%, rgba(201,168,76,0.12), transparent 70%);
+  pointer-events: none;
+}
+.movie-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: grid; grid-template-rows: 1fr auto;
+}
+.movie-poster-wrap {
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px 0 8px;
+}
+.movie-poster-frame {
+  position: relative; height: 100%; aspect-ratio: 2/3;
+  animation: revealUp 1s cubic-bezier(0.16,1,0.3,1) both;
+}
+.movie-poster-frame img {
+  width: 100%; height: 100%; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04);
+  display: block;
+}
+.watched-eye {
+  position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
+  background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px); z-index: 5;
+}
+.watched-eye svg { width: 13px; height: 13px; fill: none; stroke: #c9a84c; stroke-width: 2; }
+.trailer-pill {
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.75); border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.85); font-family: 'Rajdhani', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 3px; padding: 7px 18px;
+  backdrop-filter: blur(8px); white-space: nowrap;
+  animation: revealUp 0.6s 1.2s both;
+}
+.meta-bar {
+  background: linear-gradient(0deg, #000, rgba(0,0,0,0.97));
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 10px 24px 14px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.tagline {
+  text-align: center; font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(11px,1.4vw,17px); font-weight: 400; letter-spacing: 3px;
+  color: rgba(240,232,216,0.55); font-style: italic;
+  animation: revealUp 0.6s 0.5s both;
+}
+.badges {
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(8px,1.5vw,22px); flex-wrap: wrap;
+  animation: revealUp 0.6s 0.7s both;
+}
+.b-rating {
+  border: 2px solid rgba(255,255,255,0.5); padding: 2px 8px;
+  font-size: clamp(9px,0.9vw,12px); font-weight: 700; color: #fff;
+  line-height: 1.1; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px;
+}
+.b-rating small { display: block; font-size: 0.58em; color: rgba(255,255,255,0.6); letter-spacing: 0.3px; }
+.b-audio { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.b-audio .ab { font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.3vw,16px); letter-spacing: 2px; line-height: 1; }
+.b-audio .as { font-size: clamp(6px,0.6vw,8px); letter-spacing: 1.5px; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+.atmos .ab { color: #00b4d8; } .dtshd .ab { color: #7fb3e8; } .truehd .ab { color: #e86b6b; }
+.b-res {
+  border: 1.5px solid rgba(255,255,255,0.3); padding: 2px 9px;
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.3vw,17px);
+  letter-spacing: 2px; line-height: 1; color: rgba(255,255,255,0.85);
+}
+.b-res.uhd { border-color: #c9a84c; color: #c9a84c; }
+.b-res.hdr { border-color: #f39c12; color: #f39c12; font-size: clamp(9px,0.9vw,12px); }
+.b-aspect { color: rgba(255,255,255,0.45); font-size: clamp(10px,1vw,14px); font-weight: 500; letter-spacing: 1px; }
+.b-stars { display: flex; gap: 2px; }
+.star { font-size: clamp(13px,1.3vw,18px); }
+.s-full { color: #c9a84c; } .s-half { color: #c9a84c; opacity: 0.55; } .s-empty { color: rgba(255,255,255,0.18); }
+.b-clock { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.5vw,20px); letter-spacing: 3px; color: rgba(255,255,255,0.4); }
+.divider { width: 1px; height: 24px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
+
+/* ════════════════════════════════════════════════
+   2. PLEX — TV SHOW
+════════════════════════════════════════════════ */
+#mode-tv {
+  --b-color: #8ec5fc;
+  --b-glow: rgba(142,197,252,0.4);
+  --b-bg: linear-gradient(135deg,#000d1a,#00050e,#000d1a);
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, #080d14, #000);
+}
+.tv-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 0; align-items: stretch;
+}
+.tv-poster-col {
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 20px 24px 40px;
+}
+.tv-poster-img {
+  height: calc(100% - 20px); aspect-ratio: 2/3; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  animation: revealUp 1s cubic-bezier(0.16,1,0.3,1) both;
+}
+.tv-info-col {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 40px 40px 40px 30px; gap: 20px;
+}
+.tv-show-title {
+  font-family: 'Cinzel', serif; font-size: clamp(28px,5vw,64px);
+  font-weight: 700; color: #fff; letter-spacing: 2px; line-height: 1.05;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.8);
+  animation: revealUp 0.8s 0.1s both;
+}
+.tv-episode-meta {
+  display: flex; align-items: center; gap: 14px;
+  animation: revealUp 0.8s 0.25s both;
+}
+.tv-badge {
+  background: rgba(142,197,252,0.12); border: 1px solid rgba(142,197,252,0.3);
+  color: #8ec5fc; font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(12px,1.3vw,16px); letter-spacing: 3px; padding: 4px 12px;
+}
+.tv-episode-title {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(16px,2.2vw,28px);
+  font-weight: 600; color: rgba(255,255,255,0.75); letter-spacing: 2px;
+  animation: revealUp 0.8s 0.35s both;
+}
+.tv-overview {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(12px,1.4vw,17px);
+  font-weight: 400; color: rgba(255,255,255,0.4); line-height: 1.6;
+  max-width: 520px; letter-spacing: 0.5px;
+  animation: revealUp 0.8s 0.45s both;
+}
+.tv-meta-row {
+  display: flex; align-items: center; gap: 20px;
+  animation: revealUp 0.8s 0.55s both;
+}
+.tv-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.tv-meta-label { font-size: clamp(8px,0.7vw,10px); letter-spacing: 3px; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+.tv-meta-value { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.5vw,20px); letter-spacing: 2px; color: rgba(255,255,255,0.8); }
+.tv-progress-wrap {
+  display: flex; flex-direction: column; gap: 6px; max-width: 400px;
+  animation: revealUp 0.8s 0.65s both;
+}
+.tv-progress-label { font-size: clamp(9px,0.8vw,11px); letter-spacing: 3px; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+.tv-progress-bar { height: 2px; background: rgba(255,255,255,0.1); position: relative; }
+.tv-progress-fill { position: absolute; top: 0; left: 0; height: 100%; background: #8ec5fc; width: 34%; }
+.tv-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.08); flex-shrink: 0; }
+
+/* ════════════════════════════════════════════════
+   3. YOUTUBE MODE
+════════════════════════════════════════════════ */
+#mode-youtube {
+  background: #000;
+  --b-color: #ff4444;
+  --b-glow: rgba(255,68,68,0.4);
+  --b-bg: linear-gradient(135deg,#1a0000,#0d0000,#1a0000);
+}
+.yt-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 100% 80% at 50% 30%, #0d0000 0%, #000 70%);
+}
+.yt-scan { /* scanline effect */
+  position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+}
+.yt-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px; gap: 32px; z-index: 3;
+}
+.yt-logo-wrap {
+  display: flex; align-items: center; gap: 20px;
+  animation: revealUp 0.8s both;
+}
+.yt-logo-icon {
+  width: clamp(56px,7vw,80px); height: clamp(40px,5vw,56px);
+  background: #ff0000; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 60px rgba(255,0,0,0.5), 0 0 120px rgba(255,0,0,0.2);
+}
+.yt-logo-icon svg { width: 55%; fill: #fff; }
+.yt-wordmark { font-family: 'Bebas Neue', sans-serif; font-size: clamp(32px,5vw,60px); letter-spacing: 4px; color: #fff; }
+.yt-video-title {
+  font-family: 'Cinzel', serif; font-size: clamp(20px,3.5vw,44px);
+  font-weight: 600; color: #fff; text-align: center; letter-spacing: 2px;
+  line-height: 1.2; max-width: 800px;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.8);
+  animation: revealUp 0.8s 0.15s both;
+}
+.yt-channel {
+  display: flex; align-items: center; gap: 14px;
+  animation: revealUp 0.8s 0.3s both;
+}
+.yt-channel-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, #ff4444, #aa0000);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #fff; letter-spacing: 1px;
+}
+.yt-channel-name { font-family: 'Rajdhani', sans-serif; font-size: clamp(14px,1.5vw,20px); font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 2px; }
+.yt-stats {
+  display: flex; align-items: center; gap: 24px;
+  animation: revealUp 0.8s 0.45s both;
+}
+.yt-stat { text-align: center; }
+.yt-stat-value { font-family: 'Bebas Neue', sans-serif; font-size: clamp(16px,1.8vw,22px); letter-spacing: 2px; color: rgba(255,255,255,0.7); }
+.yt-stat-label { font-size: clamp(9px,0.8vw,11px); letter-spacing: 3px; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+.yt-progress-container {
+  width: min(600px, 80%); display: flex; flex-direction: column; gap: 8px;
+  animation: revealUp 0.8s 0.55s both;
+}
+.yt-time-row { display: flex; justify-content: space-between; font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,16px); letter-spacing: 2px; color: rgba(255,255,255,0.35); }
+.yt-progress-track { height: 3px; background: rgba(255,255,255,0.1); position: relative; border-radius: 2px; }
+.yt-progress-fill { position: absolute; inset-block: 0; left: 0; width: 42%; background: #ff0000; border-radius: 2px; }
+.yt-progress-thumb { position: absolute; top: 50%; transform: translate(-50%,-50%); left: 42%; width: 12px; height: 12px; background: #ff0000; border-radius: 50%; }
+
+/* ════════════════════════════════════════════════
+   4. SCREENSAVER
+════════════════════════════════════════════════ */
+#mode-screensaver {
+  background: #000;
+  --b-color: #c9a84c;
+  --b-bg: linear-gradient(135deg,#1a1200,#0d0a00,#1a1200);
+}
+.ss-bg-img {
+  position: absolute; inset: 0;
+  background-image: url('https://image.tmdb.org/t/p/original/5BwqwxMEjeFtdknRV792Svo0K1v.jpg');
+  background-size: cover; background-position: center;
+  filter: brightness(0.35) saturate(0.8);
+  transform: scale(1.04);
+  animation: ssKenBurns 20s ease-in-out infinite alternate;
+}
+@keyframes ssKenBurns { from { transform: scale(1.04) translate(0,0); } to { transform: scale(1.08) translate(-1%,-1%); } }
+.ss-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 20%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+}
+.ss-bottom-grad {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 70%;
+  background: linear-gradient(transparent, rgba(0,0,0,0.97));
+  pointer-events: none;
+}
+.ss-layout {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: end; padding: 50px 60px;
+  z-index: 5;
+}
+.ss-text-col { display: flex; flex-direction: column; gap: 12px; }
+.ss-source-label {
+  font-family: 'Cinzel', serif; font-size: clamp(10px,0.9vw,13px);
+  font-weight: 600; letter-spacing: 8px; color: #c9a84c;
+  text-shadow: 0 0 20px rgba(201,168,76,0.5); text-transform: uppercase;
+  animation: revealUp 0.8s both;
+}
+.ss-title {
+  font-family: 'Cinzel', serif; font-size: clamp(32px,6vw,80px);
+  font-weight: 900; color: #fff; letter-spacing: 3px; line-height: 1.0;
+  text-shadow: 0 4px 60px rgba(0,0,0,0.9);
+  animation: revealUp 0.8s 0.1s both;
+}
+.ss-meta-row {
+  display: flex; align-items: center; gap: 20px;
+  animation: revealUp 0.8s 0.25s both;
+}
+.ss-year { font-family: 'Bebas Neue', sans-serif; font-size: clamp(16px,1.8vw,22px); letter-spacing: 4px; color: rgba(255,255,255,0.45); }
+.ss-genre-pill {
+  border: 1px solid rgba(255,255,255,0.2); padding: 3px 10px;
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  font-weight: 600; letter-spacing: 2px; color: rgba(255,255,255,0.5); text-transform: uppercase;
+}
+.ss-tagline {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(14px,1.6vw,20px);
+  font-weight: 400; color: rgba(255,255,255,0.45); font-style: italic; letter-spacing: 2px;
+  animation: revealUp 0.8s 0.35s both;
+}
+.ss-poster-col {
+  padding-bottom: 4px;
+  animation: revealUp 1s 0.2s both;
+}
+.ss-poster-img {
+  height: clamp(160px,22vh,280px); aspect-ratio: 2/3; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+.ss-progress-bar {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: rgba(255,255,255,0.05);
+}
+.ss-progress-fill {
+  height: 100%; background: #c9a84c; opacity: 0.5; width: 35%;
+  animation: ssProgress 15s linear infinite;
+}
+@keyframes ssProgress { from { width: 0%; } to { width: 100%; } }
+.ss-dot-nav {
+  position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 6;
+}
+.ss-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.3s; }
+.ss-dot.active { background: #c9a84c; width: 20px; border-radius: 3px; }
+
+/* ════════════════════════════════════════════════
+   5. SOCCER / FOOTBALL
+════════════════════════════════════════════════ */
+#mode-soccer {
+  --b-color: #4ade80;
+  --b-glow: rgba(74,222,128,0.4);
+  --b-bg: linear-gradient(135deg,#001a08,#000d04,#001a08);
+  background: #000;
+}
+.soccer-field-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, #001208 0%, #000a04 100%);
+}
+/* SVG Field lines drawn in CSS */
+.field-canvas {
+  position: absolute; inset: 0; opacity: 0.18;
+}
+.soccer-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(74,222,128,0.08) 0%, transparent 70%);
+}
+.soccer-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(14px,2vh,28px); padding: 20px 40px; z-index: 10;
+}
+.soccer-competition {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,16px);
+  letter-spacing: 6px; color: rgba(255,255,255,0.35);
+  animation: revealUp 0.6s both;
+}
+.soccer-status {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(12px,1.2vw,16px);
+  font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  animation: revealUp 0.6s 0.05s both;
+}
+.live-indicator { display: flex; align-items: center; gap: 6px; color: #4ade80; }
+.live-pulse { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; animation: livePulse 1.5s infinite; }
+@keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+.match-clock { color: rgba(255,255,255,0.5); }
+.soccer-scoreboard {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: clamp(20px,4vw,60px); width: 100%; max-width: 900px;
+  animation: revealUp 0.8s 0.1s both;
+}
+.soccer-team { display: flex; flex-direction: column; align-items: center; gap: clamp(10px,1.5vh,18px); }
+.soccer-team.away { }
+.team-crest {
+  width: clamp(70px,10vw,120px); height: clamp(70px,10vw,120px);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(36px,5vw,60px); position: relative;
+}
+.team-crest::before {
+  content: ''; position: absolute; inset: -3px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.team-crest.home-crest { background: radial-gradient(135deg at 30% 30%, rgba(0,51,255,0.3), rgba(0,0,80,0.2)); }
+.team-crest.away-crest { background: radial-gradient(135deg at 30% 30%, rgba(255,0,0,0.3), rgba(80,0,0,0.2)); }
+.soccer-team-name {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(18px,2.8vw,36px);
+  letter-spacing: 3px; color: #fff; text-align: center;
+}
+.soccer-team-record { font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,1vw,13px); color: rgba(255,255,255,0.3); letter-spacing: 1px; }
+.score-center { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.soccer-score {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(72px,14vw,160px);
+  letter-spacing: -4px; line-height: 1; color: #fff;
+  display: flex; align-items: center; gap: 8px;
+  text-shadow: 0 0 80px rgba(255,255,255,0.1);
+}
+.score-dash { color: rgba(255,255,255,0.2); font-size: 0.6em; margin: 0 4px; }
+.soccer-venue { font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1.1vw,14px); color: rgba(255,255,255,0.3); letter-spacing: 2px; text-transform: uppercase; text-align: center; }
+.soccer-stats-row {
+  display: flex; align-items: center; gap: clamp(16px,3vw,40px);
+  width: 100%; max-width: 600px;
+  animation: revealUp 0.8s 0.25s both;
+}
+.stat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.stat-label { font-size: clamp(8px,0.7vw,10px); letter-spacing: 3px; color: rgba(255,255,255,0.25); text-transform: uppercase; }
+.stat-bar { width: 100%; height: 2px; background: rgba(255,255,255,0.08); position: relative; overflow: hidden; }
+.stat-fill-home { position: absolute; top: 0; left: 0; height: 100%; background: #4ade80; }
+.stat-fill-away { position: absolute; top: 0; right: 0; height: 100%; background: #f87171; }
+.stat-values { display: flex; justify-content: space-between; width: 100%; }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.3vw,16px); letter-spacing: 2px; }
+.stat-val.home { color: #4ade80; } .stat-val.away { color: #f87171; }
+.soccer-recent-goals {
+  display: flex; align-items: center; gap: 14px;
+  animation: revealUp 0.8s 0.35s both;
+}
+.goal-event {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  padding: 6px 14px; display: flex; align-items: center; gap: 8px;
+}
+.goal-icon { font-size: 14px; }
+.goal-text { font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,1vw,13px); font-weight: 600; letter-spacing: 1px; color: rgba(255,255,255,0.6); }
+.goal-min { font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,15px); letter-spacing: 2px; color: #4ade80; }
+
+/* ════════════════════════════════════════════════
+   6. NFL FOOTBALL
+════════════════════════════════════════════════ */
+#mode-nfl {
+  --b-color: #60a5fa;
+  --b-glow: rgba(96,165,250,0.4);
+  --b-bg: linear-gradient(135deg,#00081a,#000510,#00081a);
+  background: #000;
+}
+.nfl-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, #00061a 0%, #000 60%);
+}
+.nfl-field-lines {
+  position: absolute; inset: 0; opacity: 0.07;
+}
+.nfl-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(12px,2vh,24px); padding: 20px 40px; z-index: 10;
+}
+.nfl-league { font-family: 'Black Ops One', cursive; font-size: clamp(11px,1.1vw,14px); letter-spacing: 6px; color: rgba(96,165,250,0.5); animation: revealUp 0.6s both; }
+.nfl-game-status {
+  display: flex; align-items: center; gap: 16px;
+  font-family: 'Teko', sans-serif; font-size: clamp(14px,1.4vw,18px);
+  font-weight: 600; letter-spacing: 3px; color: rgba(255,255,255,0.5); text-transform: uppercase;
+  animation: revealUp 0.6s 0.05s both;
+}
+.nfl-down-badge {
+  background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3);
+  color: #60a5fa; padding: 3px 12px; font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(12px,1.2vw,15px); letter-spacing: 3px;
+}
+.nfl-scoreboard {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: clamp(20px,4vw,60px); width: 100%; max-width: 900px;
+  animation: revealUp 0.8s 0.1s both;
+}
+.nfl-team { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.nfl-helmet {
+  font-size: clamp(48px,7vw,90px); line-height: 1;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.6));
+  animation: helmetFloat 4s ease-in-out infinite;
+}
+@keyframes helmetFloat { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-6px) rotate(2deg)} }
+.nfl-team-name {
+  font-family: 'Black Ops One', cursive; font-size: clamp(16px,2.5vw,32px);
+  letter-spacing: 2px; color: #fff; text-align: center;
+}
+.nfl-team-city { font-family: 'Teko', sans-serif; font-size: clamp(12px,1.2vw,15px); letter-spacing: 3px; color: rgba(255,255,255,0.35); }
+.nfl-score-center { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.nfl-score {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(72px,14vw,160px);
+  letter-spacing: -4px; line-height: 1; color: #fff;
+  display: flex; align-items: center; gap: 8px;
+  text-shadow: 0 0 60px rgba(96,165,250,0.15);
+}
+.nfl-score-dash { color: rgba(255,255,255,0.18); font-size: 0.55em; }
+.nfl-quarter-info { font-family: 'Teko', sans-serif; font-size: clamp(13px,1.3vw,18px); font-weight: 600; letter-spacing: 4px; color: rgba(255,255,255,0.4); text-transform: uppercase; text-align: center; }
+.nfl-score-grid {
+  display: grid; grid-template-columns: auto repeat(4,1fr) auto;
+  gap: 0; width: 100%; max-width: 500px;
+  border: 1px solid rgba(255,255,255,0.08); overflow: hidden;
+  animation: revealUp 0.8s 0.25s both;
+}
+.nfl-sg-cell {
+  padding: 6px 12px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1.1vw,15px); letter-spacing: 2px;
+}
+.nfl-sg-cell:last-child { border-right: none; }
+.nfl-sg-header { color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.02); font-size: clamp(9px,0.8vw,11px); letter-spacing: 3px; }
+.nfl-sg-total { color: #fff; font-weight: 700; background: rgba(255,255,255,0.04); }
+.nfl-sg-team { color: rgba(255,255,255,0.6); text-align: left; padding-left: 14px; font-family: 'Teko', sans-serif; font-size: clamp(12px,1.2vw,16px); letter-spacing: 2px; }
+.nfl-sg-score { color: rgba(255,255,255,0.75); }
+.nfl-sg-active { color: #60a5fa; }
+.nfl-possession {
+  font-family: 'Teko', sans-serif; font-size: clamp(11px,1.1vw,14px); letter-spacing: 3px;
+  color: rgba(255,255,255,0.3); text-transform: uppercase; text-align: center;
+  animation: revealUp 0.8s 0.35s both;
+}
+.possession-arrow { color: #60a5fa; font-size: 1.2em; }
+
+/* ════════════════════════════════════════════════
+   7. NBA BASKETBALL
+════════════════════════════════════════════════ */
+#mode-nba {
+  --b-color: #fb923c;
+  --b-glow: rgba(251,146,60,0.4);
+  --b-bg: linear-gradient(135deg,#1a0800,#0d0500,#1a0800);
+  background: #000;
+}
+.nba-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 50% 30%, #0d0500 0%, #000 70%);
+}
+.nba-court-lines { position: absolute; inset: 0; opacity: 0.08; }
+.nba-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(12px,2vh,22px); padding: 20px 40px; z-index: 10;
+}
+.nba-league { font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1.1vw,14px); letter-spacing: 6px; color: rgba(251,146,60,0.5); animation: revealUp 0.6s both; }
+.nba-status { display: flex; align-items: center; gap: 12px; animation: revealUp 0.6s 0.05s both; }
+.nba-quarter { font-family: 'Teko', sans-serif; font-size: clamp(14px,1.4vw,18px); font-weight: 600; letter-spacing: 3px; color: rgba(255,255,255,0.5); }
+.nba-clock-badge {
+  background: rgba(251,146,60,0.15); border: 1px solid rgba(251,146,60,0.35);
+  color: #fb923c; font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(14px,1.4vw,18px); letter-spacing: 3px; padding: 3px 14px;
+}
+.nba-scoreboard {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: clamp(20px,4vw,60px); width: 100%; max-width: 860px;
+  animation: revealUp 0.8s 0.1s both;
+}
+.nba-team { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.nba-logo {
+  width: clamp(70px,10vw,120px); height: clamp(70px,10vw,120px);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(42px,6vw,72px); position: relative;
+}
+.nba-logo.home-logo { background: rgba(29,66,138,0.25); border: 1px solid rgba(29,66,138,0.3); }
+.nba-logo.away-logo { background: rgba(205,14,14,0.2); border: 1px solid rgba(205,14,14,0.25); }
+.nba-team-name {
+  font-family: 'Teko', sans-serif; font-size: clamp(18px,2.8vw,36px);
+  font-weight: 700; letter-spacing: 2px; color: #fff; text-align: center;
+}
+.nba-team-record { font-size: clamp(10px,1vw,13px); color: rgba(255,255,255,0.3); letter-spacing: 1px; font-family: 'Rajdhani', sans-serif; }
+.nba-center { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.nba-score {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(72px,14vw,160px);
+  letter-spacing: -4px; line-height: 1; color: #fff; display: flex; align-items: center; gap: 8px;
+  text-shadow: 0 0 60px rgba(251,146,60,0.12);
+}
+.nba-dash { color: rgba(255,255,255,0.18); font-size: 0.55em; }
+.nba-last-play { font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1.1vw,14px); color: rgba(255,255,255,0.35); letter-spacing: 1px; text-align: center; font-style: italic; }
+.nba-stats-row {
+  display: flex; gap: clamp(10px,2vw,30px); width: 100%; max-width: 700px;
+  animation: revealUp 0.8s 0.25s both;
+}
+.nba-team-stats { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.nba-team-stats.right-stats { align-items: flex-end; }
+.nba-stat-line { display: flex; align-items: center; gap: 8px; }
+.nba-stat-name { font-size: clamp(9px,0.8vw,11px); letter-spacing: 2px; color: rgba(255,255,255,0.25); text-transform: uppercase; font-family: 'Rajdhani', sans-serif; flex: 1; }
+.nba-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: clamp(13px,1.3vw,17px); letter-spacing: 2px; color: rgba(255,255,255,0.7); }
+.nba-stat-bar-wrap { width: 80px; height: 2px; background: rgba(255,255,255,0.08); position: relative; }
+.nba-stat-fill { position: absolute; top: 0; left: 0; height: 100%; }
+.home-fill { background: #1d428a; } .away-fill { background: #c9082a; right: 0; left: auto; }
+.nba-center-stats { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.nba-stat-label-c { font-size: clamp(8px,0.7vw,10px); letter-spacing: 3px; color: rgba(255,255,255,0.2); text-transform: uppercase; font-family: 'Rajdhani', sans-serif; text-align: center; }
+
+/* ════════════════════════════════════════════════
+   8. UFC / MMA
+════════════════════════════════════════════════ */
+#mode-ufc {
+  --b-color: #facc15;
+  --b-glow: rgba(250,204,21,0.4);
+  --b-bg: linear-gradient(135deg,#1a1000,#0d0800,#1a1000);
+  background: #000;
+}
+.ufc-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 100% 80% at 50% 50%, #0a0500 0%, #000 70%);
+}
+.octagon-bg {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.05;
+}
+.ufc-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(14px,2vh,26px); padding: 20px 40px; z-index: 10;
+}
+.ufc-org { font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1.1vw,14px); letter-spacing: 8px; color: rgba(250,204,21,0.5); animation: revealUp 0.6s both; }
+.ufc-event { font-family: 'Black Ops One', cursive; font-size: clamp(14px,1.5vw,20px); letter-spacing: 4px; color: rgba(255,255,255,0.35); animation: revealUp 0.6s 0.05s both; }
+.ufc-status { animation: revealUp 0.6s 0.1s both; }
+.ufc-live { font-family: 'Bebas Neue', sans-serif; font-size: clamp(13px,1.3vw,17px); letter-spacing: 6px; color: #facc15; }
+.ufc-round-clock { font-family: 'Teko', sans-serif; font-size: clamp(12px,1.2vw,16px); letter-spacing: 3px; color: rgba(255,255,255,0.4); }
+.ufc-matchup {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: clamp(20px,3vw,50px); width: 100%; max-width: 900px;
+  animation: revealUp 0.8s 0.15s both;
+}
+.ufc-fighter { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.ufc-fighter.red { align-items: flex-end; }
+.ufc-fighter.blue { align-items: flex-start; }
+.fighter-avatar {
+  width: clamp(80px,10vw,130px); height: clamp(80px,10vw,130px);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(40px,5vw,64px); position: relative; overflow: hidden;
+}
+.fighter-avatar.red-corner {
+  background: radial-gradient(circle at 40% 40%, rgba(220,38,38,0.4), rgba(100,0,0,0.2));
+  border: 2px solid rgba(220,38,38,0.4);
+  box-shadow: 0 0 40px rgba(220,38,38,0.2);
+}
+.fighter-avatar.blue-corner {
+  background: radial-gradient(circle at 40% 40%, rgba(37,99,235,0.4), rgba(0,0,100,0.2));
+  border: 2px solid rgba(37,99,235,0.4);
+  box-shadow: 0 0 40px rgba(37,99,235,0.2);
+}
+.fighter-name {
+  font-family: 'Black Ops One', cursive; font-size: clamp(18px,2.5vw,32px);
+  letter-spacing: 2px; color: #fff; text-align: center;
+}
+.fighter-nickname { font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1.1vw,15px); font-weight: 400; color: rgba(255,255,255,0.4); font-style: italic; letter-spacing: 2px; text-align: center; }
+.fighter-record { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.4vw,18px); letter-spacing: 3px; color: rgba(255,255,255,0.55); }
+.fighter-country { font-size: clamp(20px,2.5vw,30px); }
+.ufc-vs-block { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ufc-vs { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px,6vw,72px); letter-spacing: 2px; color: rgba(255,255,255,0.12); }
+.ufc-weight-class { font-family: 'Teko', sans-serif; font-size: clamp(10px,1vw,14px); font-weight: 600; letter-spacing: 3px; color: rgba(250,204,21,0.6); text-transform: uppercase; text-align: center; }
+.ufc-title-badge {
+  background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.3);
+  padding: 4px 14px; font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(11px,1.1vw,14px); letter-spacing: 3px; color: #facc15;
+}
+.ufc-stats {
+  display: flex; gap: clamp(16px,3vw,40px); width: 100%; max-width: 700px;
+  animation: revealUp 0.8s 0.3s both;
+}
+.ufc-stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ufc-stat-label { font-size: clamp(8px,0.7vw,10px); letter-spacing: 3px; color: rgba(255,255,255,0.25); text-transform: uppercase; font-family: 'Rajdhani', sans-serif; }
+.ufc-stat-bar { width: 100%; height: 3px; background: rgba(255,255,255,0.06); position: relative; display: flex; }
+.ufc-stat-red { height: 100%; background: rgba(220,38,38,0.7); }
+.ufc-stat-blue { height: 100%; background: rgba(37,99,235,0.7); }
+.ufc-stat-vals { display: flex; justify-content: space-between; width: 100%; }
+.ufc-stat-r { font-family: 'Bebas Neue', sans-serif; font-size: clamp(13px,1.3vw,17px); letter-spacing: 2px; color: rgba(220,80,80,0.9); }
+.ufc-stat-b { font-family: 'Bebas Neue', sans-serif; font-size: clamp(13px,1.3vw,17px); letter-spacing: 2px; color: rgba(80,120,220,0.9); }
+
+/* ════════════════════════════════════════════════
+   9. BASEBALL
+════════════════════════════════════════════════ */
+#mode-mlb {
+  --b-color: #f9a825;
+  --b-glow: rgba(249,168,37,0.4);
+  --b-bg: linear-gradient(135deg,#1a1000,#0d0800,#1a1000);
+  background: #000;
+}
+.mlb-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 90% 60% at 50% 60%, #060300 0%, #000 60%);
+}
+.diamond-bg { position: absolute; inset: 0; opacity: 0.07; display: flex; align-items: center; justify-content: center; }
+.mlb-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: clamp(20px,4vw,60px); padding: 20px 40px; z-index: 10;
+}
+.mlb-team-col { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.mlb-logo {
+  width: clamp(80px,12vw,140px); height: clamp(80px,12vw,140px);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(44px,6.5vw,80px);
+}
+.mlb-logo.home { background: radial-gradient(circle, rgba(0,45,114,0.3), transparent); border: 1px solid rgba(0,45,114,0.4); }
+.mlb-logo.away { background: radial-gradient(circle, rgba(189,48,57,0.3), transparent); border: 1px solid rgba(189,48,57,0.4); }
+.mlb-team-name { font-family: 'Bebas Neue', sans-serif; font-size: clamp(20px,3vw,40px); letter-spacing: 3px; color: #fff; text-align: center; }
+.mlb-record { font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1.1vw,15px); color: rgba(255,255,255,0.35); letter-spacing: 1px; }
+.mlb-center { display: flex; flex-direction: column; align-items: center; gap: clamp(10px,2vh,20px); }
+.mlb-score {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(60px,12vw,150px);
+  letter-spacing: -4px; line-height: 1; color: #fff; display: flex; align-items: center; gap: 6px;
+}
+.mlb-sep { color: rgba(255,255,255,0.18); font-size: 0.55em; }
+.mlb-inning-badge {
+  background: rgba(249,168,37,0.1); border: 1px solid rgba(249,168,37,0.3);
+  padding: 5px 16px; font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(13px,1.3vw,17px); letter-spacing: 4px; color: #f9a825;
+  display: flex; align-items: center; gap: 8px;
+}
+.inning-arrow { font-size: 0.8em; }
+.mlb-diamond {
+  display: grid; grid-template-areas: '. second .' 'third . first' '. home .';
+  grid-template-columns: 1fr 1fr 1fr; gap: 4px; width: 90px;
+}
+.base {
+  width: 22px; height: 22px; border: 2px solid rgba(255,255,255,0.15);
+  transform: rotate(45deg); transition: all 0.3s;
+}
+.base.occupied { background: #f9a825; border-color: #f9a825; box-shadow: 0 0 12px rgba(249,168,37,0.6); }
+.base-second { grid-area: second; justify-self: center; }
+.base-third { grid-area: third; justify-self: end; }
+.base-first { grid-area: first; justify-self: start; }
+.base-home { grid-area: home; justify-self: center; width: 22px; height: 22px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.1); clip-path: polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%); }
+.mlb-count {
+  display: flex; gap: 16px;
+}
+.count-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.count-label { font-size: clamp(8px,0.7vw,10px); letter-spacing: 3px; color: rgba(255,255,255,0.25); text-transform: uppercase; font-family: 'Rajdhani', sans-serif; }
+.count-dots { display: flex; gap: 4px; }
+.count-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.2); }
+.count-dot.on-balls { background: #4ade80; border-color: #4ade80; }
+.count-dot.on-strikes { background: #f87171; border-color: #f87171; }
+.count-dot.on-outs { background: #facc15; border-color: #facc15; }
+
+/* ════════════════════════════════════════════════
+   SHARED ANIMATIONS
+════════════════════════════════════════════════ */
+@keyframes revealUp { from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <span class="nav-label">MARQUEE</span>
+  <button class="nav-btn active" onclick="showMode('movie',this)">🎬 Movie</button>
+  <button class="nav-btn" onclick="showMode('tv',this)">📺 TV Show</button>
+  <button class="nav-btn" onclick="showMode('youtube',this)">▶ YouTube</button>
+  <button class="nav-btn" onclick="showMode('screensaver',this)">💤 Screensaver</button>
+  <button class="nav-btn" onclick="showMode('soccer',this)">⚽ Soccer</button>
+  <button class="nav-btn" onclick="showMode('nfl',this)">🏈 NFL</button>
+  <button class="nav-btn" onclick="showMode('nba',this)">🏀 NBA</button>
+  <button class="nav-btn" onclick="showMode('ufc',this)">🥊 UFC</button>
+  <button class="nav-btn" onclick="showMode('mlb',this)">⚾ Baseball</button>
+</div>
+
+<!-- ══════════ MOVIE MODE ══════════ -->
+<div class="screen active" id="screen-movie">
+  <div id="mode-movie">
+    <div class="movie-ambient"></div>
+    <div class="banner" style="--b-color:#c9a84c;--b-glow:rgba(201,168,76,0.4);--b-bg:linear-gradient(135deg,#1a1200,#0d0a00,#1a1200)">
+      <span class="banner-orn">✦ ── ✦</span>
+      <span class="banner-text">Now Playing</span>
+      <span class="banner-orn">✦ ── ✦</span>
+    </div>
+    <div class="movie-layout">
+      <div class="movie-poster-wrap">
+        <div class="movie-poster-frame">
+          <img src="https://image.tmdb.org/t/p/w500/pgvUGHzMfapRQh9S4LcpqvXLQtP.jpg" alt="Predator: Badlands" onerror="this.style.background='#111';this.style.minHeight='300px'">
+          <div class="watched-eye">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="trailer-pill">▶ &nbsp;Play Trailer</div>
+        </div>
+      </div>
+      <div class="meta-bar">
+        <div class="tagline">First hunt. Last chance.</div>
+        <div class="badges">
+          <div class="b-rating">PG-13<small>Parents Strongly Cautioned</small></div>
+          <div class="divider"></div>
+          <div class="b-audio dtshd"><div class="ab">DTS-HD</div><div class="as">Master Audio</div></div>
+          <div class="divider"></div>
+          <div class="b-aspect">2.35 : 1</div>
+          <div class="divider"></div>
+          <div class="b-res">1080p</div>
+          <div class="divider"></div>
+          <div class="b-stars"><span class="star s-full">★</span><span class="star s-full">★</span><span class="star s-full">★</span><span class="star s-full">★</span><span class="star s-half">★</span></div>
+          <div class="divider"></div>
+          <div class="b-clock" id="clock1">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TV SHOW MODE ══════════ -->
+<div class="screen" id="screen-tv">
+  <div id="mode-tv" style="position:absolute;inset:0">
+    <div class="banner" style="--b-color:#8ec5fc;--b-glow:rgba(142,197,252,0.4);--b-bg:linear-gradient(135deg,#000d1a,#00050e,#000d1a)">
+      <span class="banner-orn" style="color:#8ec5fc">◈ ── ◈</span>
+      <span class="banner-text" style="color:#8ec5fc">Now Playing</span>
+      <span class="banner-orn" style="color:#8ec5fc">◈ ── ◈</span>
+    </div>
+    <div class="tv-layout">
+      <div class="tv-poster-col">
+        <img class="tv-poster-img" src="https://image.tmdb.org/t/p/w342/56v2KjBlU4XaOv9rVYEQypROD7P.jpg" alt="Severance" onerror="this.style.background='#111'">
+      </div>
+      <div class="tv-info-col">
+        <div class="tv-show-title">Severance</div>
+        <div class="tv-episode-meta">
+          <div class="tv-badge">S2 · E07</div>
+          <div style="width:1px;height:20px;background:rgba(255,255,255,0.1)"></div>
+          <div class="tv-badge" style="border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.35);background:transparent">Apple TV+</div>
+        </div>
+        <div class="tv-episode-title">Chikhai Bardo</div>
+        <div class="tv-overview">
+          Mark navigates the aftermath of a stunning revelation, while Helly grapples with the truth about her innie's past. The Macrodata Refinement team inches closer to the severed floor's darkest secret.
+        </div>
+        <div class="tv-meta-row">
+          <div class="tv-meta-item"><div class="tv-meta-label">Runtime</div><div class="tv-meta-value">52 min</div></div>
+          <div class="tv-divider"></div>
+          <div class="tv-meta-item"><div class="tv-meta-label">Rating</div><div class="tv-meta-value">TV-MA</div></div>
+          <div class="tv-divider"></div>
+          <div class="tv-meta-item"><div class="tv-meta-label">Audio</div><div class="tv-meta-value" style="color:#7fb3e8">Dolby Atmos</div></div>
+          <div class="tv-divider"></div>
+          <div class="tv-meta-item"><div class="tv-meta-label">Video</div><div class="tv-meta-value" style="color:#c9a84c">4K HDR</div></div>
+        </div>
+        <div class="tv-progress-wrap">
+          <div class="tv-progress-label">34% watched</div>
+          <div class="tv-progress-bar"><div class="tv-progress-fill"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ YOUTUBE MODE ══════════ -->
+<div class="screen" id="screen-youtube">
+  <div id="mode-youtube" style="position:absolute;inset:0">
+    <div class="yt-bg"></div>
+    <div class="yt-scan"></div>
+    <div class="banner" style="--b-color:#ff4444;--b-glow:rgba(255,68,68,0.4);--b-bg:linear-gradient(135deg,#1a0000,#0d0000,#1a0000)">
+      <span class="banner-orn" style="color:#ff4444">▸ ── ▸</span>
+      <span class="banner-text" style="color:#ff4444">Watching Now</span>
+      <span class="banner-orn" style="color:#ff4444">◂ ── ◂</span>
+    </div>
+    <div class="yt-layout">
+      <div class="yt-logo-wrap">
+        <div class="yt-logo-icon">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="yt-wordmark">YouTube</div>
+      </div>
+      <div class="yt-video-title">Building a Home Theater PC from Scratch — Full Build Guide 2025</div>
+      <div class="yt-channel">
+        <div class="yt-channel-avatar">LTT</div>
+        <div class="yt-channel-name">Linus Tech Tips</div>
+      </div>
+      <div class="yt-stats">
+        <div class="yt-stat"><div class="yt-stat-value">4.2M</div><div class="yt-stat-label">Views</div></div>
+        <div style="width:1px;height:30px;background:rgba(255,255,255,0.08)"></div>
+        <div class="yt-stat"><div class="yt-stat-value">98K</div><div class="yt-stat-label">Likes</div></div>
+        <div style="width:1px;height:30px;background:rgba(255,255,255,0.08)"></div>
+        <div class="yt-stat"><div class="yt-stat-value">42:18</div><div class="yt-stat-label">Duration</div></div>
+        <div style="width:1px;height:30px;background:rgba(255,255,255,0.08)"></div>
+        <div class="yt-stat"><div class="yt-stat-value" id="clock2">—</div><div class="yt-stat-label">Time</div></div>
+      </div>
+      <div class="yt-progress-container">
+        <div class="yt-time-row"><span>17:44</span><span>42:18</span></div>
+        <div class="yt-progress-track">
+          <div class="yt-progress-fill"></div>
+          <div class="yt-progress-thumb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SCREENSAVER ══════════ -->
+<div class="screen" id="screen-screensaver">
+  <div id="mode-screensaver" style="position:absolute;inset:0">
+    <div class="ss-bg-img"></div>
+    <div class="ss-vignette"></div>
+    <div class="ss-bottom-grad"></div>
+    <div class="banner" style="--b-color:#c9a84c;--b-glow:rgba(201,168,76,0.4);--b-bg:linear-gradient(135deg,#1a1200,#0d0a00,#1a1200)">
+      <span class="banner-orn">✦ ── ✦</span>
+      <span class="banner-text">Coming Soon</span>
+      <span class="banner-orn">✦ ── ✦</span>
+    </div>
+    <div class="ss-layout">
+      <div class="ss-text-col">
+        <div class="ss-source-label">Coming Soon</div>
+        <div class="ss-title">Avengers:<br>Doomsday</div>
+        <div class="ss-meta-row">
+          <div class="ss-year">2026</div>
+          <div class="ss-genre-pill">Action</div>
+          <div class="ss-genre-pill">Marvel</div>
+        </div>
+        <div class="ss-tagline">"The universe will never be the same."</div>
+      </div>
+      <div class="ss-poster-col">
+        <img class="ss-poster-img loaded" src="https://image.tmdb.org/t/p/w342/jYEW5xZkZk2WTrdbMGAPFuBqbDc.jpg" alt="Avengers Doomsday" onerror="this.style.display='none'">
+      </div>
+    </div>
+    <div class="ss-progress-bar"><div class="ss-progress-fill"></div></div>
+    <div class="ss-dot-nav">
+      <div class="ss-dot active"></div>
+      <div class="ss-dot"></div>
+      <div class="ss-dot"></div>
+      <div class="ss-dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SOCCER ══════════ -->
+<div class="screen" id="screen-soccer">
+  <div id="mode-soccer" style="position:absolute;inset:0">
+    <div class="soccer-field-bg"></div>
+    <svg class="field-canvas" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+      <rect x="60" y="40" width="680" height="520" fill="none" stroke="#4ade80" stroke-width="2"/>
+      <line x1="400" y1="40" x2="400" y2="560" stroke="#4ade80" stroke-width="1.5"/>
+      <circle cx="400" cy="300" r="70" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+      <circle cx="400" cy="300" r="4" fill="#4ade80" opacity="0.5"/>
+      <rect x="60" y="180" width="100" height="240" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+      <rect x="640" y="180" width="100" height="240" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+      <rect x="60" y="240" width="50" height="120" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+      <rect x="690" y="240" width="50" height="120" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+      <circle cx="60" cy="40" r="20" fill="none" stroke="#4ade80" stroke-width="1" stroke-dasharray="5,3"/>
+      <circle cx="740" cy="40" r="20" fill="none" stroke="#4ade80" stroke-width="1" stroke-dasharray="5,3"/>
+      <circle cx="60" cy="560" r="20" fill="none" stroke="#4ade80" stroke-width="1" stroke-dasharray="5,3"/>
+      <circle cx="740" cy="560" r="20" fill="none" stroke="#4ade80" stroke-width="1" stroke-dasharray="5,3"/>
+    </svg>
+    <div class="soccer-glow"></div>
+    <div class="banner" style="--b-color:#4ade80;--b-glow:rgba(74,222,128,0.4);--b-bg:linear-gradient(135deg,#001a08,#000d04,#001a08)">
+      <span class="banner-orn" style="color:#4ade80">◆ ── ◆</span>
+      <span class="banner-text" style="color:#4ade80">Live Match</span>
+      <span class="banner-orn" style="color:#4ade80">◆ ── ◆</span>
+    </div>
+    <div class="soccer-layout">
+      <div class="soccer-competition">UEFA Champions League · Round of 16</div>
+      <div class="soccer-status">
+        <div class="live-indicator"><div class="live-pulse"></div>LIVE</div>
+        <div class="match-clock">73'</div>
+        <div style="color:rgba(255,255,255,0.25);font-size:clamp(10px,1vw,13px);letter-spacing:2px">Signal Iduna Park</div>
+      </div>
+      <div class="soccer-scoreboard">
+        <div class="soccer-team">
+          <div class="team-crest home-crest">🦁</div>
+          <div class="soccer-team-name">Real Madrid</div>
+          <div class="soccer-team-record">ESP · Group A</div>
+        </div>
+        <div class="score-center">
+          <div class="soccer-score">
+            <span>2</span><span class="score-dash">–</span><span>1</span>
+          </div>
+          <div class="soccer-venue">Attendance 81,365</div>
+        </div>
+        <div class="soccer-team">
+          <div class="team-crest away-crest">⚫</div>
+          <div class="soccer-team-name">Borussia Dortmund</div>
+          <div class="soccer-team-record">GER · Group B</div>
+        </div>
+      </div>
+      <div class="soccer-stats-row">
+        <div class="stat-item">
+          <div class="stat-bar"><div class="stat-fill-home" style="width:60%"></div><div class="stat-fill-away" style="width:40%"></div></div>
+          <div class="stat-values"><span class="stat-val home">60%</span><span class="stat-label">Possession</span><span class="stat-val away">40%</span></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-bar"><div class="stat-fill-home" style="width:55%"></div><div class="stat-fill-away" style="width:45%"></div></div>
+          <div class="stat-values"><span class="stat-val home">8</span><span class="stat-label">Shots</span><span class="stat-val away">6</span></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-bar"><div class="stat-fill-home" style="width:70%"></div><div class="stat-fill-away" style="width:30%"></div></div>
+          <div class="stat-values"><span class="stat-val home">5</span><span class="stat-label">On Target</span><span class="stat-val away">2</span></div>
+        </div>
+      </div>
+      <div class="soccer-recent-goals">
+        <div class="goal-event"><div class="goal-icon">⚽</div><div class="goal-text">Vinícius Jr.</div><div class="goal-min">23'</div></div>
+        <div class="goal-event"><div class="goal-icon">⚽</div><div class="goal-text">Adeyemi</div><div class="goal-min">41'</div></div>
+        <div class="goal-event"><div class="goal-icon">⚽</div><div class="goal-text">Bellingham</div><div class="goal-min">67'</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ NFL ══════════ -->
+<div class="screen" id="screen-nfl">
+  <div id="mode-nfl" style="position:absolute;inset:0">
+    <div class="nfl-bg"></div>
+    <svg class="nfl-field-lines" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid slice">
+      <rect x="30" y="20" width="840" height="460" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+      <line x1="114" y1="20" x2="114" y2="480" stroke="#60a5fa" stroke-width="1"/>
+      <line x1="198" y1="20" x2="198" y2="480" stroke="#60a5fa" stroke-width="1"/>
+      <line x1="282" y1="20" x2="282" y2="480" stroke="#60a5fa" stroke-width="1"/>
+      <line x1="366" y1="20" x2="366" y2="480" stroke="#60a5fa" stroke-width="1"/>
+      <line x1="450" y1="20" x2="450" y2="480" stroke="#60a5fa" stroke-width="2"/>
+      <line x1="534" y1="20" x2="534" y2="480" stroke="#60a5fa" stroke-width="1"/>
+      <line x1="618" y1="20" x2="618" y2="480" stroke="#60a5fa" stroke-width="1"/>
+      <line x1="702" y1="20" x2="702" y2="480" stroke="#60a5fa" stroke-width="1"/>
+      <line x1="786" y1="20" x2="786" y2="480" stroke="#60a5fa" stroke-width="1"/>
+      <rect x="30" y="20" width="84" height="460" fill="rgba(96,165,250,0.04)"/>
+      <rect x="786" y="20" width="84" height="460" fill="rgba(96,165,250,0.04)"/>
+    </svg>
+    <div class="banner" style="--b-color:#60a5fa;--b-glow:rgba(96,165,250,0.4);--b-bg:linear-gradient(135deg,#00081a,#000510,#00081a)">
+      <span class="banner-orn" style="color:#60a5fa">★ ── ★</span>
+      <span class="banner-text" style="color:#60a5fa">Live Game</span>
+      <span class="banner-orn" style="color:#60a5fa">★ ── ★</span>
+    </div>
+    <div class="nfl-layout">
+      <div class="nfl-league">National Football League</div>
+      <div class="nfl-game-status">
+        <div class="live-indicator" style="color:#60a5fa"><div class="live-pulse" style="background:#60a5fa"></div>LIVE</div>
+        <div style="color:rgba(255,255,255,0.35)">3rd Quarter · 8:42</div>
+        <div class="nfl-down-badge">2nd & 7</div>
+      </div>
+      <div class="nfl-scoreboard">
+        <div class="nfl-team">
+          <div class="nfl-helmet">🦅</div>
+          <div class="nfl-team-city" style="color:rgba(255,255,255,0.35);font-family:'Teko',sans-serif;letter-spacing:3px;font-size:clamp(11px,1.1vw,15px)">Philadelphia</div>
+          <div class="nfl-team-name">Eagles</div>
+        </div>
+        <div class="nfl-score-center">
+          <div class="nfl-score"><span>24</span><span class="nfl-score-dash">–</span><span>17</span></div>
+          <div class="nfl-quarter-info">SoFi Stadium · Los Angeles</div>
+        </div>
+        <div class="nfl-team">
+          <div class="nfl-helmet">🐏</div>
+          <div class="nfl-team-city" style="color:rgba(255,255,255,0.35);font-family:'Teko',sans-serif;letter-spacing:3px;font-size:clamp(11px,1.1vw,15px)">Los Angeles</div>
+          <div class="nfl-team-name">Rams</div>
+        </div>
+      </div>
+      <div class="nfl-score-grid">
+        <div class="nfl-sg-cell nfl-sg-header">Team</div>
+        <div class="nfl-sg-cell nfl-sg-header">Q1</div>
+        <div class="nfl-sg-cell nfl-sg-header">Q2</div>
+        <div class="nfl-sg-cell nfl-sg-header nfl-sg-active" style="color:#60a5fa">Q3</div>
+        <div class="nfl-sg-cell nfl-sg-header">Q4</div>
+        <div class="nfl-sg-cell nfl-sg-header nfl-sg-total">TOT</div>
+        <div class="nfl-sg-cell nfl-sg-team">Eagles</div>
+        <div class="nfl-sg-cell nfl-sg-score">7</div>
+        <div class="nfl-sg-cell nfl-sg-score">10</div>
+        <div class="nfl-sg-cell nfl-sg-score nfl-sg-active" style="color:#60a5fa">7</div>
+        <div class="nfl-sg-cell nfl-sg-score" style="color:rgba(255,255,255,0.2)">—</div>
+        <div class="nfl-sg-cell nfl-sg-total">24</div>
+        <div class="nfl-sg-cell nfl-sg-team">Rams</div>
+        <div class="nfl-sg-cell nfl-sg-score">3</div>
+        <div class="nfl-sg-cell nfl-sg-score">7</div>
+        <div class="nfl-sg-cell nfl-sg-score nfl-sg-active" style="color:#60a5fa">7</div>
+        <div class="nfl-sg-cell nfl-sg-score" style="color:rgba(255,255,255,0.2)">—</div>
+        <div class="nfl-sg-cell nfl-sg-total">17</div>
+      </div>
+      <div class="nfl-possession"><span class="possession-arrow">▶ </span>Eagles ball at LAR 34</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ NBA ══════════ -->
+<div class="screen" id="screen-nba">
+  <div id="mode-nba" style="position:absolute;inset:0">
+    <div class="nba-bg"></div>
+    <svg class="nba-court-lines" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid slice">
+      <rect x="30" y="20" width="840" height="460" fill="none" stroke="#fb923c" stroke-width="2"/>
+      <circle cx="450" cy="250" r="60" fill="none" stroke="#fb923c" stroke-width="1.5"/>
+      <line x1="450" y1="20" x2="450" y2="480" stroke="#fb923c" stroke-width="1"/>
+      <rect x="30" y="140" width="190" height="220" fill="none" stroke="#fb923c" stroke-width="1.5"/>
+      <rect x="680" y="140" width="190" height="220" fill="none" stroke="#fb923c" stroke-width="1.5"/>
+      <path d="M30,140 Q220,250 30,360" fill="none" stroke="#fb923c" stroke-width="1.5"/>
+      <path d="M870,140 Q680,250 870,360" fill="none" stroke="#fb923c" stroke-width="1.5"/>
+      <circle cx="130" cy="250" r="6" fill="#fb923c" opacity="0.4"/>
+      <circle cx="770" cy="250" r="6" fill="#fb923c" opacity="0.4"/>
+    </svg>
+    <div class="banner" style="--b-color:#fb923c;--b-glow:rgba(251,146,60,0.4);--b-bg:linear-gradient(135deg,#1a0800,#0d0500,#1a0800)">
+      <span class="banner-orn" style="color:#fb923c">● ── ●</span>
+      <span class="banner-text" style="color:#fb923c">Live Game</span>
+      <span class="banner-orn" style="color:#fb923c">● ── ●</span>
+    </div>
+    <div class="nba-layout">
+      <div class="nba-league">National Basketball Association</div>
+      <div class="nba-status">
+        <div class="live-indicator" style="color:#fb923c"><div class="live-pulse" style="background:#fb923c"></div>LIVE</div>
+        <div class="nba-quarter">4th Quarter</div>
+        <div class="nba-clock-badge">2:34</div>
+      </div>
+      <div class="nba-scoreboard">
+        <div class="nba-team">
+          <div class="nba-logo home-logo">🏀</div>
+          <div class="nba-team-name">Lakers</div>
+          <div class="nba-team-record">38-22 · W3</div>
+        </div>
+        <div class="nba-center">
+          <div class="nba-score"><span>108</span><span class="nba-dash">–</span><span>104</span></div>
+          <div class="nba-last-play">Curry made 3pt · Warriors ball</div>
+        </div>
+        <div class="nba-team">
+          <div class="nba-logo away-logo">🌉</div>
+          <div class="nba-team-name">Warriors</div>
+          <div class="nba-team-record">35-25 · L1</div>
+        </div>
+      </div>
+      <div class="nba-stats-row">
+        <div class="nba-team-stats">
+          <div class="nba-stat-line">
+            <div class="nba-stat-name">FG%</div>
+            <div class="nba-stat-bar-wrap"><div class="nba-stat-fill home-fill" style="width:58%"></div></div>
+            <div class="nba-stat-val">48.2%</div>
+          </div>
+          <div class="nba-stat-line">
+            <div class="nba-stat-name">3PT%</div>
+            <div class="nba-stat-bar-wrap"><div class="nba-stat-fill home-fill" style="width:44%"></div></div>
+            <div class="nba-stat-val">36.4%</div>
+          </div>
+          <div class="nba-stat-line">
+            <div class="nba-stat-name">Rebounds</div>
+            <div class="nba-stat-bar-wrap"><div class="nba-stat-fill home-fill" style="width:62%"></div></div>
+            <div class="nba-stat-val">44</div>
+          </div>
+        </div>
+        <div class="nba-center-stats">
+          <div class="nba-stat-label-c">Season Series</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,2.5vw,30px);letter-spacing:3px;color:rgba(255,255,255,0.5)">2 – 1</div>
+          <div class="nba-stat-label-c">Crypto.com Arena</div>
+        </div>
+        <div class="nba-team-stats right-stats">
+          <div class="nba-stat-line" style="flex-direction:row-reverse">
+            <div class="nba-stat-name" style="text-align:right">FG%</div>
+            <div class="nba-stat-bar-wrap"><div class="nba-stat-fill away-fill" style="width:52%"></div></div>
+            <div class="nba-stat-val">44.1%</div>
+          </div>
+          <div class="nba-stat-line" style="flex-direction:row-reverse">
+            <div class="nba-stat-name" style="text-align:right">3PT%</div>
+            <div class="nba-stat-bar-wrap"><div class="nba-stat-fill away-fill" style="width:65%"></div></div>
+            <div class="nba-stat-val">42.8%</div>
+          </div>
+          <div class="nba-stat-line" style="flex-direction:row-reverse">
+            <div class="nba-stat-name" style="text-align:right">Rebounds</div>
+            <div class="nba-stat-bar-wrap"><div class="nba-stat-fill away-fill" style="width:38%"></div></div>
+            <div class="nba-stat-val">38</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ UFC ══════════ -->
+<div class="screen" id="screen-ufc">
+  <div id="mode-ufc" style="position:absolute;inset:0">
+    <div class="ufc-bg"></div>
+    <div class="octagon-bg">
+      <svg width="500" height="500" viewBox="0 0 500 500">
+        <polygon points="147,30 353,30 470,147 470,353 353,470 147,470 30,353 30,147" fill="none" stroke="#facc15" stroke-width="3"/>
+        <polygon points="175,80 325,80 420,175 420,325 325,420 175,420 80,325 80,175" fill="none" stroke="#facc15" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="banner" style="--b-color:#facc15;--b-glow:rgba(250,204,21,0.4);--b-bg:linear-gradient(135deg,#1a1000,#0d0800,#1a1000)">
+      <span class="banner-orn" style="color:#facc15">◈ ── ◈</span>
+      <span class="banner-text" style="color:#facc15">Live Fight</span>
+      <span class="banner-orn" style="color:#facc15">◈ ── ◈</span>
+    </div>
+    <div class="ufc-layout">
+      <div class="ufc-org">UFC 312 · Main Event</div>
+      <div class="ufc-event">T-Mobile Arena · Las Vegas, NV</div>
+      <div class="ufc-status">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ufc-live"><span style="color:#facc15">● </span>LIVE</div>
+          <div class="ufc-round-clock">Round 3 · 3:42</div>
+        </div>
+      </div>
+      <div class="ufc-matchup">
+        <div class="ufc-fighter red">
+          <div class="fighter-country">🇧🇷</div>
+          <div class="fighter-avatar red-corner">🥋</div>
+          <div class="fighter-name">Aldo</div>
+          <div class="fighter-nickname">"Junior"</div>
+          <div class="fighter-record">32-8-0</div>
+          <div style="background:rgba(220,38,38,0.2);border:1px solid rgba(220,38,38,0.4);padding:3px 14px;font-family:'Bebas Neue',sans-serif;font-size:clamp(11px,1.1vw,14px);letter-spacing:3px;color:#f87171;">Red Corner</div>
+        </div>
+        <div class="ufc-vs-block">
+          <div class="ufc-vs">VS</div>
+          <div class="ufc-weight-class">Featherweight</div>
+          <div class="ufc-title-badge">🏆 Title Bout</div>
+          <div style="margin-top:8px;font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,3vw,38px);letter-spacing:-1px;color:#fff;text-align:center;line-height:1">2 – 1</div>
+          <div style="font-family:'Teko',sans-serif;font-size:clamp(10px,1vw,13px);letter-spacing:3px;color:rgba(255,255,255,0.3)">ROUNDS</div>
+        </div>
+        <div class="ufc-fighter blue">
+          <div class="fighter-country">🇺🇸</div>
+          <div class="fighter-avatar blue-corner">🥊</div>
+          <div class="fighter-name">Holloway</div>
+          <div class="fighter-nickname">"Blessed"</div>
+          <div class="fighter-record">26-7-0</div>
+          <div style="background:rgba(37,99,235,0.2);border:1px solid rgba(37,99,235,0.4);padding:3px 14px;font-family:'Bebas Neue',sans-serif;font-size:clamp(11px,1.1vw,14px);letter-spacing:3px;color:#60a5fa;">Blue Corner</div>
+        </div>
+      </div>
+      <div class="ufc-stats">
+        <div class="ufc-stat">
+          <div class="ufc-stat-label">Significant Strikes</div>
+          <div class="ufc-stat-bar"><div class="ufc-stat-red" style="width:52%"></div><div class="ufc-stat-blue" style="width:48%"></div></div>
+          <div class="ufc-stat-vals"><span class="ufc-stat-r">73</span><span class="ufc-stat-b">68</span></div>
+        </div>
+        <div class="ufc-stat">
+          <div class="ufc-stat-label">Takedowns</div>
+          <div class="ufc-stat-bar"><div class="ufc-stat-red" style="width:75%"></div><div class="ufc-stat-blue" style="width:25%"></div></div>
+          <div class="ufc-stat-vals"><span class="ufc-stat-r">3</span><span class="ufc-stat-b">1</span></div>
+        </div>
+        <div class="ufc-stat">
+          <div class="ufc-stat-label">Knockdowns</div>
+          <div class="ufc-stat-bar"><div class="ufc-stat-red" style="width:50%"></div><div class="ufc-stat-blue" style="width:50%"></div></div>
+          <div class="ufc-stat-vals"><span class="ufc-stat-r">1</span><span class="ufc-stat-b">1</span></div>
+        </div>
+        <div class="ufc-stat">
+          <div class="ufc-stat-label">Accuracy</div>
+          <div class="ufc-stat-bar"><div class="ufc-stat-red" style="width:48%"></div><div class="ufc-stat-blue" style="width:52%"></div></div>
+          <div class="ufc-stat-vals"><span class="ufc-stat-r">44%</span><span class="ufc-stat-b">47%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ BASEBALL ══════════ -->
+<div class="screen" id="screen-mlb">
+  <div id="mode-mlb" style="position:absolute;inset:0">
+    <div class="mlb-bg"></div>
+    <div class="diamond-bg">
+      <svg width="400" height="400" viewBox="0 0 400 400">
+        <polygon points="200,20 380,200 200,380 20,200" fill="none" stroke="#f9a825" stroke-width="2"/>
+        <line x1="200" y1="20" x2="200" y2="380" stroke="#f9a825" stroke-width="1" stroke-dasharray="6,4"/>
+        <line x1="20" y1="200" x2="380" y2="200" stroke="#f9a825" stroke-width="1" stroke-dasharray="6,4"/>
+        <circle cx="200" cy="200" r="80" fill="none" stroke="#f9a825" stroke-width="1"/>
+        <circle cx="200" cy="200" r="5" fill="#f9a825" opacity="0.5"/>
+      </svg>
+    </div>
+    <div class="banner" style="--b-color:#f9a825;--b-glow:rgba(249,168,37,0.4);--b-bg:linear-gradient(135deg,#1a1000,#0d0800,#1a1000)">
+      <span class="banner-orn" style="color:#f9a825">◇ ── ◇</span>
+      <span class="banner-text" style="color:#f9a825">Live Game</span>
+      <span class="banner-orn" style="color:#f9a825">◇ ── ◇</span>
+    </div>
+    <div class="mlb-layout">
+      <div class="mlb-team-col">
+        <div class="mlb-logo home">🧢</div>
+        <div class="mlb-team-name">New York<br>Yankees</div>
+        <div class="mlb-record">72-50 · W2</div>
+      </div>
+      <div class="mlb-center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(11px,1.1vw,14px);letter-spacing:6px;color:rgba(255,255,255,0.3)">Major League Baseball</div>
+        <div class="mlb-score">
+          <span>5</span><span class="mlb-sep">–</span><span>3</span>
+        </div>
+        <div class="mlb-inning-badge"><span class="inning-arrow">▲</span>Top 7th</div>
+        <div class="mlb-diamond">
+          <div></div><div class="base base-second"></div><div></div>
+          <div class="base base-third occupied"></div><div></div><div class="base base-first"></div>
+          <div></div><div class="base-home"></div><div></div>
+        </div>
+        <div class="mlb-count">
+          <div class="count-group">
+            <div class="count-label">Balls</div>
+            <div class="count-dots">
+              <div class="count-dot on-balls"></div>
+              <div class="count-dot on-balls"></div>
+              <div class="count-dot on-balls"></div>
+              <div class="count-dot"></div>
+            </div>
+          </div>
+          <div class="count-group">
+            <div class="count-label">Strikes</div>
+            <div class="count-dots">
+              <div class="count-dot on-strikes"></div>
+              <div class="count-dot on-strikes"></div>
+              <div class="count-dot"></div>
+            </div>
+          </div>
+          <div class="count-group">
+            <div class="count-label">Outs</div>
+            <div class="count-dots">
+              <div class="count-dot on-outs"></div>
+              <div class="count-dot"></div>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:clamp(11px,1.1vw,14px);color:rgba(255,255,255,0.35);letter-spacing:2px;text-align:center">Yankee Stadium · New York</div>
+      </div>
+      <div class="mlb-team-col">
+        <div class="mlb-logo away">🔴</div>
+        <div class="mlb-team-name">Boston<br>Red Sox</div>
+        <div class="mlb-record">68-54 · L1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showMode(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function tick() {
+  const now = new Date();
+  let h = now.getHours() % 12 || 12;
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const ap = now.getHours() >= 12 ? 'PM' : 'AM';
+  const t = h + ':' + m + ' ' + ap;
+  ['clock1','clock2'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = t; });
+}
+setInterval(tick, 1000); tick();
+</script>
+</body>
+</html>

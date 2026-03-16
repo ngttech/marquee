@@ -1,0 +1,251 @@
+const express = require('express');
+const multer = require('multer');
+const router = express.Router();
+const { parseWebhookPayload } = require('../services/plex');
+const { enrichMovie, enrichTVShow } = require('../services/tmdb');
+const { getState, setState, getRooms, broadcastToRoom } = require('../state');
+const { getPlayerRoomMap: getConfigPlayerMap } = require('../config');
+const screensaver = require('../services/screensaver');
+const espn = require('../services/espn');
+const ha = require('../services/ha');
+
+const upload = multer();
+
+// Player name → room slug mapping (config-based with env var fallback)
+function getPlayerRoomMap() {
+  const configMap = getConfigPlayerMap();
+  if (Object.keys(configMap).length > 0) return configMap;
+  // Fallback to env var
+  try {
+    return JSON.parse(process.env.PLAYER_ROOM_MAP || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function resolveRoom(playerName) {
+  const map = getPlayerRoomMap();
+  if (playerName && map[playerName]) return map[playerName];
+  return 'theater'; // default room
+}
+
+// POST /webhook/plex
+router.post('/plex', upload.none(), async (req, res) => {
+  // Respond immediately — Plex retries on timeout
+  res.sendStatus(200);
+
+  try {
+    const raw = req.body?.payload;
+    if (!raw) {
+      console.warn('[webhook] No payload in request body');
+      return;
+    }
+
+    const payload = JSON.parse(raw);
+    const parsed = parseWebhookPayload(payload);
+
+    console.log(`[webhook] ${parsed.event} — ${parsed.type} — ${parsed.title || '(no title)'}`);
+
+    // Only handle movie and episode events
+    if (parsed.type !== 'movie' && parsed.type !== 'episode') return;
+
+    const room = resolveRoom(parsed.playerName);
+
+    if (parsed.event === 'media.play' || parsed.event === 'media.resume') {
+      // Stop screensaver rotation and ESPN polling
+      screensaver.stopRotation(room);
+      espn.stopPolling(room);
+
+      let state;
+
+      if (parsed.type === 'episode') {
+        // TV episode flow
+        const tmdb = await enrichTVShow(parsed.showTitle, parsed.seasonNum, parsed.episodeNum);
+        const progress = parsed.duration ? Math.round((parsed.viewOffset / parsed.duration) * 100) : 0;
+
+        state = {
+          mode: 'nowplaying-tv',
+          title: parsed.showTitle,
+          showTitle: tmdb?.showTitle || parsed.showTitle,
+          episodeTitle: parsed.episodeTitle || parsed.title,
+          seasonNum: parsed.seasonNum,
+          episodeNum: parsed.episodeNum,
+          overview: tmdb?.episodeOverview || parsed.summary || null,
+          runtime: tmdb?.episodeRuntime || null,
+          network: tmdb?.network || null,
+          contentRating: tmdb?.contentRating || parsed.contentRating,
+          contentRatingDesc: tmdb?.contentRatingDesc || null,
+          audioCodec: parsed.audioCodec,
+          audioLabel: parsed.audioLabel,
+          audioClass: parsed.audioClass,
+          resolution: parsed.resolution,
+          resClass: parsed.resClass,
+          aspectRatio: parsed.aspectRatio,
+          rating: tmdb?.rating || null,
+          posterUrl: tmdb?.posterUrl || null,
+          backdropUrl: tmdb?.backdropUrl || null,
+          trailerKey: tmdb?.trailerKey || null,
+          genres: tmdb?.genres || [],
+          duration: parsed.duration,
+          viewOffset: parsed.viewOffset,
+          progress,
+        };
+      } else {
+        // Movie flow (existing)
+        const tmdb = await enrichMovie(parsed.title, parsed.year);
+
+        state = {
+          mode: 'nowplaying',
+          title: tmdb?.title || parsed.title,
+          year: tmdb?.year || parsed.year,
+          tagline: tmdb?.tagline || null,
+          contentRating: tmdb?.contentRating || parsed.contentRating,
+          contentRatingDesc: tmdb?.contentRatingDesc || null,
+          audioCodec: parsed.audioCodec,
+          audioLabel: parsed.audioLabel,
+          audioClass: parsed.audioClass,
+          resolution: parsed.resolution,
+          resClass: parsed.resClass,
+          aspectRatio: parsed.aspectRatio,
+          rating: tmdb?.rating || null,
+          posterUrl: tmdb?.posterUrl || null,
+          backdropUrl: tmdb?.backdropUrl || null,
+          trailerKey: tmdb?.trailerKey || null,
+          genres: tmdb?.genres || [],
+        };
+      }
+
+      setState(room, state);
+
+      // Broadcast augmented payload
+      try {
+        const { getRoomPayload } = require('../index');
+        const payload = getRoomPayload(room);
+        broadcastToRoom(room, payload || state);
+      } catch {
+        broadcastToRoom(room, state);
+      }
+
+    } else if (parsed.event === 'media.stop' || parsed.event === 'media.pause') {
+      const current = getState(room) || {};
+      const state = {
+        ...current,
+        mode: 'screensaver',
+      };
+      setState(room, state);
+
+      try {
+        const { getRoomPayload } = require('../index');
+        const payload = getRoomPayload(room);
+        broadcastToRoom(room, payload || state);
+      } catch {
+        broadcastToRoom(room, state);
+      }
+
+      // Start screensaver rotation
+      screensaver.startRotation(room).catch(err =>
+        console.error(`[webhook] Failed to start screensaver for ${room}:`, err.message)
+      );
+
+      // Restart ESPN polling if room has auto-switch enabled
+      const { getRoomConfig: getRoomCfg } = require('../config');
+      const roomCfg = getRoomCfg(room);
+      if (roomCfg?.autoSwitchSports && roomCfg?.trackedTeams?.length > 0) {
+        espn.startPolling(room);
+      }
+    }
+  } catch (err) {
+    console.error('[webhook] Error processing payload:', err);
+  }
+});
+
+// POST /webhook/ha
+router.post('/ha', express.json(), async (req, res) => {
+  res.sendStatus(200);
+
+  try {
+    const { entity_id, state: entityState, attributes, room: roomFromPayload } = req.body || {};
+
+    if (!entity_id && !roomFromPayload) {
+      console.warn('[webhook/ha] No entity_id or room in payload');
+      return;
+    }
+
+    // Resolve room: use room from payload, or look up via entity→room map
+    let room = roomFromPayload;
+    if (!room) {
+      const entityRoomMap = ha.getEntityRoomMap();
+      room = entityRoomMap[entity_id];
+    }
+    if (!room) {
+      console.warn(`[webhook/ha] No room mapping for entity ${entity_id}`);
+      return;
+    }
+
+    console.log(`[webhook/ha] ${entity_id} → ${entityState} (room: ${room})`);
+
+    const mapped = ha.mapHaStateToMode({ state: entityState, attributes: attributes || {} });
+
+    // null = Plex is playing, don't interfere
+    if (mapped === null) {
+      console.log('[webhook/ha] Plex detected, ignoring');
+      return;
+    }
+
+    const current = getState(room) || {};
+    const currentMode = current.mode || 'screensaver';
+
+    if (mapped.mode === 'screensaver') {
+      // Only transition if current mode is youtube or app
+      if (currentMode !== 'youtube' && currentMode !== 'app') return;
+
+      const newState = { ...current, mode: 'screensaver' };
+      setState(room, newState);
+
+      try {
+        const { getRoomPayload } = require('../index');
+        const payload = getRoomPayload(room);
+        broadcastToRoom(room, payload || newState);
+      } catch {
+        broadcastToRoom(room, newState);
+      }
+
+      // Start screensaver rotation
+      screensaver.startRotation(room).catch(err =>
+        console.error(`[webhook/ha] Failed to start screensaver for ${room}:`, err.message)
+      );
+
+      // Restart ESPN polling if applicable
+      const { getRoomConfig: getRoomCfg } = require('../config');
+      const roomCfg = getRoomCfg(room);
+      if (roomCfg?.autoSwitchSports && roomCfg?.trackedTeams?.length > 0) {
+        espn.startPolling(room);
+      }
+    } else {
+      // youtube or app mode — don't override Plex/sports
+      if (currentMode === 'nowplaying' || currentMode === 'nowplaying-tv' || currentMode.startsWith('sports-')) {
+        console.log(`[webhook/ha] Not overriding ${currentMode} mode`);
+        return;
+      }
+
+      // Stop screensaver + ESPN
+      screensaver.stopRotation(room);
+      espn.stopPolling(room);
+
+      const newState = { ...current, ...mapped };
+      setState(room, newState);
+
+      try {
+        const { getRoomPayload } = require('../index');
+        const payload = getRoomPayload(room);
+        broadcastToRoom(room, payload || newState);
+      } catch {
+        broadcastToRoom(room, newState);
+      }
+    }
+  } catch (err) {
+    console.error('[webhook/ha] Error processing payload:', err);
+  }
+});
+
+module.exports = router;

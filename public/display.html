@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marquee — Display</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Bebas+Neue&family=Black+Ops+One&family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.youtube.com/iframe_api"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani', sans-serif; overflow: hidden; }
+:root {
+  --b-color: #c9a84c;
+  --b-glow: rgba(201,168,76,0.4);
+  --b-bg: linear-gradient(135deg,#1a1200,#0d0a00,#1a1200);
+}
+
+/* ═══ BANNER ═══ */
+.banner {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px 40px 11px;
+  border-bottom: 1px solid var(--b-color);
+  background: var(--b-bg);
+  overflow: hidden;
+}
+.banner-text {
+  font-family: 'Cinzel', serif; font-size: clamp(16px,2.2vw,28px);
+  font-weight: 700; letter-spacing: clamp(6px,1vw,14px);
+  text-transform: uppercase; color: var(--b-color);
+  text-shadow: 0 0 20px var(--b-glow);
+  white-space: nowrap;
+}
+.banner-orn { color: var(--b-color); opacity: 0.6; margin: 0 16px; font-size: 14px; letter-spacing: 3px; }
+
+/* ═══ NOW PLAYING ═══ */
+.np-wrap {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, #0d0d0d, #000);
+}
+.movie-ambient {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 55% 65% at 50% 50%, color-mix(in srgb, var(--b-color) 12%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.movie-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: grid; grid-template-rows: 1fr auto;
+}
+.movie-poster-wrap {
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px 0 8px;
+}
+.movie-poster-frame {
+  position: relative; height: 100%; aspect-ratio: 2/3;
+  animation: revealUp 1s cubic-bezier(0.16,1,0.3,1) both;
+}
+.movie-poster-frame img {
+  width: 100%; height: 100%; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04);
+  display: block;
+}
+.watched-eye {
+  position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
+  background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px); z-index: 5;
+}
+.watched-eye svg { width: 13px; height: 13px; fill: none; stroke: var(--b-color); stroke-width: 2; }
+.trailer-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7); font-size: 12px;
+  backdrop-filter: blur(8px); cursor: pointer;
+  transition: all 0.2s; margin-top: 6px;
+  animation: revealUp 0.6s 1.2s both;
+}
+.trailer-pill:hover { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.4); }
+.meta-bar {
+  background: linear-gradient(0deg, #000, rgba(0,0,0,0.97));
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 10px 24px 14px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.tagline {
+  text-align: center; font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(11px,1.4vw,17px); font-weight: 400; letter-spacing: 3px;
+  color: rgba(240,232,216,0.55); font-style: italic;
+  animation: revealUp 0.6s 0.5s both;
+}
+.badges {
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(8px,1.5vw,22px); flex-wrap: wrap;
+  animation: revealUp 0.6s 0.7s both;
+}
+.b-rating {
+  border: 2px solid rgba(255,255,255,0.5); padding: 2px 8px;
+  font-size: clamp(9px,0.9vw,12px); font-weight: 700; color: #fff;
+  line-height: 1.1; font-family: 'Rajdhani', sans-serif; letter-spacing: 0.5px;
+}
+.b-rating small { display: block; font-size: 0.58em; color: rgba(255,255,255,0.6); letter-spacing: 0.3px; }
+.b-audio { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.b-audio .ab { font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.3vw,16px); letter-spacing: 2px; line-height: 1; }
+.b-audio .as { font-size: clamp(6px,0.6vw,8px); letter-spacing: 1.5px; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+.atmos .ab { color: #00b4d8; }
+.dtshd .ab { color: #7fb3e8; }
+.truehd .ab { color: #e86b6b; }
+.b-res {
+  border: 1.5px solid rgba(255,255,255,0.3); padding: 2px 9px;
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.3vw,17px);
+  letter-spacing: 2px; line-height: 1; color: rgba(255,255,255,0.85);
+}
+.b-res.uhd { border-color: var(--b-color); color: var(--b-color); }
+.b-res.hdr { border-color: #f39c12; color: #f39c12; font-size: clamp(9px,0.9vw,12px); }
+.b-aspect { color: rgba(255,255,255,0.45); font-size: clamp(10px,1vw,14px); font-weight: 500; letter-spacing: 1px; }
+.b-stars { display: flex; gap: 2px; }
+.star { font-size: clamp(13px,1.3vw,18px); }
+.s-full { color: var(--b-color); }
+.s-half { color: var(--b-color); opacity: 0.55; }
+.s-empty { color: rgba(255,255,255,0.18); }
+.b-clock { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.5vw,20px); letter-spacing: 3px; color: rgba(255,255,255,0.4); }
+.divider { width: 1px; height: 24px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
+
+/* ═══ SCREENSAVER ═══ */
+.ss-wrap {
+  position: fixed; inset: 0;
+  background: #000;
+}
+.ss-bg-img {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  filter: brightness(0.35) saturate(0.8);
+  transform: scale(1.04);
+  animation: ssKenBurns1 20s ease-in-out infinite alternate;
+}
+.ss-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 20%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+}
+.ss-bottom-grad {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 70%;
+  background: linear-gradient(transparent, rgba(0,0,0,0.97));
+  pointer-events: none;
+}
+.ss-layout {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: end; padding: 50px 60px;
+  z-index: 5;
+}
+.ss-text-col { display: flex; flex-direction: column; gap: 12px; }
+.ss-source-label {
+  font-family: 'Cinzel', serif; font-size: clamp(10px,0.9vw,13px);
+  font-weight: 600; letter-spacing: 8px; color: var(--b-color);
+  text-shadow: 0 0 20px var(--b-glow); text-transform: uppercase;
+  animation: revealUp 0.8s both;
+}
+.ss-title {
+  font-family: 'Cinzel', serif; font-size: clamp(32px,6vw,80px);
+  font-weight: 900; color: #fff; letter-spacing: 3px; line-height: 1.0;
+  text-shadow: 0 4px 60px rgba(0,0,0,0.9);
+  animation: revealUp 0.8s 0.1s both;
+}
+.ss-meta-row {
+  display: flex; align-items: center; gap: 20px;
+  animation: revealUp 0.8s 0.25s both;
+}
+.ss-year { font-family: 'Bebas Neue', sans-serif; font-size: clamp(16px,1.8vw,22px); letter-spacing: 4px; color: rgba(255,255,255,0.45); }
+.ss-genre-pill {
+  border: 1px solid rgba(255,255,255,0.2); padding: 3px 10px;
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  font-weight: 600; letter-spacing: 2px; color: rgba(255,255,255,0.5); text-transform: uppercase;
+}
+.ss-tagline {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(14px,1.6vw,20px);
+  font-weight: 400; color: rgba(255,255,255,0.45); font-style: italic; letter-spacing: 2px;
+  animation: revealUp 0.8s 0.35s both;
+}
+.ss-badges {
+  display: flex; align-items: center; gap: clamp(8px,1.2vw,18px); flex-wrap: wrap;
+  animation: revealUp 0.8s 0.4s both;
+}
+.ss-runtime {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.4vw,18px);
+  letter-spacing: 3px; color: rgba(255,255,255,0.4);
+}
+.ss-overview {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(12px,1.2vw,16px);
+  font-weight: 400; color: rgba(255,255,255,0.35); letter-spacing: 1px; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  max-width: 60vw;
+  animation: revealUp 0.8s 0.5s both;
+}
+.ss-credits {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1vw,14px);
+  font-weight: 500; color: rgba(255,255,255,0.3); letter-spacing: 2px;
+  animation: revealUp 0.8s 0.55s both;
+}
+.ss-poster-col {
+  padding-bottom: 4px;
+  animation: revealUp 1s 0.2s both;
+}
+.ss-poster-img {
+  height: clamp(160px,22vh,280px); aspect-ratio: 2/3; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+.ss-progress-bar {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: rgba(255,255,255,0.05);
+}
+.ss-progress-fill {
+  height: 100%; background: var(--b-color); opacity: 0.5; width: 35%;
+  animation: ssProgress 15s linear infinite;
+}
+.ss-dot-nav {
+  position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 6;
+}
+.ss-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.3s; }
+.ss-dot.active { background: var(--b-color); width: 20px; border-radius: 3px; }
+
+/* ═══ NOW PLAYING TV ═══ */
+.tv-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: grid; grid-template-columns: auto 1fr; gap: 0;
+  padding: 24px 40px 20px;
+}
+.tv-poster-col {
+  display: flex; align-items: center; justify-content: center;
+  padding-right: 36px;
+}
+.tv-poster-img {
+  height: clamp(280px, 50vh, 520px); aspect-ratio: 2/3; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04);
+  animation: revealUp 1s cubic-bezier(0.16,1,0.3,1) both;
+}
+.tv-info-col {
+  display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  overflow: hidden;
+  animation: revealUp 0.8s 0.2s both;
+}
+.tv-show-title {
+  font-family: 'Cinzel', serif; font-size: clamp(28px,4vw,52px);
+  font-weight: 900; color: #fff; letter-spacing: 2px; line-height: 1.1;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.8);
+}
+.tv-badge-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tv-badge {
+  border: 1px solid rgba(255,255,255,0.2); padding: 3px 10px;
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1vw,14px);
+  font-weight: 600; letter-spacing: 2px; color: rgba(255,255,255,0.6); text-transform: uppercase;
+}
+.tv-badge.accent { border-color: var(--b-color); color: var(--b-color); }
+.tv-episode-title {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(18px,2.4vw,32px);
+  font-weight: 500; color: rgba(255,255,255,0.75); letter-spacing: 1px;
+}
+.tv-overview {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(12px,1.2vw,16px);
+  font-weight: 400; color: rgba(255,255,255,0.4); letter-spacing: 1px; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  max-width: 50vw;
+}
+.tv-meta-row {
+  display: flex; align-items: center; gap: clamp(10px,1.5vw,22px); flex-wrap: wrap;
+}
+.tv-meta-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tv-meta-label {
+  font-size: clamp(7px,0.6vw,9px); letter-spacing: 2px; color: rgba(255,255,255,0.3);
+  text-transform: uppercase; font-weight: 600;
+}
+.tv-meta-value {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.4vw,18px);
+  letter-spacing: 2px; color: rgba(255,255,255,0.8);
+}
+.tv-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
+.tv-progress-wrap { margin-top: 4px; }
+.tv-progress-bar {
+  height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
+  max-width: 50vw;
+}
+.tv-progress-fill {
+  height: 100%; background: var(--b-color); border-radius: 2px;
+  transition: width 0.5s ease;
+}
+.tv-progress-label {
+  font-size: clamp(9px,0.7vw,11px); color: rgba(255,255,255,0.25);
+  letter-spacing: 2px; margin-top: 4px; font-weight: 600;
+}
+
+/* ═══ TRAILER OVERLAY ═══ */
+.trailer-overlay {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(0,0,0,0.92);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.4s ease;
+}
+.trailer-overlay iframe {
+  width: min(90vw, 1200px); height: min(50.625vw, 675px);
+  border: none;
+}
+.trailer-close {
+  position: absolute; top: 24px; right: 32px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7); font-family: 'Rajdhani', sans-serif;
+  font-size: 13px; font-weight: 600; letter-spacing: 3px; padding: 8px 20px;
+  cursor: pointer; text-transform: uppercase;
+  transition: all 0.2s;
+}
+.trailer-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ═══ THEME EFFECTS ═══ */
+
+/* Christmas snowflakes */
+.snowflake {
+  position: absolute; top: -10px; color: #fff; font-size: 14px;
+  opacity: 0.7; pointer-events: none; z-index: 25;
+  animation: snowfall linear infinite;
+}
+@keyframes snowfall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 0.7; }
+  100% { transform: translateY(60px) rotate(360deg); opacity: 0; }
+}
+
+/* Halloween bats */
+.bat {
+  position: absolute; top: 8px; font-size: 16px;
+  opacity: 0.6; pointer-events: none; z-index: 25;
+  animation: batFly linear infinite;
+}
+@keyframes batFly {
+  0% { transform: translateX(-40px) translateY(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translateX(calc(100vw + 40px)) translateY(-10px); opacity: 0; }
+}
+
+/* ═══ SPORTS — SHARED CARD ═══ */
+.sports-atmosphere {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.sports-atmosphere::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, transparent 20%, rgba(0,0,0,0.7) 100%),
+    linear-gradient(180deg, var(--sport-tint, rgba(0,0,0,0.5)) 0%, rgba(0,0,0,0.6) 100%);
+}
+.sports-atmosphere::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 30%, rgba(0,0,0,0.5) 100%);
+}
+.sports-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px 40px; z-index: 10;
+}
+.sports-card {
+  position: relative;
+  background: rgba(12, 14, 20, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 60px rgba(0,0,0,0.5), 0 0 80px var(--sport-glow, rgba(255,255,255,0.05)),
+              inset 0 1px 0 rgba(255,255,255,0.05);
+  padding: clamp(24px,3vw,44px) clamp(28px,4vw,56px);
+  max-width: clamp(700px,70vw,920px);
+  width: 90%;
+  display: flex; flex-direction: column; align-items: center;
+  gap: clamp(12px,2vh,22px);
+  animation: revealUp 0.8s cubic-bezier(0.16,1,0.3,1) both;
+}
+@supports not (backdrop-filter: blur(24px)) {
+  .sports-card { background: rgba(12,14,20,0.85); }
+}
+.sports-card-header {
+  display: flex; align-items: center; gap: 16px; width: 100%;
+  animation: revealUp 0.6s both;
+}
+.sc-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sport-accent-dim, rgba(255,255,255,0.1)), transparent);
+}
+.sports-card-header span {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,16px);
+  letter-spacing: 6px; color: var(--sport-accent, #fff);
+  white-space: nowrap;
+}
+.sports-scoreboard {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: clamp(20px,4vw,60px); width: 100%;
+  animation: revealUp 0.8s 0.1s both;
+}
+.sports-team { display: flex; flex-direction: column; align-items: center; gap: clamp(8px,1.2vh,14px); }
+.sports-logo {
+  width: clamp(70px,10vw,120px); height: clamp(70px,10vw,120px);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(36px,5vw,60px); position: relative;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.sports-logo img { width: 80%; height: 80%; object-fit: contain; }
+.sports-team-name {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(18px,2.8vw,36px);
+  letter-spacing: 3px; color: #fff; text-align: center;
+}
+.sports-team-record {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,1vw,13px);
+  color: rgba(255,255,255,0.3); letter-spacing: 1px;
+}
+.sports-score-center { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.sports-score {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(64px,12vw,140px);
+  letter-spacing: -4px; line-height: 1; color: #fff;
+  display: flex; align-items: center; gap: 8px;
+  text-shadow: 0 0 80px var(--sport-glow, rgba(255,255,255,0.08));
+}
+.sports-score-dash { color: rgba(255,255,255,0.2); font-size: 0.6em; margin: 0 4px; }
+.sports-stats-footer {
+  width: 100%; padding-top: clamp(12px,1.5vh,20px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; flex-direction: column; align-items: center; gap: clamp(10px,1.5vh,16px);
+  animation: revealUp 0.8s 0.25s both;
+}
+.sports-live-dot { display: flex; align-items: center; gap: 8px; }
+.live-indicator { display: flex; align-items: center; gap: 6px; color: var(--sport-accent, #4ade80); }
+.live-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--sport-accent, #4ade80); animation: livePulse 1.5s infinite; }
+@keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+.sports-venue {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  color: rgba(255,255,255,0.25); letter-spacing: 2px; text-transform: uppercase;
+}
+.sports-clock {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.4vw,18px);
+  letter-spacing: 3px; padding: 3px 14px;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--sport-accent-dim, rgba(255,255,255,0.1));
+  color: var(--sport-accent, #fff);
+}
+
+/* Per-sport atmosphere backgrounds */
+.soccer-atmosphere { background-image: url('/img/bg-soccer.png'); --sport-tint: rgba(0,18,8,0.5); }
+.nfl-atmosphere { background-image: url('/img/bg-nfl.png'); --sport-tint: rgba(0,6,26,0.5); }
+.nba-atmosphere { background-image: url('/img/bg-nba.png'); --sport-tint: rgba(13,5,0,0.5); }
+.ufc-atmosphere { background-image: url('/img/bg-ufc.png'); --sport-tint: rgba(10,5,0,0.5); }
+.mlb-atmosphere { background-image: url('/img/bg-mlb.png'); --sport-tint: rgba(6,3,0,0.5); }
+.nhl-atmosphere { background-image: url('/img/bg-nhl.png'); --sport-tint: rgba(0,21,40,0.5); }
+
+/* Per-sport logo backgrounds */
+.sports-logo.home-crest { background: radial-gradient(135deg at 30% 30%, rgba(0,51,255,0.3), rgba(0,0,80,0.2)); }
+.sports-logo.away-crest { background: radial-gradient(135deg at 30% 30%, rgba(255,0,0,0.3), rgba(80,0,0,0.2)); }
+.sports-logo.nba-home { background: rgba(29,66,138,0.25); border-color: rgba(29,66,138,0.3); border-radius: 8px; }
+.sports-logo.nba-away { background: rgba(205,14,14,0.2); border-color: rgba(205,14,14,0.25); border-radius: 8px; }
+.sports-logo.nhl-home { background: rgba(56,189,248,0.15); border-color: rgba(56,189,248,0.2); border-radius: 8px; }
+.sports-logo.nhl-away { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); border-radius: 8px; }
+.sports-logo.mlb-home { background: radial-gradient(circle, rgba(0,45,114,0.3), transparent); border-color: rgba(0,45,114,0.4); }
+.sports-logo.mlb-away { background: radial-gradient(circle, rgba(189,48,57,0.3), transparent); border-color: rgba(189,48,57,0.4); }
+
+/* ═══ SPORT-SPECIFIC: SOCCER STATS ═══ */
+.stat-row {
+  display: flex; align-items: center; gap: clamp(16px,3vw,40px); width: 100%; max-width: 600px;
+}
+.stat-item { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.stat-label { font-size: clamp(8px,0.7vw,10px); letter-spacing: 3px; color: rgba(255,255,255,0.25); text-transform: uppercase; }
+.stat-bar { width: 100%; height: 2px; background: rgba(255,255,255,0.08); position: relative; overflow: hidden; }
+.stat-fill-home { position: absolute; top: 0; left: 0; height: 100%; background: #4ade80; }
+.stat-fill-away { position: absolute; top: 0; right: 0; height: 100%; background: #f87171; }
+.stat-values { display: flex; justify-content: space-between; width: 100%; }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.3vw,16px); letter-spacing: 2px; }
+.stat-val.home { color: #4ade80; } .stat-val.away { color: #f87171; }
+.soccer-recent-goals {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
+}
+.goal-event {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  padding: 6px 14px; display: flex; align-items: center; gap: 8px; border-radius: 6px;
+}
+.goal-icon { font-size: 14px; }
+.goal-text { font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,1vw,13px); font-weight: 600; letter-spacing: 1px; color: rgba(255,255,255,0.6); }
+.goal-min { font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,15px); letter-spacing: 2px; color: #4ade80; }
+
+/* ═══ SPORT-SPECIFIC: NFL ═══ */
+.nfl-down-badge {
+  background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3);
+  color: #60a5fa; padding: 3px 12px; font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(12px,1.2vw,15px); letter-spacing: 3px; border-radius: 4px;
+}
+@keyframes helmetFloat { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-6px) rotate(2deg)} }
+.nfl-score-grid {
+  display: grid; grid-template-columns: auto repeat(4,1fr) auto;
+  gap: 0; width: 100%; max-width: 500px;
+  border: 1px solid rgba(255,255,255,0.08); overflow: hidden; border-radius: 8px;
+}
+.nfl-sg-cell {
+  padding: 6px 12px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1.1vw,15px); letter-spacing: 2px;
+}
+.nfl-sg-cell:last-child { border-right: none; }
+.nfl-sg-header { color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.02); font-size: clamp(9px,0.8vw,11px); letter-spacing: 3px; }
+.nfl-sg-total { color: #fff; font-weight: 700; background: rgba(255,255,255,0.04); }
+.nfl-sg-team { color: rgba(255,255,255,0.6); text-align: left; padding-left: 14px; font-family: 'Teko', sans-serif; font-size: clamp(12px,1.2vw,16px); letter-spacing: 2px; }
+.nfl-sg-score { color: rgba(255,255,255,0.75); }
+.nfl-sg-active { color: #60a5fa; }
+.nfl-possession {
+  font-family: 'Teko', sans-serif; font-size: clamp(11px,1.1vw,14px); letter-spacing: 3px;
+  color: rgba(255,255,255,0.3); text-transform: uppercase; text-align: center;
+}
+.possession-arrow { color: #60a5fa; font-size: 1.2em; }
+
+/* ═══ SPORT-SPECIFIC: NBA STATS ═══ */
+.nba-stats-row {
+  display: flex; gap: clamp(10px,2vw,30px); width: 100%; max-width: 700px;
+}
+.nba-team-stats { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.nba-team-stats.right-stats { align-items: flex-end; }
+.nba-stat-line { display: flex; align-items: center; gap: 8px; }
+.nba-stat-name { font-size: clamp(9px,0.8vw,11px); letter-spacing: 2px; color: rgba(255,255,255,0.25); text-transform: uppercase; font-family: 'Rajdhani', sans-serif; flex: 1; }
+.nba-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: clamp(13px,1.3vw,17px); letter-spacing: 2px; color: rgba(255,255,255,0.7); }
+.nba-stat-bar-wrap { width: 80px; height: 2px; background: rgba(255,255,255,0.08); position: relative; }
+.nba-stat-fill { position: absolute; top: 0; left: 0; height: 100%; }
+.home-fill { background: #1d428a; } .away-fill { background: #c9082a; right: 0; left: auto; }
+.nba-last-play {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1.1vw,14px);
+  color: rgba(255,255,255,0.35); letter-spacing: 1px; text-align: center; font-style: italic;
+}
+
+/* ═══ SPORT-SPECIFIC: NHL ═══ */
+.nhl-power-play {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1.1vw,14px);
+  letter-spacing: 4px; color: #facc15; animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ═══ SPORT-SPECIFIC: UFC ═══ */
+.ufc-matchup {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: clamp(20px,3vw,50px); width: 100%;
+}
+.ufc-fighter { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.ufc-fighter.red { align-items: flex-end; }
+.ufc-fighter.blue { align-items: flex-start; }
+.fighter-avatar {
+  width: clamp(80px,10vw,130px); height: clamp(80px,10vw,130px);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(40px,5vw,64px); position: relative; overflow: hidden;
+}
+.fighter-avatar.red-corner {
+  background: radial-gradient(circle at 40% 40%, rgba(220,38,38,0.4), rgba(100,0,0,0.2));
+  border: 2px solid rgba(220,38,38,0.4);
+  box-shadow: 0 0 40px rgba(220,38,38,0.2);
+}
+.fighter-avatar.blue-corner {
+  background: radial-gradient(circle at 40% 40%, rgba(37,99,235,0.4), rgba(0,0,100,0.2));
+  border: 2px solid rgba(37,99,235,0.4);
+  box-shadow: 0 0 40px rgba(37,99,235,0.2);
+}
+.fighter-name {
+  font-family: 'Black Ops One', cursive; font-size: clamp(18px,2.5vw,32px);
+  letter-spacing: 2px; color: #fff; text-align: center;
+}
+.fighter-record { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.4vw,18px); letter-spacing: 3px; color: rgba(255,255,255,0.55); }
+.ufc-vs-block { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ufc-vs { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px,6vw,72px); letter-spacing: 2px; color: rgba(255,255,255,0.12); }
+.ufc-weight-class { font-family: 'Teko', sans-serif; font-size: clamp(10px,1vw,14px); font-weight: 600; letter-spacing: 3px; color: rgba(250,204,21,0.6); text-transform: uppercase; text-align: center; }
+.ufc-stats {
+  display: flex; gap: clamp(16px,3vw,40px); width: 100%; max-width: 700px;
+}
+.ufc-stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ufc-stat-label { font-size: clamp(8px,0.7vw,10px); letter-spacing: 3px; color: rgba(255,255,255,0.25); text-transform: uppercase; font-family: 'Rajdhani', sans-serif; }
+.ufc-stat-bar { width: 100%; height: 3px; background: rgba(255,255,255,0.06); position: relative; display: flex; border-radius: 2px; }
+.ufc-stat-red { height: 100%; background: rgba(220,38,38,0.7); border-radius: 2px 0 0 2px; }
+.ufc-stat-blue { height: 100%; background: rgba(37,99,235,0.7); border-radius: 0 2px 2px 0; }
+.ufc-stat-vals { display: flex; justify-content: space-between; width: 100%; }
+.ufc-stat-r { font-family: 'Bebas Neue', sans-serif; font-size: clamp(13px,1.3vw,17px); letter-spacing: 2px; color: rgba(220,80,80,0.9); }
+.ufc-stat-b { font-family: 'Bebas Neue', sans-serif; font-size: clamp(13px,1.3vw,17px); letter-spacing: 2px; color: rgba(80,120,220,0.9); }
+.ufc-corner-badge {
+  padding: 3px 14px; font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(11px,1.1vw,14px); letter-spacing: 3px; border-radius: 4px;
+}
+.ufc-corner-badge.red { background: rgba(220,38,38,0.2); border: 1px solid rgba(220,38,38,0.4); color: #f87171; }
+.ufc-corner-badge.blue { background: rgba(37,99,235,0.2); border: 1px solid rgba(37,99,235,0.4); color: #60a5fa; }
+
+/* ═══ SPORT-SPECIFIC: MLB ═══ */
+.mlb-diamond {
+  display: grid; grid-template-areas: '. second .' 'third . first' '. home .';
+  grid-template-columns: 1fr 1fr 1fr; gap: 4px; width: 90px;
+}
+.base {
+  width: 22px; height: 22px; border: 2px solid rgba(255,255,255,0.15);
+  transform: rotate(45deg); transition: all 0.3s;
+}
+.base.occupied { background: #f9a825; border-color: #f9a825; box-shadow: 0 0 12px rgba(249,168,37,0.6); }
+.base-second { grid-area: second; justify-self: center; }
+.base-third { grid-area: third; justify-self: end; }
+.base-first { grid-area: first; justify-self: start; }
+.base-home { grid-area: home; justify-self: center; width: 22px; height: 22px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.1); clip-path: polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%); }
+.mlb-inning-badge {
+  background: rgba(249,168,37,0.1); border: 1px solid rgba(249,168,37,0.3);
+  padding: 5px 16px; font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(13px,1.3vw,17px); letter-spacing: 4px; color: #f9a825;
+  display: flex; align-items: center; gap: 8px; border-radius: 6px;
+}
+.inning-arrow { font-size: 0.8em; }
+.mlb-count { display: flex; gap: 16px; }
+.count-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.count-label { font-size: clamp(8px,0.7vw,10px); letter-spacing: 3px; color: rgba(255,255,255,0.25); text-transform: uppercase; font-family: 'Rajdhani', sans-serif; }
+.count-dots { display: flex; gap: 4px; }
+.count-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.2); }
+.count-dot.on-balls { background: #4ade80; border-color: #4ade80; }
+.count-dot.on-strikes { background: #f87171; border-color: #f87171; }
+.count-dot.on-outs { background: #facc15; border-color: #facc15; }
+
+/* ═══ ANIMATIONS ═══ */
+/* ═══ CROSSFADE ═══ */
+.ss-wrap { transition: opacity 0.4s ease; }
+.ss-wrap.ss-fade-out { opacity: 0; }
+.ss-wrap.ss-fade-in { opacity: 1; }
+
+.ss-subtitle {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(14px,1.4vw,18px);
+  font-weight: 500; color: rgba(255,255,255,0.5); letter-spacing: 2px;
+  animation: revealUp 0.8s 0.15s both;
+}
+
+/* ═══ YOUTUBE MODE ═══ */
+.yt-wrap {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse 100% 80% at 50% 30%, #0d0000, #000);
+}
+.yt-scan {
+  position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,0,0,0.015) 2px, rgba(255,0,0,0.015) 4px);
+}
+.yt-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 32px; padding: 20px 40px; z-index: 5;
+}
+.yt-logo-wrap {
+  display: flex; align-items: center; gap: 16px;
+  animation: revealUp 0.8s both;
+}
+.yt-logo-icon {
+  width: 52px; height: 36px; background: #ff0000; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 30px rgba(255,0,0,0.3);
+}
+.yt-logo-icon svg { width: 20px; height: 20px; fill: #fff; }
+.yt-logo-text {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(28px,4vw,44px);
+  letter-spacing: 6px; color: #fff;
+}
+.yt-video-title {
+  font-family: 'Cinzel', serif; font-size: clamp(20px,3.5vw,44px);
+  font-weight: 700; color: #fff; text-align: center;
+  letter-spacing: 2px; line-height: 1.2;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.8);
+  max-width: 80vw;
+  animation: revealUp 0.8s 0.15s both;
+}
+.yt-channel {
+  display: flex; align-items: center; gap: 14px;
+  animation: revealUp 0.8s 0.25s both;
+}
+.yt-channel-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,68,68,0.25); border: 1px solid rgba(255,68,68,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 18px;
+  color: #ff4444; letter-spacing: 1px;
+}
+.yt-channel-name {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(14px,1.8vw,22px);
+  font-weight: 500; color: rgba(255,255,255,0.6); letter-spacing: 2px;
+}
+.yt-stats {
+  display: flex; align-items: center; gap: clamp(12px,2vw,24px);
+  animation: revealUp 0.8s 0.35s both;
+}
+.yt-stat {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(13px,1.3vw,17px);
+  letter-spacing: 3px; color: rgba(255,255,255,0.35);
+}
+.yt-stat-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
+.yt-progress-wrap {
+  width: 60vw; max-width: 700px;
+  animation: revealUp 0.8s 0.45s both;
+}
+.yt-progress-bar {
+  height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;
+  position: relative; overflow: hidden;
+}
+.yt-progress-fill {
+  height: 100%; background: #ff0000; border-radius: 2px;
+  transition: width 1s linear;
+}
+.yt-progress-thumb {
+  position: absolute; top: 50%; right: -6px; transform: translateY(-50%);
+  width: 12px; height: 12px; border-radius: 50%; background: #ff0000;
+  box-shadow: 0 0 10px rgba(255,0,0,0.5);
+}
+.yt-progress-times {
+  display: flex; justify-content: space-between; margin-top: 6px;
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1vw,14px);
+  letter-spacing: 2px; color: rgba(255,255,255,0.25);
+}
+
+/* ═══ APP MODE ═══ */
+.app-wrap {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse 100% 80% at 50% 30%, #0a0a0a, #000);
+}
+.app-layout {
+  position: absolute; top: 56px; bottom: 0; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 28px; padding: 20px 40px; z-index: 5;
+}
+.app-icon {
+  font-size: clamp(64px,10vw,96px); line-height: 1;
+  animation: revealUp 0.8s both;
+}
+.app-name {
+  font-family: 'Cinzel', serif; font-size: clamp(28px,4.5vw,56px);
+  font-weight: 700; color: #fff; letter-spacing: 4px;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.8);
+  animation: revealUp 0.8s 0.15s both;
+}
+.app-title {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(16px,2vw,26px);
+  font-weight: 400; color: rgba(255,255,255,0.45); letter-spacing: 2px;
+  text-align: center; max-width: 70vw;
+  animation: revealUp 0.8s 0.25s both;
+}
+.app-clock {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(16px,1.8vw,22px);
+  letter-spacing: 4px; color: rgba(255,255,255,0.3);
+  animation: revealUp 0.8s 0.35s both;
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes revealUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ssKenBurns1 { from { transform: scale(1.04) translate(0,0); } to { transform: scale(1.08) translate(-1%,-1%); } }
+@keyframes ssKenBurns2 { from { transform: scale(1.06) translate(-1%,0); } to { transform: scale(1.1) translate(1%,-1%); } }
+@keyframes ssKenBurns3 { from { transform: scale(1.04) translate(1%,-0.5%); } to { transform: scale(1.08) translate(-0.5%,0.5%); } }
+@keyframes ssProgress { from { width: 0%; } to { width: 100%; } }
+</style>
+</head>
+<body>
+
+<div id="display"></div>
+<div id="effects"></div>
+
+<script>
+const room = window.location.pathname.split('/room/')[1] || 'theater';
+let ws;
+let clockInterval;
+let currentTheme = 'default';
+let trailerTimer = null;
+let ytPlayer = null;
+let _ytProgressInterval = null;
+
+// ── Theme definitions ──
+const THEMES = {
+  default: {
+    color: '#c9a84c',
+    glow: 'rgba(201,168,76,0.4)',
+    bg: 'linear-gradient(135deg,#1a1200,#0d0a00,#1a1200)',
+    effect: null,
+  },
+  christmas: {
+    color: '#d4373e',
+    glow: 'rgba(212,55,62,0.4)',
+    bg: 'linear-gradient(135deg,#1a0000,#0d0000,#1a0505)',
+    effect: 'snow',
+  },
+  halloween: {
+    color: '#ff8c00',
+    glow: 'rgba(255,140,0,0.4)',
+    bg: 'linear-gradient(135deg,#1a0f00,#0d0800,#1a0f00)',
+    effect: 'bats',
+  },
+  ocean: {
+    color: '#00b4d8',
+    glow: 'rgba(0,180,216,0.4)',
+    bg: 'linear-gradient(135deg,#001219,#000a0d,#001219)',
+    effect: null,
+  },
+  royal: {
+    color: '#9b5de5',
+    glow: 'rgba(155,93,229,0.4)',
+    bg: 'linear-gradient(135deg,#0f0020,#080010,#0f0020)',
+    effect: null,
+  },
+  emerald: {
+    color: '#2ec4b6',
+    glow: 'rgba(46,196,182,0.4)',
+    bg: 'linear-gradient(135deg,#001a16,#000d0b,#001a16)',
+    effect: null,
+  },
+  rose: {
+    color: '#e8628c',
+    glow: 'rgba(232,98,140,0.4)',
+    bg: 'linear-gradient(135deg,#1a0010,#0d0008,#1a0010)',
+    effect: null,
+  },
+};
+
+function applyTheme(name) {
+  const theme = THEMES[name] || THEMES.default;
+  currentTheme = name;
+  document.documentElement.style.setProperty('--b-color', theme.color);
+  document.documentElement.style.setProperty('--b-glow', theme.glow);
+  document.documentElement.style.setProperty('--b-bg', theme.bg);
+
+  // Clear existing effects
+  const effectsEl = document.getElementById('effects');
+  effectsEl.innerHTML = '';
+
+  // Apply effects
+  if (theme.effect === 'snow') {
+    renderSnowflakes(effectsEl);
+  } else if (theme.effect === 'bats') {
+    renderBats(effectsEl);
+  }
+}
+
+function renderSnowflakes(container) {
+  const banner = document.querySelector('.banner');
+  if (!banner) return;
+  const flakes = ['❄', '❅', '❆', '✦', '•'];
+  for (let i = 0; i < 10; i++) {
+    const el = document.createElement('span');
+    el.className = 'snowflake';
+    el.textContent = flakes[i % flakes.length];
+    el.style.left = (5 + Math.random() * 90) + '%';
+    el.style.animationDuration = (2 + Math.random() * 3) + 's';
+    el.style.animationDelay = (Math.random() * 4) + 's';
+    el.style.fontSize = (10 + Math.random() * 8) + 'px';
+    banner.appendChild(el);
+  }
+}
+
+function renderBats(container) {
+  const banner = document.querySelector('.banner');
+  if (!banner) return;
+  for (let i = 0; i < 5; i++) {
+    const el = document.createElement('span');
+    el.className = 'bat';
+    el.textContent = '🦇';
+    el.style.top = (4 + Math.random() * 20) + 'px';
+    el.style.animationDuration = (4 + Math.random() * 4) + 's';
+    el.style.animationDelay = (Math.random() * 8) + 's';
+    el.style.fontSize = (12 + Math.random() * 8) + 'px';
+    banner.appendChild(el);
+  }
+}
+
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}`);
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ type: 'join', room }));
+  };
+
+  ws.onmessage = (e) => {
+    try {
+      const state = JSON.parse(e.data);
+      render(state);
+    } catch (err) {
+      console.error('[ws] Bad message:', err);
+    }
+  };
+
+  ws.onclose = () => {
+    setTimeout(connectWS, 3000);
+  };
+}
+
+function render(state) {
+  if (clockInterval) { clearInterval(clockInterval); clockInterval = null; }
+  if (_ytProgressInterval) { clearInterval(_ytProgressInterval); _ytProgressInterval = null; }
+  if (trailerTimer) { clearTimeout(trailerTimer); trailerTimer = null; }
+  closeTrailer();
+
+  // Apply theme from state
+  if (state.theme && state.theme !== currentTheme) {
+    applyTheme(state.theme);
+  }
+
+  if (state.mode === 'nowplaying') {
+    renderNowPlaying(state);
+  } else if (state.mode === 'nowplaying-tv') {
+    renderNowPlayingTV(state);
+  } else if (state.mode === 'sports-soccer') {
+    renderSportsSoccer(state);
+  } else if (state.mode === 'sports-nfl') {
+    renderSportsNFL(state);
+  } else if (state.mode === 'sports-nba') {
+    renderSportsNBA(state);
+  } else if (state.mode === 'sports-ufc') {
+    renderSportsUFC(state);
+  } else if (state.mode === 'sports-mlb') {
+    renderSportsMLB(state);
+  } else if (state.mode === 'sports-nhl') {
+    renderSportsNHL(state);
+  } else if (state.mode === 'youtube') {
+    renderYouTube(state);
+  } else if (state.mode === 'app') {
+    renderApp(state);
+  } else {
+    renderScreensaver(state);
+  }
+
+  // Re-apply effects after render (banner was re-created)
+  const theme = THEMES[currentTheme] || THEMES.default;
+  if (theme.effect === 'snow') {
+    renderSnowflakes(document.getElementById('effects'));
+  } else if (theme.effect === 'bats') {
+    renderBats(document.getElementById('effects'));
+  }
+}
+
+function buildStars(rating) {
+  if (!rating) return '';
+  const full = Math.floor(rating);
+  const remainder = rating - full;
+  const half = remainder >= 0.3 ? 1 : 0;
+  const empty = 5 - full - half;
+  let html = '';
+  for (let i = 0; i < full; i++) html += '<span class="star s-full">★</span>';
+  if (half) html += '<span class="star s-half">★</span>';
+  for (let i = 0; i < empty; i++) html += '<span class="star s-empty">★</span>';
+  return html;
+}
+
+function formatTime() {
+  const now = new Date();
+  let h = now.getHours();
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${m} ${ampm}`;
+}
+
+function renderNowPlaying(s) {
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Now Playing';
+
+  el.innerHTML = `
+    <div class="np-wrap">
+      <div class="movie-ambient"></div>
+      <div class="banner">
+        <span class="banner-orn">✦ ── ✦</span>
+        <span class="banner-text">${bannerText}</span>
+        <span class="banner-orn">✦ ── ✦</span>
+      </div>
+      <div class="movie-layout">
+        <div class="movie-poster-wrap">
+          <div class="movie-poster-frame">
+            <img src="${s.posterUrl || '/assets/placeholder.png'}" alt="${s.title || ''}"
+                 onerror="this.onerror=null;this.src='/assets/placeholder.png'">
+            <div class="watched-eye">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="meta-bar">
+          ${s.tagline ? `<div class="tagline">${s.tagline}</div>` : ''}
+          <div class="badges">
+            ${s.contentRating ? `<div class="b-rating">${s.contentRating}${s.contentRatingDesc ? `<small>${s.contentRatingDesc}</small>` : ''}</div><div class="divider"></div>` : ''}
+            ${s.audioCodec ? `<div class="b-audio ${s.audioClass || ''}"><div class="ab">${s.audioCodec}</div><div class="as">${s.audioLabel || ''}</div></div><div class="divider"></div>` : ''}
+            ${s.aspectRatio ? `<div class="b-aspect">${s.aspectRatio}</div><div class="divider"></div>` : ''}
+            ${s.resolution ? `<div class="b-res ${s.resClass || ''}">${s.resolution}</div><div class="divider"></div>` : ''}
+            ${s.rating ? `<div class="b-stars">${buildStars(s.rating)}</div><div class="divider"></div>` : ''}
+            <div class="b-clock" id="live-clock">${formatTime()}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  clockInterval = setInterval(() => {
+    const clockEl = document.getElementById('live-clock');
+    if (clockEl) clockEl.textContent = formatTime();
+  }, 1000);
+}
+
+function renderNowPlayingTV(s) {
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Now Playing';
+  const seasonEp = (s.seasonNum && s.episodeNum)
+    ? `S${String(s.seasonNum).padStart(2,'0')} · E${String(s.episodeNum).padStart(2,'0')}`
+    : '';
+
+  el.innerHTML = `
+    <div class="np-wrap">
+      <div class="movie-ambient"></div>
+      <div class="banner">
+        <span class="banner-orn">✦ ── ✦</span>
+        <span class="banner-text">${bannerText}</span>
+        <span class="banner-orn">✦ ── ✦</span>
+      </div>
+      <div class="tv-layout">
+        <div class="tv-poster-col">
+          <img class="tv-poster-img" src="${s.posterUrl || '/assets/placeholder.png'}" alt="${s.showTitle || ''}"
+               onerror="this.onerror=null;this.src='/assets/placeholder.png'">
+        </div>
+        <div class="tv-info-col">
+          <div class="tv-show-title">${s.showTitle || s.title || ''}</div>
+          <div class="tv-badge-row">
+            ${seasonEp ? `<div class="tv-badge accent">${seasonEp}</div>` : ''}
+            ${s.network ? `<div class="tv-badge">${s.network}</div>` : ''}
+            ${(s.genres || []).slice(0, 3).map(g => `<div class="tv-badge">${g}</div>`).join('')}
+          </div>
+          ${s.episodeTitle ? `<div class="tv-episode-title">${s.episodeTitle}</div>` : ''}
+          ${s.overview ? `<div class="tv-overview">${s.overview}</div>` : ''}
+          <div class="tv-meta-row">
+            ${s.runtime ? `<div class="tv-meta-item"><div class="tv-meta-label">Runtime</div><div class="tv-meta-value">${s.runtime}</div></div><div class="tv-divider"></div>` : ''}
+            ${s.contentRating ? `<div class="tv-meta-item"><div class="tv-meta-label">Rating</div><div class="tv-meta-value">${s.contentRating}</div></div><div class="tv-divider"></div>` : ''}
+            ${s.audioCodec ? `<div class="tv-meta-item"><div class="tv-meta-label">Audio</div><div class="tv-meta-value">${s.audioCodec}</div></div><div class="tv-divider"></div>` : ''}
+            ${s.resolution ? `<div class="tv-meta-item"><div class="tv-meta-label">Video</div><div class="tv-meta-value">${s.resolution}</div></div><div class="tv-divider"></div>` : ''}
+            ${s.rating ? `<div class="b-stars">${buildStars(s.rating)}</div><div class="tv-divider"></div>` : ''}
+            <div class="b-clock" id="live-clock">${formatTime()}</div>
+          </div>
+          ${typeof s.progress === 'number' && s.progress > 0 ? `
+          <div class="tv-progress-wrap">
+            <div class="tv-progress-bar"><div class="tv-progress-fill" style="width:${s.progress}%"></div></div>
+            <div class="tv-progress-label">${s.progress}% watched</div>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+
+  clockInterval = setInterval(() => {
+    const clockEl = document.getElementById('live-clock');
+    if (clockEl) clockEl.textContent = formatTime();
+  }, 1000);
+}
+
+function openTrailer(youtubeKey) {
+  console.log('[trailer] openTrailer called with key:', youtubeKey);
+  closeTrailer();
+  // Tell server to pause screensaver rotation while trailer plays
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'trailer-start', room }));
+  }
+  const overlay = document.createElement('div');
+  overlay.className = 'trailer-overlay';
+  overlay.id = 'trailer-overlay';
+  overlay.innerHTML = `
+    <div id="yt-player"></div>
+    <button class="trailer-close" onclick="closeTrailer()">Close</button>
+  `;
+  document.body.appendChild(overlay);
+
+  ytPlayer = new YT.Player('yt-player', {
+    videoId: youtubeKey,
+    playerVars: { autoplay: 1, mute: 1, rel: 0, modestbranding: 1 },
+    events: {
+      onStateChange: (e) => {
+        if (e.data === YT.PlayerState.ENDED) {
+          closeTrailer();
+        }
+      }
+    }
+  });
+}
+
+function closeTrailer() {
+  if (ytPlayer) { ytPlayer.destroy(); ytPlayer = null; }
+  const existing = document.getElementById('trailer-overlay');
+  if (existing) existing.remove();
+  // Tell server to resume screensaver rotation
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'trailer-end', room }));
+  }
+}
+
+function scheduleTrailer(key, mode, delay) {
+  console.log('[trailer] scheduleTrailer called — key:', key, 'mode:', mode, 'delay:', delay);
+  if (!key || mode === 'off' || !mode) { console.log('[trailer] scheduleTrailer skipped (no key or mode off)'); return; }
+  const seconds = (delay && delay >= 5) ? delay : 30;
+  console.log('[trailer] scheduling auto-play in', seconds, 'seconds');
+  trailerTimer = setTimeout(() => openTrailer(key), seconds * 1000);
+}
+
+function teamLogoHtml(team, cssClass) {
+  if (team.logo) return `<img src="${team.logo}" alt="${team.name}" onerror="this.style.display='none';this.parentElement.textContent='${team.abbreviation || '?'}'">`;
+  return team.abbreviation || '?';
+}
+
+function renderSportsSoccer(s) {
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Live Match';
+  const home = s.homeTeam || {};
+  const away = s.awayTeam || {};
+
+  document.documentElement.style.setProperty('--b-color', '#4ade80');
+  document.documentElement.style.setProperty('--b-glow', 'rgba(74,222,128,0.4)');
+  document.documentElement.style.setProperty('--b-bg', 'linear-gradient(135deg,#001a08,#000d04,#001a08)');
+  document.documentElement.style.setProperty('--sport-accent', '#4ade80');
+  document.documentElement.style.setProperty('--sport-accent-dim', 'rgba(74,222,128,0.15)');
+  document.documentElement.style.setProperty('--sport-glow', 'rgba(74,222,128,0.1)');
+
+  const possession = s.possession || {};
+  const shots = s.shots || {};
+  const shotsOT = s.shotsOnTarget || {};
+  const goals = (s.goals || []).slice(0, 5);
+  const statusText = s.isLive ? 'LIVE GAME' : (s.statusText || 'MATCH');
+
+  el.innerHTML = `
+    <div class="np-wrap" style="background:#000">
+      <div class="sports-atmosphere soccer-atmosphere"></div>
+      <div class="banner">
+        <span class="banner-orn" style="color:#4ade80">◆ ── ◆</span>
+        <span class="banner-text" style="color:#4ade80">${bannerText}</span>
+        <span class="banner-orn" style="color:#4ade80">◆ ── ◆</span>
+      </div>
+      <div class="sports-layout">
+        <div class="sports-card">
+          <div class="sports-card-header">
+            <div class="sc-line"></div>
+            <span>${statusText}</span>
+            <div class="sc-line"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            ${s.isLive ? '<div class="live-indicator"><div class="live-pulse"></div>LIVE</div>' : ''}
+            <span style="font-family:'Rajdhani',sans-serif;font-size:clamp(12px,1.2vw,16px);font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.5)">${s.periodText || s.clock || ''}</span>
+            ${s.league || s.competition ? `<span class="sports-venue">${s.league || s.competition}</span>` : ''}
+          </div>
+          <div class="sports-scoreboard">
+            <div class="sports-team">
+              <div class="sports-logo home-crest">${teamLogoHtml(home)}</div>
+              <div class="sports-team-name">${home.name || 'Home'}</div>
+              <div class="sports-team-record">${home.record || ''}</div>
+            </div>
+            <div class="sports-score-center">
+              <div class="sports-score">
+                <span>${home.score || 0}</span><span class="sports-score-dash">–</span><span>${away.score || 0}</span>
+              </div>
+              ${s.venue ? `<div class="sports-venue">${s.venue}</div>` : ''}
+            </div>
+            <div class="sports-team">
+              <div class="sports-logo away-crest">${teamLogoHtml(away)}</div>
+              <div class="sports-team-name">${away.name || 'Away'}</div>
+              <div class="sports-team-record">${away.record || ''}</div>
+            </div>
+          </div>
+          ${(possession.home || shots.home || goals.length) ? `
+          <div class="sports-stats-footer">
+            ${(possession.home || shots.home) ? `<div class="stat-row">
+              ${possession.home ? `<div class="stat-item">
+                <div class="stat-bar"><div class="stat-fill-home" style="width:${parseInt(possession.home)||50}%"></div><div class="stat-fill-away" style="width:${parseInt(possession.away)||50}%"></div></div>
+                <div class="stat-values"><span class="stat-val home">${possession.home}</span><span class="stat-label">Possession</span><span class="stat-val away">${possession.away}</span></div>
+              </div>` : ''}
+              ${shots.home ? `<div class="stat-item">
+                <div class="stat-bar"><div class="stat-fill-home" style="width:${Math.round(parseInt(shots.home)/(parseInt(shots.home)+parseInt(shots.away)||1)*100)}%"></div><div class="stat-fill-away" style="width:${Math.round(parseInt(shots.away)/(parseInt(shots.home)+parseInt(shots.away)||1)*100)}%"></div></div>
+                <div class="stat-values"><span class="stat-val home">${shots.home}</span><span class="stat-label">Shots</span><span class="stat-val away">${shots.away}</span></div>
+              </div>` : ''}
+              ${shotsOT.home ? `<div class="stat-item">
+                <div class="stat-bar"><div class="stat-fill-home" style="width:${Math.round(parseInt(shotsOT.home)/(parseInt(shotsOT.home)+parseInt(shotsOT.away)||1)*100)}%"></div><div class="stat-fill-away" style="width:${Math.round(parseInt(shotsOT.away)/(parseInt(shotsOT.home)+parseInt(shotsOT.away)||1)*100)}%"></div></div>
+                <div class="stat-values"><span class="stat-val home">${shotsOT.home}</span><span class="stat-label">On Target</span><span class="stat-val away">${shotsOT.away}</span></div>
+              </div>` : ''}
+            </div>` : ''}
+            ${goals.length ? `<div class="soccer-recent-goals">
+              ${goals.map(g => `<div class="goal-event"><div class="goal-icon">⚽</div><div class="goal-text">${g.player}</div><div class="goal-min">${g.minute}</div></div>`).join('')}
+            </div>` : ''}
+          </div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSportsNFL(s) {
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Live Game';
+  const home = s.homeTeam || {};
+  const away = s.awayTeam || {};
+  const qs = s.quarterScores || { home: [], away: [] };
+
+  document.documentElement.style.setProperty('--b-color', '#60a5fa');
+  document.documentElement.style.setProperty('--b-glow', 'rgba(96,165,250,0.4)');
+  document.documentElement.style.setProperty('--b-bg', 'linear-gradient(135deg,#00081a,#000510,#00081a)');
+  document.documentElement.style.setProperty('--sport-accent', '#60a5fa');
+  document.documentElement.style.setProperty('--sport-accent-dim', 'rgba(96,165,250,0.15)');
+  document.documentElement.style.setProperty('--sport-glow', 'rgba(96,165,250,0.1)');
+
+  let gridHtml = '';
+  gridHtml += '<div class="nfl-sg-cell nfl-sg-header">Team</div>';
+  for (let q = 1; q <= 4; q++) {
+    const active = s.period === q ? ' nfl-sg-active' : '';
+    gridHtml += `<div class="nfl-sg-cell nfl-sg-header${active}"${active ? ' style="color:#60a5fa"' : ''}>Q${q}</div>`;
+  }
+  gridHtml += '<div class="nfl-sg-cell nfl-sg-header nfl-sg-total">TOT</div>';
+  gridHtml += `<div class="nfl-sg-cell nfl-sg-team">${home.abbreviation || home.name}</div>`;
+  for (let q = 0; q < 4; q++) {
+    const val = qs.home[q] !== undefined ? qs.home[q] : '—';
+    const active = s.period === q + 1 ? ' nfl-sg-active' : '';
+    gridHtml += `<div class="nfl-sg-cell nfl-sg-score${active}"${active ? ' style="color:#60a5fa"' : ''}>${val}</div>`;
+  }
+  gridHtml += `<div class="nfl-sg-cell nfl-sg-total">${home.score || 0}</div>`;
+  gridHtml += `<div class="nfl-sg-cell nfl-sg-team">${away.abbreviation || away.name}</div>`;
+  for (let q = 0; q < 4; q++) {
+    const val = qs.away[q] !== undefined ? qs.away[q] : '—';
+    const active = s.period === q + 1 ? ' nfl-sg-active' : '';
+    gridHtml += `<div class="nfl-sg-cell nfl-sg-score${active}"${active ? ' style="color:#60a5fa"' : ''}>${val}</div>`;
+  }
+  gridHtml += `<div class="nfl-sg-cell nfl-sg-total">${away.score || 0}</div>`;
+
+  const statusText = s.isLive ? 'LIVE GAME' : (s.statusText || 'GAME');
+
+  el.innerHTML = `
+    <div class="np-wrap" style="background:#000">
+      <div class="sports-atmosphere nfl-atmosphere"></div>
+      <div class="banner">
+        <span class="banner-orn" style="color:#60a5fa">★ ── ★</span>
+        <span class="banner-text" style="color:#60a5fa">${bannerText}</span>
+        <span class="banner-orn" style="color:#60a5fa">★ ── ★</span>
+      </div>
+      <div class="sports-layout">
+        <div class="sports-card">
+          <div class="sports-card-header">
+            <div class="sc-line"></div>
+            <span>${statusText}</span>
+            <div class="sc-line"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            ${s.isLive ? '<div class="live-indicator"><div class="live-pulse"></div>LIVE</div>' : ''}
+            <span style="font-family:'Teko',sans-serif;font-size:clamp(14px,1.4vw,18px);font-weight:600;letter-spacing:3px;color:rgba(255,255,255,0.5)">${s.periodText || ''}</span>
+            ${s.down ? `<div class="nfl-down-badge">${s.down}</div>` : ''}
+          </div>
+          <div class="sports-scoreboard">
+            <div class="sports-team">
+              <div class="sports-logo" style="border-radius:8px;background:rgba(96,165,250,0.12)">${home.logo ? `<img src="${home.logo}" onerror="this.outerHTML='🏈'">` : '🏈'}</div>
+              <div style="font-family:'Teko',sans-serif;font-size:clamp(11px,1.1vw,15px);letter-spacing:3px;color:rgba(255,255,255,0.35)">${home.abbreviation || ''}</div>
+              <div class="sports-team-name" style="font-family:'Black Ops One',cursive;font-size:clamp(16px,2.5vw,32px)">${home.name || 'Home'}</div>
+            </div>
+            <div class="sports-score-center">
+              <div class="sports-score"><span>${home.score || 0}</span><span class="sports-score-dash">–</span><span>${away.score || 0}</span></div>
+              ${s.venue ? `<div class="sports-venue">${s.venue}</div>` : ''}
+            </div>
+            <div class="sports-team">
+              <div class="sports-logo" style="border-radius:8px;background:rgba(96,165,250,0.12)">${away.logo ? `<img src="${away.logo}" onerror="this.outerHTML='🏈'">` : '🏈'}</div>
+              <div style="font-family:'Teko',sans-serif;font-size:clamp(11px,1.1vw,15px);letter-spacing:3px;color:rgba(255,255,255,0.35)">${away.abbreviation || ''}</div>
+              <div class="sports-team-name" style="font-family:'Black Ops One',cursive;font-size:clamp(16px,2.5vw,32px)">${away.name || 'Away'}</div>
+            </div>
+          </div>
+          <div class="sports-stats-footer">
+            <div class="nfl-score-grid">${gridHtml}</div>
+            ${s.yardLine ? `<div class="nfl-possession"><span class="possession-arrow">▶ </span>${s.yardLine}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSportsNBA(s) {
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Live Game';
+  const home = s.homeTeam || {};
+  const away = s.awayTeam || {};
+  const hStats = s.teamStats?.home || {};
+  const aStats = s.teamStats?.away || {};
+
+  document.documentElement.style.setProperty('--b-color', '#fb923c');
+  document.documentElement.style.setProperty('--b-glow', 'rgba(251,146,60,0.4)');
+  document.documentElement.style.setProperty('--b-bg', 'linear-gradient(135deg,#1a0800,#0d0500,#1a0800)');
+  document.documentElement.style.setProperty('--sport-accent', '#fb923c');
+  document.documentElement.style.setProperty('--sport-accent-dim', 'rgba(251,146,60,0.15)');
+  document.documentElement.style.setProperty('--sport-glow', 'rgba(251,146,60,0.1)');
+
+  const statusText = s.isLive ? 'LIVE GAME' : (s.statusText || 'GAME');
+
+  el.innerHTML = `
+    <div class="np-wrap" style="background:#000">
+      <div class="sports-atmosphere nba-atmosphere"></div>
+      <div class="banner">
+        <span class="banner-orn" style="color:#fb923c">● ── ●</span>
+        <span class="banner-text" style="color:#fb923c">${bannerText}</span>
+        <span class="banner-orn" style="color:#fb923c">● ── ●</span>
+      </div>
+      <div class="sports-layout">
+        <div class="sports-card">
+          <div class="sports-card-header">
+            <div class="sc-line"></div>
+            <span>${statusText}</span>
+            <div class="sc-line"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            ${s.isLive ? '<div class="live-indicator"><div class="live-pulse"></div>LIVE</div>' : ''}
+            <span style="font-family:'Teko',sans-serif;font-size:clamp(14px,1.4vw,18px);font-weight:600;letter-spacing:3px;color:rgba(255,255,255,0.5)">${s.periodText || ''}</span>
+            ${s.clock ? `<div class="sports-clock">${s.clock}</div>` : ''}
+          </div>
+          <div class="sports-scoreboard">
+            <div class="sports-team">
+              <div class="sports-logo nba-home">${home.logo ? `<img src="${home.logo}" onerror="this.outerHTML='🏀'">` : '🏀'}</div>
+              <div class="sports-team-name" style="font-family:'Teko',sans-serif;font-weight:700">${home.name || 'Home'}</div>
+              <div class="sports-team-record">${home.record || ''}</div>
+            </div>
+            <div class="sports-score-center">
+              <div class="sports-score"><span>${home.score || 0}</span><span class="sports-score-dash">–</span><span>${away.score || 0}</span></div>
+              ${s.lastPlay ? `<div class="nba-last-play">${s.lastPlay}</div>` : ''}
+            </div>
+            <div class="sports-team">
+              <div class="sports-logo nba-away">${away.logo ? `<img src="${away.logo}" onerror="this.outerHTML='🏀'">` : '🏀'}</div>
+              <div class="sports-team-name" style="font-family:'Teko',sans-serif;font-weight:700">${away.name || 'Away'}</div>
+              <div class="sports-team-record">${away.record || ''}</div>
+            </div>
+          </div>
+          ${(hStats.fieldGoalPct || s.venue) ? `
+          <div class="sports-stats-footer">
+            <div class="nba-stats-row">
+              <div class="nba-team-stats">
+                ${hStats.fieldGoalPct ? `<div class="nba-stat-line"><div class="nba-stat-name">FG%</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill home-fill" style="width:${parseFloat(hStats.fieldGoalPct)||50}%"></div></div><div class="nba-stat-val">${hStats.fieldGoalPct}</div></div>` : ''}
+                ${hStats.threePointFieldGoalPct ? `<div class="nba-stat-line"><div class="nba-stat-name">3PT%</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill home-fill" style="width:${parseFloat(hStats.threePointFieldGoalPct)||50}%"></div></div><div class="nba-stat-val">${hStats.threePointFieldGoalPct}</div></div>` : ''}
+                ${hStats.rebounds ? `<div class="nba-stat-line"><div class="nba-stat-name">Rebounds</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill home-fill" style="width:${Math.round(parseInt(hStats.rebounds)/(parseInt(hStats.rebounds)+parseInt(aStats.rebounds||0)||1)*100)}%"></div></div><div class="nba-stat-val">${hStats.rebounds}</div></div>` : ''}
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
+                ${s.venue ? `<div style="font-size:clamp(8px,0.7vw,10px);letter-spacing:3px;color:rgba(255,255,255,0.2);text-transform:uppercase;font-family:'Rajdhani',sans-serif;text-align:center">${s.venue}</div>` : ''}
+              </div>
+              <div class="nba-team-stats right-stats">
+                ${aStats.fieldGoalPct ? `<div class="nba-stat-line" style="flex-direction:row-reverse"><div class="nba-stat-name" style="text-align:right">FG%</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill away-fill" style="width:${parseFloat(aStats.fieldGoalPct)||50}%"></div></div><div class="nba-stat-val">${aStats.fieldGoalPct}</div></div>` : ''}
+                ${aStats.threePointFieldGoalPct ? `<div class="nba-stat-line" style="flex-direction:row-reverse"><div class="nba-stat-name" style="text-align:right">3PT%</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill away-fill" style="width:${parseFloat(aStats.threePointFieldGoalPct)||50}%"></div></div><div class="nba-stat-val">${aStats.threePointFieldGoalPct}</div></div>` : ''}
+                ${aStats.rebounds ? `<div class="nba-stat-line" style="flex-direction:row-reverse"><div class="nba-stat-name" style="text-align:right">Rebounds</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill away-fill" style="width:${Math.round(parseInt(aStats.rebounds)/(parseInt(hStats.rebounds||0)+parseInt(aStats.rebounds)||1)*100)}%"></div></div><div class="nba-stat-val">${aStats.rebounds}</div></div>` : ''}
+              </div>
+            </div>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSportsUFC(s) {
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Live Fight';
+  const home = s.homeTeam || {};
+  const away = s.awayTeam || {};
+  const fighters = s.fighters || {};
+
+  document.documentElement.style.setProperty('--b-color', '#facc15');
+  document.documentElement.style.setProperty('--b-glow', 'rgba(250,204,21,0.4)');
+  document.documentElement.style.setProperty('--b-bg', 'linear-gradient(135deg,#1a1000,#0d0800,#1a1000)');
+  document.documentElement.style.setProperty('--sport-accent', '#facc15');
+  document.documentElement.style.setProperty('--sport-accent-dim', 'rgba(250,204,21,0.15)');
+  document.documentElement.style.setProperty('--sport-glow', 'rgba(250,204,21,0.1)');
+
+  const redName = fighters.red?.name || home.name || 'Fighter 1';
+  const blueName = fighters.blue?.name || away.name || 'Fighter 2';
+  const redRecord = fighters.red?.record || home.record || '';
+  const blueRecord = fighters.blue?.record || away.record || '';
+  const statusText = s.isLive ? 'LIVE FIGHT' : (s.statusText || 'FIGHT');
+  const fightStats = s.fightStats || {};
+
+  el.innerHTML = `
+    <div class="np-wrap" style="background:#000">
+      <div class="sports-atmosphere ufc-atmosphere"></div>
+      <div class="banner">
+        <span class="banner-orn" style="color:#facc15">◈ ── ◈</span>
+        <span class="banner-text" style="color:#facc15">${bannerText}</span>
+        <span class="banner-orn" style="color:#facc15">◈ ── ◈</span>
+      </div>
+      <div class="sports-layout">
+        <div class="sports-card">
+          <div class="sports-card-header">
+            <div class="sc-line"></div>
+            <span>${statusText}</span>
+            <div class="sc-line"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            ${s.isLive ? '<div class="live-indicator"><div class="live-pulse"></div>LIVE</div>' : ''}
+            <span style="font-family:'Teko',sans-serif;font-size:clamp(12px,1.2vw,16px);letter-spacing:3px;color:rgba(255,255,255,0.4)">${s.periodText || (s.round ? `Round ${s.round}` : '')}</span>
+            ${s.weightClass ? `<span style="font-family:'Teko',sans-serif;font-size:clamp(10px,1vw,14px);font-weight:600;letter-spacing:3px;color:rgba(250,204,21,0.6);text-transform:uppercase">${s.weightClass}</span>` : ''}
+          </div>
+          <div class="ufc-matchup">
+            <div class="ufc-fighter red">
+              <div class="fighter-avatar red-corner">${home.logo ? `<img src="${home.logo}" style="width:80%;height:80%;object-fit:contain;border-radius:50%" onerror="this.outerHTML='🥋'">` : '🥋'}</div>
+              <div class="fighter-name">${redName}</div>
+              <div class="fighter-record">${redRecord}</div>
+              <div class="ufc-corner-badge red">Red Corner</div>
+            </div>
+            <div class="ufc-vs-block">
+              <div class="ufc-vs">VS</div>
+              ${s.competition ? `<div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(11px,1.1vw,14px);letter-spacing:4px;color:rgba(250,204,21,0.5)">${s.competition}</div>` : ''}
+            </div>
+            <div class="ufc-fighter blue">
+              <div class="fighter-avatar blue-corner">${away.logo ? `<img src="${away.logo}" style="width:80%;height:80%;object-fit:contain;border-radius:50%" onerror="this.outerHTML='🥊'">` : '🥊'}</div>
+              <div class="fighter-name">${blueName}</div>
+              <div class="fighter-record">${blueRecord}</div>
+              <div class="ufc-corner-badge blue">Blue Corner</div>
+            </div>
+          </div>
+          ${(fightStats.sigStrikes || s.venue) ? `
+          <div class="sports-stats-footer">
+            ${fightStats.sigStrikes ? `<div class="ufc-stats">
+              <div class="ufc-stat">
+                <div class="ufc-stat-label">Sig. Strikes</div>
+                <div class="ufc-stat-bar"><div class="ufc-stat-red" style="width:${Math.round(parseInt(fightStats.sigStrikes.red)/(parseInt(fightStats.sigStrikes.red)+parseInt(fightStats.sigStrikes.blue)||1)*100)}%"></div><div class="ufc-stat-blue" style="width:${Math.round(parseInt(fightStats.sigStrikes.blue)/(parseInt(fightStats.sigStrikes.red)+parseInt(fightStats.sigStrikes.blue)||1)*100)}%"></div></div>
+                <div class="ufc-stat-vals"><span class="ufc-stat-r">${fightStats.sigStrikes.red}</span><span class="ufc-stat-b">${fightStats.sigStrikes.blue}</span></div>
+              </div>
+              ${fightStats.takedowns ? `<div class="ufc-stat">
+                <div class="ufc-stat-label">Takedowns</div>
+                <div class="ufc-stat-bar"><div class="ufc-stat-red" style="width:${Math.round(parseInt(fightStats.takedowns.red)/(parseInt(fightStats.takedowns.red)+parseInt(fightStats.takedowns.blue)||1)*100)}%"></div><div class="ufc-stat-blue" style="width:${Math.round(parseInt(fightStats.takedowns.blue)/(parseInt(fightStats.takedowns.red)+parseInt(fightStats.takedowns.blue)||1)*100)}%"></div></div>
+                <div class="ufc-stat-vals"><span class="ufc-stat-r">${fightStats.takedowns.red}</span><span class="ufc-stat-b">${fightStats.takedowns.blue}</span></div>
+              </div>` : ''}
+            </div>` : ''}
+            ${s.venue ? `<div class="sports-venue">${s.venue}</div>` : ''}
+          </div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSportsMLB(s) {
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Live Game';
+  const home = s.homeTeam || {};
+  const away = s.awayTeam || {};
+  const bases = s.bases || {};
+  const count = s.count || {};
+
+  document.documentElement.style.setProperty('--b-color', '#f9a825');
+  document.documentElement.style.setProperty('--b-glow', 'rgba(249,168,37,0.4)');
+  document.documentElement.style.setProperty('--b-bg', 'linear-gradient(135deg,#1a1000,#0d0800,#1a1000)');
+  document.documentElement.style.setProperty('--sport-accent', '#f9a825');
+  document.documentElement.style.setProperty('--sport-accent-dim', 'rgba(249,168,37,0.15)');
+  document.documentElement.style.setProperty('--sport-glow', 'rgba(249,168,37,0.1)');
+
+  const inningText = s.inning ? `${s.isTop ? 'Top' : 'Bot'} ${s.inning}${['st','nd','rd'][s.inning-1]||'th'}` : s.periodText || '';
+  const inningArrow = s.isTop ? '▲' : '▼';
+  const statusText = s.isLive ? 'LIVE GAME' : (s.statusText || 'GAME');
+
+  function dots(count, max, cls) {
+    let h = '';
+    for (let i = 0; i < max; i++) h += `<div class="count-dot${i < count ? ' ' + cls : ''}"></div>`;
+    return h;
+  }
+
+  el.innerHTML = `
+    <div class="np-wrap" style="background:#000">
+      <div class="sports-atmosphere mlb-atmosphere"></div>
+      <div class="banner">
+        <span class="banner-orn" style="color:#f9a825">◇ ── ◇</span>
+        <span class="banner-text" style="color:#f9a825">${bannerText}</span>
+        <span class="banner-orn" style="color:#f9a825">◇ ── ◇</span>
+      </div>
+      <div class="sports-layout">
+        <div class="sports-card">
+          <div class="sports-card-header">
+            <div class="sc-line"></div>
+            <span>${statusText}</span>
+            <div class="sc-line"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            ${s.isLive ? '<div class="live-indicator"><div class="live-pulse"></div>LIVE</div>' : ''}
+            <div class="mlb-inning-badge"><span class="inning-arrow">${inningArrow}</span>${inningText}</div>
+          </div>
+          <div class="sports-scoreboard">
+            <div class="sports-team">
+              <div class="sports-logo mlb-home">${home.logo ? `<img src="${home.logo}" onerror="this.outerHTML='🧢'">` : '🧢'}</div>
+              <div class="sports-team-name">${home.name || 'Home'}</div>
+              <div class="sports-team-record">${home.record || ''}</div>
+            </div>
+            <div class="sports-score-center">
+              <div class="sports-score"><span>${home.score || 0}</span><span class="sports-score-dash">–</span><span>${away.score || 0}</span></div>
+            </div>
+            <div class="sports-team">
+              <div class="sports-logo mlb-away">${away.logo ? `<img src="${away.logo}" onerror="this.outerHTML='🔴'">` : '🔴'}</div>
+              <div class="sports-team-name">${away.name || 'Away'}</div>
+              <div class="sports-team-record">${away.record || ''}</div>
+            </div>
+          </div>
+          <div class="sports-stats-footer">
+            <div style="display:flex;align-items:center;gap:clamp(20px,4vw,40px)">
+              <div class="mlb-diamond">
+                <div></div><div class="base base-second${bases.second ? ' occupied' : ''}"></div><div></div>
+                <div class="base base-third${bases.third ? ' occupied' : ''}"></div><div></div><div class="base base-first${bases.first ? ' occupied' : ''}"></div>
+                <div></div><div class="base-home"></div><div></div>
+              </div>
+              <div class="mlb-count">
+                <div class="count-group"><div class="count-label">Balls</div><div class="count-dots">${dots(count.balls||0, 4, 'on-balls')}</div></div>
+                <div class="count-group"><div class="count-label">Strikes</div><div class="count-dots">${dots(count.strikes||0, 3, 'on-strikes')}</div></div>
+                <div class="count-group"><div class="count-label">Outs</div><div class="count-dots">${dots(count.outs||0, 3, 'on-outs')}</div></div>
+              </div>
+            </div>
+            ${s.venue ? `<div class="sports-venue">${s.venue}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSportsNHL(s) {
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Live Game';
+  const home = s.homeTeam || {};
+  const away = s.awayTeam || {};
+
+  document.documentElement.style.setProperty('--b-color', '#38bdf8');
+  document.documentElement.style.setProperty('--b-glow', 'rgba(56,189,248,0.4)');
+  document.documentElement.style.setProperty('--b-bg', 'linear-gradient(135deg,#001528,#000a14,#001528)');
+  document.documentElement.style.setProperty('--sport-accent', '#38bdf8');
+  document.documentElement.style.setProperty('--sport-accent-dim', 'rgba(56,189,248,0.15)');
+  document.documentElement.style.setProperty('--sport-glow', 'rgba(56,189,248,0.1)');
+
+  const statusText = s.isLive ? 'LIVE GAME' : (s.statusText || 'GAME');
+
+  el.innerHTML = `
+    <div class="np-wrap" style="background:#000">
+      <div class="sports-atmosphere nhl-atmosphere"></div>
+      <div class="banner">
+        <span class="banner-orn" style="color:#38bdf8">❄ ── ❄</span>
+        <span class="banner-text" style="color:#38bdf8">${bannerText}</span>
+        <span class="banner-orn" style="color:#38bdf8">❄ ── ❄</span>
+      </div>
+      <div class="sports-layout">
+        <div class="sports-card">
+          <div class="sports-card-header">
+            <div class="sc-line"></div>
+            <span>${statusText}</span>
+            <div class="sc-line"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            ${s.isLive ? '<div class="live-indicator"><div class="live-pulse"></div>LIVE</div>' : ''}
+            <span style="font-family:'Teko',sans-serif;font-size:clamp(14px,1.4vw,18px);font-weight:600;letter-spacing:3px;color:rgba(255,255,255,0.5)">${s.periodText || ''}</span>
+            ${s.clock ? `<div class="sports-clock">${s.clock}</div>` : ''}
+          </div>
+          ${s.powerPlay ? `<div class="nhl-power-play">POWER PLAY</div>` : ''}
+          <div class="sports-scoreboard">
+            <div class="sports-team">
+              <div class="sports-logo nhl-home">${home.logo ? `<img src="${home.logo}" onerror="this.outerHTML='🏒'">` : '🏒'}</div>
+              <div class="sports-team-name" style="font-family:'Teko',sans-serif;font-weight:700">${home.name || 'Home'}</div>
+              <div class="sports-team-record">${home.record || ''}</div>
+            </div>
+            <div class="sports-score-center">
+              <div class="sports-score"><span>${home.score || 0}</span><span class="sports-score-dash">–</span><span>${away.score || 0}</span></div>
+            </div>
+            <div class="sports-team">
+              <div class="sports-logo nhl-away">${away.logo ? `<img src="${away.logo}" onerror="this.outerHTML='🏒'">` : '🏒'}</div>
+              <div class="sports-team-name" style="font-family:'Teko',sans-serif;font-weight:700">${away.name || 'Away'}</div>
+              <div class="sports-team-record">${away.record || ''}</div>
+            </div>
+          </div>
+          ${s.venue ? `
+          <div class="sports-stats-footer">
+            <div class="sports-venue">${s.venue}</div>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ── YouTube mode ──
+function formatDuration(seconds) {
+  if (!seconds) return '--:--';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s2 = Math.floor(seconds % 60);
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s2).padStart(2,'0')}`;
+  return `${m}:${String(s2).padStart(2,'0')}`;
+}
+
+function renderYouTube(s) {
+  if (_ytProgressInterval) { clearInterval(_ytProgressInterval); _ytProgressInterval = null; }
+
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Watching Now';
+  const hasMetadata = s.mediaTitle;
+  const initials = s.mediaArtist ? s.mediaArtist.split(/\s+/).map(w => w[0]).join('').substring(0,2).toUpperCase() : 'YT';
+
+  // Override theme colors for YouTube
+  document.documentElement.style.setProperty('--b-color', '#ff4444');
+  document.documentElement.style.setProperty('--b-glow', 'rgba(255,68,68,0.4)');
+  document.documentElement.style.setProperty('--b-bg', 'linear-gradient(135deg,#1a0000,#0d0000,#1a0000)');
+
+  if (!hasMetadata) {
+    el.innerHTML = `
+      <div class="yt-wrap">
+        <div class="yt-scan"></div>
+        <div class="banner">
+          <span class="banner-orn">✦ ── ✦</span>
+          <span class="banner-text">${bannerText}</span>
+          <span class="banner-orn">✦ ── ✦</span>
+        </div>
+        <div class="yt-layout">
+          <div class="yt-logo-wrap">
+            <div class="yt-logo-icon"><svg viewBox="0 0 24 24"><polygon points="10,8 16,12 10,16"/></svg></div>
+            <div class="yt-logo-text">YouTube</div>
+          </div>
+          <div class="yt-video-title" style="color:rgba(255,255,255,0.4)">${bannerText}</div>
+          <div class="app-clock" id="live-clock">${formatTime()}</div>
+        </div>
+      </div>
+    `;
+    clockInterval = setInterval(() => {
+      const c = document.getElementById('live-clock');
+      if (c) c.textContent = formatTime();
+    }, 1000);
+    return;
+  }
+
+  let position = s.mediaPosition || 0;
+  const duration = s.mediaDuration || 0;
+  const pct = duration > 0 ? Math.min((position / duration) * 100, 100) : 0;
+
+  el.innerHTML = `
+    <div class="yt-wrap">
+      <div class="yt-scan"></div>
+      <div class="banner">
+        <span class="banner-orn">✦ ── ✦</span>
+        <span class="banner-text">${bannerText}</span>
+        <span class="banner-orn">✦ ── ✦</span>
+      </div>
+      <div class="yt-layout">
+        <div class="yt-logo-wrap">
+          <div class="yt-logo-icon"><svg viewBox="0 0 24 24"><polygon points="10,8 16,12 10,16"/></svg></div>
+          <div class="yt-logo-text">YouTube</div>
+        </div>
+        <div class="yt-video-title">${s.mediaTitle}</div>
+        ${s.mediaArtist ? `
+          <div class="yt-channel">
+            <div class="yt-channel-avatar">${initials}</div>
+            <div class="yt-channel-name">${s.mediaArtist}</div>
+          </div>
+        ` : ''}
+        <div class="yt-stats">
+          ${duration ? `<div class="yt-stat">${formatDuration(duration)}</div><div class="yt-stat-divider"></div>` : ''}
+          <div class="yt-stat" id="live-clock">${formatTime()}</div>
+        </div>
+        ${duration ? `
+          <div class="yt-progress-wrap">
+            <div class="yt-progress-bar">
+              <div class="yt-progress-fill" id="yt-fill" style="width:${pct}%">
+                <div class="yt-progress-thumb"></div>
+              </div>
+            </div>
+            <div class="yt-progress-times">
+              <span id="yt-pos">${formatDuration(position)}</span>
+              <span>${formatDuration(duration)}</span>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
+  clockInterval = setInterval(() => {
+    const c = document.getElementById('live-clock');
+    if (c) c.textContent = formatTime();
+  }, 1000);
+
+  if (duration > 0) {
+    _ytProgressInterval = setInterval(() => {
+      position++;
+      if (position > duration) position = duration;
+      const fill = document.getElementById('yt-fill');
+      const posEl = document.getElementById('yt-pos');
+      if (fill) fill.style.width = Math.min((position / duration) * 100, 100) + '%';
+      if (posEl) posEl.textContent = formatDuration(position);
+    }, 1000);
+  }
+}
+
+// ── App mode ──
+function getAppIcon(appName) {
+  const name = (appName || '').toLowerCase();
+  const icons = {
+    netflix: '🎬', 'disney+': '🏰', 'disney plus': '🏰',
+    hbo: '🎭', 'hbo max': '🎭', 'max': '🎭',
+    'prime video': '📦', 'amazon prime': '📦',
+    spotify: '🎵', 'apple music': '🎵', 'tidal': '🎵',
+    twitch: '🎮', 'apple tv': '📺', 'apple tv+': '📺',
+    hulu: '📗', peacock: '🦚', paramount: '⛰️', 'paramount+': '⛰️',
+    crunchyroll: '🍥', funimation: '🍥',
+    vlc: '🔶', kodi: '📺', jellyfin: '📺', emby: '📺',
+  };
+  for (const [key, icon] of Object.entries(icons)) {
+    if (name.includes(key)) return icon;
+  }
+  return '📱';
+}
+
+function renderApp(s) {
+  const el = document.getElementById('display');
+  const bannerText = s.bannerText || 'Now Playing';
+  const icon = getAppIcon(s.appName);
+
+  el.innerHTML = `
+    <div class="app-wrap">
+      <div class="banner">
+        <span class="banner-orn">✦ ── ✦</span>
+        <span class="banner-text">${bannerText}</span>
+        <span class="banner-orn">✦ ── ✦</span>
+      </div>
+      <div class="app-layout">
+        <div class="app-icon">${icon}</div>
+        <div class="app-name">${s.appName || 'Unknown App'}</div>
+        ${s.mediaTitle ? `<div class="app-title">${s.mediaTitle}${s.mediaArtist ? ` — ${s.mediaArtist}` : ''}</div>` : ''}
+        <div class="app-clock" id="live-clock">${formatTime()}</div>
+      </div>
+    </div>
+  `;
+
+  clockInterval = setInterval(() => {
+    const c = document.getElementById('live-clock');
+    if (c) c.textContent = formatTime();
+  }, 1000);
+}
+
+function renderScreensaver(s) {
+  const el = document.getElementById('display');
+  const bgImage = s.backdropUrl || s.posterUrl || '';
+  const genres = (s.genres || []).map(g => `<div class="ss-genre-pill">${g}</div>`).join('');
+
+  // Configurable element visibility
+  const elems = s.screensaverElements || [];
+  const showRuntime = elems.includes('runtime');
+  const showRating = elems.includes('rating');
+  const showContentRating = elems.includes('contentRating');
+  const showOverview = elems.includes('overview');
+  const showCredits = elems.includes('credits');
+
+  // Source label
+  const sourceLabel = s.sourceLabel || 'Featured';
+
+  // Banner text: server sends source-based text for screensaver mode
+  const ssBannerText = s.bannerText || 'Marquee';
+
+  // Ken Burns variation based on slide index
+  const slideIndex = s.slideIndex || 0;
+  const kenBurnsAnim = `ssKenBurns${(slideIndex % 3) + 1}`;
+
+  // Dynamic dot navigation
+  const maxDots = 10;
+  const slideCount = Math.min(s.slideCount || 1, maxDots);
+  const activeDot = slideIndex % maxDots;
+  let dotsHtml = '';
+  for (let i = 0; i < slideCount; i++) {
+    dotsHtml += `<div class="ss-dot${i === activeDot ? ' active' : ''}"></div>`;
+  }
+
+  // Progress bar duration
+  const interval = s.screensaverInterval || 15;
+
+  // Subtitle for TV shows
+  const subtitleHtml = s.subtitle ? `<div class="ss-subtitle">${s.subtitle}</div>` : '';
+
+  // Crossfade: only apply fade transition when the title actually changes
+  const existing = el.querySelector('.ss-wrap');
+  const prevTitle = existing?.querySelector('.ss-title')?.textContent;
+  if (existing && prevTitle && prevTitle !== (s.title || '')) {
+    existing.classList.add('ss-fade-out');
+    setTimeout(() => {
+      renderScreensaverContent();
+    }, 400);
+  } else {
+    renderScreensaverContent();
+  }
+
+  function renderScreensaverContent() {
+    el.innerHTML = `
+      <div class="ss-wrap ss-fade-in">
+        <div class="ss-bg-img" style="background-image:url('${bgImage}'); animation: ${kenBurnsAnim} 20s ease-in-out infinite alternate;"></div>
+        <div class="ss-vignette"></div>
+        <div class="ss-bottom-grad"></div>
+        <div class="banner">
+          <span class="banner-orn">✦ ── ✦</span>
+          <span class="banner-text">${ssBannerText}</span>
+          <span class="banner-orn">✦ ── ✦</span>
+        </div>
+        <div class="ss-layout">
+          <div class="ss-text-col">
+            <div class="ss-source-label">${sourceLabel}</div>
+            <div class="ss-title">${s.title || ''}</div>
+            ${subtitleHtml}
+            <div class="ss-meta-row">
+              ${s.year ? `<div class="ss-year">${s.year}</div>` : ''}
+              ${genres}
+            </div>
+            ${s.tagline ? `<div class="ss-tagline">${s.tagline}</div>` : ''}
+            ${(showContentRating && s.contentRating) || (showRating && s.rating) || (showRuntime && s.runtime) ? `
+            <div class="ss-badges">
+              ${showContentRating && s.contentRating ? `<div class="b-rating">${s.contentRating}${s.contentRatingDesc ? `<small>${s.contentRatingDesc}</small>` : ''}</div>` : ''}
+              ${showRating && s.rating ? `<div class="b-stars">${buildStars(s.rating)}</div>` : ''}
+              ${showRuntime && s.runtime ? `<div class="ss-runtime">${s.runtime}</div>` : ''}
+            </div>` : ''}
+            ${showOverview && s.overview ? `<div class="ss-overview">${s.overview}</div>` : ''}
+            ${showCredits && (s.director || (s.cast && s.cast.length)) ? `<div class="ss-credits">${s.director ? 'Directed by ' + s.director : ''}${s.director && s.cast && s.cast.length ? ' · ' : ''}${s.cast && s.cast.length ? s.cast.join(', ') : ''}</div>` : ''}
+            ${s.trailerKey && (s.source === 'coming_soon' || s.source === 'trending') ? `<div class="trailer-pill">▶</div>` : ''}
+          </div>
+          ${s.posterUrl ? `<div class="ss-poster-col"><img class="ss-poster-img" src="${s.posterUrl}" alt="${s.title || ''}" onerror="this.onerror=null;this.src='/assets/placeholder.png'"></div>` : ''}
+        </div>
+        <div class="ss-progress-bar"><div class="ss-progress-fill" style="animation-duration:${interval}s"></div></div>
+        <div class="ss-dot-nav">
+          ${dotsHtml}
+        </div>
+      </div>
+    `;
+
+    // Wire trailer pill click + auto-play for Coming Soon slides
+    if (s.trailerKey && (s.source === 'coming_soon' || s.source === 'trending')) {
+      const pill = el.querySelector('.trailer-pill');
+      if (pill) {
+        pill.addEventListener('click', () => openTrailer(s.trailerKey));
+      }
+      scheduleTrailer(s.trailerKey, s.trailerMode, s.trailerDelay);
+    }
+  }
+}
+
+// Set page title
+document.title = `Marquee — ${room.replace(/-/g, ' ')}`;
+
+// Connect
+connectWS();
+</script>
+</body>
+</html>

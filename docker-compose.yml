@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  marquee:
+    build: .
+    container_name: marquee
+    ports:
+      - "3000:3000"
+    volumes:
+      - marquee-data:/app/data
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  marquee-data:

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marquee — Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100vh; background: #0a0a0a; font-family: 'Rajdhani', sans-serif; color: #fff; }
+
+/* ═══ BANNER ═══ */
+.banner {
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px 40px 11px;
+  border-bottom: 1px solid #c9a84c;
+  background: linear-gradient(135deg,#1a1200,#0d0a00,#1a1200);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+}
+.banner-text {
+  font-family: 'Cinzel', serif; font-size: clamp(16px,2.2vw,28px);
+  font-weight: 700; letter-spacing: clamp(6px,1vw,14px);
+  text-transform: uppercase; color: #c9a84c;
+  text-shadow: 0 0 20px rgba(201,168,76,0.4);
+  white-space: nowrap;
+}
+.banner-orn { color: #c9a84c; opacity: 0.6; margin: 0 16px; font-size: 14px; letter-spacing: 3px; }
+.banner-link {
+  position: absolute; left: 20px; color: rgba(255,255,255,0.4);
+  text-decoration: none; font-size: 14px; letter-spacing: 2px; font-weight: 600;
+  transition: color 0.2s;
+}
+.banner-link:hover { color: #c9a84c; }
+
+/* ═══ LAYOUT ═══ */
+.container {
+  max-width: 680px; margin: 0 auto; padding: 80px 20px 40px;
+}
+h2 {
+  font-family: 'Cinzel', serif; font-size: 16px;
+  font-weight: 600; letter-spacing: 6px; text-transform: uppercase;
+  color: #c9a84c; margin: 32px 0 16px;
+  padding-bottom: 8px; border-bottom: 1px solid rgba(201,168,76,0.2);
+}
+h2:first-of-type { margin-top: 16px; }
+
+/* ═══ FORM ELEMENTS ═══ */
+.field { margin-bottom: 14px; }
+.field label {
+  display: block; font-size: 12px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); margin-bottom: 5px;
+}
+.field input, .field select {
+  width: 100%; padding: 10px 14px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: #fff; font-family: 'Rajdhani', sans-serif; font-size: 15px;
+  font-weight: 500; letter-spacing: 0.5px;
+  outline: none; transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus { border-color: #c9a84c; }
+.field select { cursor: pointer; }
+.field select option { background: #1a1a1a; color: #fff; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 24px; border: 1px solid rgba(201,168,76,0.4);
+  background: rgba(201,168,76,0.08); color: #c9a84c;
+  font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn:hover { background: rgba(201,168,76,0.15); border-color: #c9a84c; }
+.btn-danger { border-color: rgba(200,50,50,0.4); background: rgba(200,50,50,0.08); color: #c83232; }
+.btn-danger:hover { background: rgba(200,50,50,0.15); border-color: #c83232; }
+.btn-sm { padding: 6px 14px; font-size: 12px; letter-spacing: 2px; }
+.btn-row { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+
+/* ═══ ROOM CARDS ═══ */
+.room-card {
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+  padding: 16px 20px; margin-bottom: 12px; transition: border-color 0.2s;
+}
+.room-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer;
+}
+.room-card-header:hover { color: #c9a84c; }
+.room-card-name {
+  font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+}
+.room-card-meta {
+  display: flex; align-items: center; gap: 12px;
+}
+.theme-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.room-card-slug {
+  font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1px;
+}
+.room-edit {
+  display: none; padding-top: 16px; margin-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.room-edit.open { display: block; }
+
+/* ═══ ADD ROOM ═══ */
+.add-room-form {
+  display: none; background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(201,168,76,0.2); padding: 20px; margin-top: 12px;
+}
+.add-room-form.open { display: block; }
+
+/* ═══ TOAST ═══ */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  padding: 12px 28px; font-family: 'Rajdhani', sans-serif; font-size: 14px;
+  font-weight: 600; letter-spacing: 2px; z-index: 100;
+  opacity: 0; transition: all 0.3s ease;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { background: rgba(46,196,182,0.15); border: 1px solid rgba(46,196,182,0.4); color: #2ec4b6; }
+.toast.error { background: rgba(200,50,50,0.15); border: 1px solid rgba(200,50,50,0.4); color: #e05050; }
+#tmdb-test-result.ok { color: #2ec4b6; }
+#tmdb-test-result.fail { color: #e05050; }
+#plex-test-result.ok { color: #2ec4b6; }
+#plex-test-result.fail { color: #e05050; }
+
+/* ═══ SPORTS OVERRIDE ═══ */
+.sport-game-card {
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 16px; margin-bottom: 8px; display: flex;
+  align-items: center; justify-content: space-between; gap: 12px;
+}
+.sport-game-info { flex: 1; }
+.sport-game-teams {
+  font-family: 'Rajdhani', sans-serif; font-size: 15px;
+  font-weight: 600; color: rgba(255,255,255,0.8); letter-spacing: 0.5px;
+}
+.sport-game-detail {
+  font-size: 12px; color: rgba(255,255,255,0.35); letter-spacing: 1px; margin-top: 2px;
+}
+.sport-badge {
+  display: inline-block; padding: 2px 8px; font-size: 10px;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  border: 1px solid; margin-right: 6px;
+}
+.sport-badge.live { border-color: rgba(74,222,128,0.4); color: #4ade80; background: rgba(74,222,128,0.08); }
+.sport-badge.pre { border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); }
+.sport-badge.post { border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.25); }
+.sport-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+.sport-tab {
+  padding: 6px 14px; font-size: 12px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.4); transition: all 0.2s; font-family: 'Bebas Neue', sans-serif;
+}
+.sport-tab:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.2); }
+.sport-tab.active { color: #c9a84c; border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.08); }
+.sport-tab .tab-count { font-size: 10px; opacity: 0.6; margin-left: 4px; }
+.team-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.3);
+  padding: 4px 10px; margin: 3px; font-size: 12px; font-weight: 600;
+  letter-spacing: 1px; color: #c9a84c;
+}
+.team-pill .remove-team {
+  cursor: pointer; color: rgba(255,255,255,0.3); font-size: 14px;
+  margin-left: 2px; transition: color 0.2s;
+}
+.team-pill .remove-team:hover { color: #e05050; }
+.team-pills { display: flex; flex-wrap: wrap; gap: 2px; margin-bottom: 6px; }
+
+/* ═══ CHECKBOX GROUP ═══ */
+.checkbox-group {
+  display: flex; flex-direction: column; gap: 8px; margin-top: 4px;
+}
+.check-label {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Rajdhani', sans-serif; font-size: 14px;
+  font-weight: 500; letter-spacing: 1px; color: rgba(255,255,255,0.7);
+  cursor: pointer;
+}
+.check-label input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: #c9a84c; cursor: pointer;
+}
+.check-label .coming-soon-tag {
+  font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 2px;
+  text-transform: uppercase; margin-left: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <a href="/" class="banner-link">← Rooms</a>
+  <span class="banner-orn">✦ ── ✦</span>
+  <span class="banner-text">Settings</span>
+  <span class="banner-orn">✦ ── ✦</span>
+</div>
+
+<div class="container">
+  <!-- Global Settings -->
+  <h2>API Keys &amp; Services</h2>
+  <div id="global-form">
+    <div class="field">
+      <label>TMDB API Key</label>
+      <input type="password" id="g-tmdbApiKey" autocomplete="off">
+      <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+        <button class="btn btn-sm" id="tmdb-test-btn" onclick="testTmdbKey()">Test</button>
+        <span id="tmdb-test-result" style="font-size:13px; letter-spacing:1px;"></span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Plex URL</label>
+      <input type="url" id="g-plexUrl" placeholder="http://192.168.1.x:32400">
+    </div>
+    <div class="field">
+      <label>Plex Token</label>
+      <input type="password" id="g-plexToken" autocomplete="off">
+      <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+        <button class="btn btn-sm" id="plex-test-btn" onclick="testPlexConnection()">Test</button>
+        <span id="plex-test-result" style="font-size:13px; letter-spacing:1px;"></span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Home Assistant URL</label>
+      <input type="url" id="g-haUrl" placeholder="http://homeassistant.local:8123">
+    </div>
+    <div class="field">
+      <label>Home Assistant Token</label>
+      <input type="password" id="g-haToken" autocomplete="off">
+      <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+        <button class="btn btn-sm" id="ha-test-btn" onclick="testHaConnection()">Test</button>
+        <span id="ha-test-result" style="font-size:13px; letter-spacing:1px;"></span>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="saveGlobal()">Save</button>
+    </div>
+  </div>
+
+  <!-- Rooms -->
+  <h2>Rooms</h2>
+  <div id="rooms-list"></div>
+  <div class="btn-row">
+    <button class="btn" onclick="toggleAddRoom()">+ Add Room</button>
+  </div>
+
+  <!-- Sports Override -->
+  <h2>Sports Override</h2>
+  <div class="field">
+    <label>Target Room</label>
+    <select id="sports-room-select"></select>
+  </div>
+  <div class="btn-row" style="margin-bottom:12px">
+    <button class="btn btn-sm" onclick="loadLiveGames()">Refresh Live Games</button>
+    <button class="btn btn-sm btn-danger" onclick="stopSportsMode()">Stop Sports</button>
+  </div>
+  <div id="sport-tabs" class="sport-tabs"></div>
+  <div id="live-games-list"></div>
+
+  <div class="add-room-form" id="add-room-form">
+    <div class="field">
+      <label>Slug (URL-friendly ID)</label>
+      <input type="text" id="new-slug" placeholder="e.g. bedroom" pattern="[a-z0-9-]{2,30}">
+    </div>
+    <div class="field">
+      <label>Display Name</label>
+      <input type="text" id="new-name" placeholder="e.g. Bedroom">
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="addRoom()">Create Room</button>
+      <button class="btn btn-sm" onclick="toggleAddRoom()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const THEME_COLORS = {
+  default: '#c9a84c', christmas: '#d4373e', halloween: '#ff8c00',
+  ocean: '#00b4d8', royal: '#9b5de5', emerald: '#2ec4b6', rose: '#e8628c',
+};
+const THEME_NAMES = Object.keys(THEME_COLORS);
+const GLOBAL_FIELDS = ['tmdbApiKey','plexUrl','plexToken','haUrl','haToken'];
+
+let config = null;
+
+async function loadConfig() {
+  try {
+    const res = await fetch('/api/config');
+    config = await res.json();
+    populateGlobal();
+    populateRooms();
+    populateSportsRoomSelect();
+  } catch (err) {
+    toast('Failed to load config', 'error');
+  }
+}
+
+function populateGlobal() {
+  for (const f of GLOBAL_FIELDS) {
+    const el = document.getElementById('g-' + f);
+    if (el) el.value = config.global[f] || '';
+  }
+}
+
+function populateRooms() {
+  const container = document.getElementById('rooms-list');
+  const slugs = Object.keys(config.rooms);
+  container.innerHTML = slugs.map(slug => {
+    const r = config.rooms[slug];
+    const themeColor = THEME_COLORS[r.theme] || THEME_COLORS.default;
+    const themeOptions = THEME_NAMES.map(t =>
+      `<option value="${t}"${t === r.theme ? ' selected' : ''}>${t.charAt(0).toUpperCase() + t.slice(1)}</option>`
+    ).join('');
+
+    return `
+      <div class="room-card" data-slug="${slug}">
+        <div class="room-card-header" onclick="toggleRoomEdit('${slug}')">
+          <div>
+            <span class="room-card-name">${r.name || slug}</span>
+            <span class="room-card-slug">${slug}</span>
+          </div>
+          <div class="room-card-meta">
+            <span class="theme-dot" style="background:${themeColor}"></span>
+          </div>
+        </div>
+        <div class="room-edit" id="edit-${slug}">
+          <div class="field">
+            <label>Display Name</label>
+            <input type="text" id="r-${slug}-name" value="${r.name || ''}">
+          </div>
+          <div class="field">
+            <label>Theme</label>
+            <select id="r-${slug}-theme">${themeOptions}</select>
+          </div>
+          <div class="field">
+            <label>Now Playing Banner</label>
+            <input type="text" id="r-${slug}-bannerText" value="${r.bannerText || 'Now Playing'}">
+          </div>
+          <div class="field">
+            <label>Plex Player Name</label>
+            <input type="text" id="r-${slug}-plexPlayerName" value="${r.plexPlayerName || ''}" placeholder="e.g. SHIELD Android TV">
+          </div>
+          <div class="field">
+            <label>Home Assistant Entity</label>
+            <input type="text" id="r-${slug}-haEntity" value="${r.haEntity || ''}" placeholder="e.g. media_player.theater">
+          </div>
+          <div class="field">
+            <label>Trailer Mode</label>
+            <select id="r-${slug}-trailerMode">
+              <option value="off"${(r.trailerMode || 'off') === 'off' ? ' selected' : ''}>Off</option>
+              <option value="on"${r.trailerMode && r.trailerMode !== 'off' ? ' selected' : ''}>On</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Trailer Delay (seconds)</label>
+            <input type="number" id="r-${slug}-trailerDelay" value="${r.trailerDelay || 30}" min="5" max="300">
+          </div>
+          <div class="field">
+            <label>Screensaver Interval (seconds)</label>
+            <input type="number" id="r-${slug}-screensaverInterval" value="${r.screensaverInterval || 15}" min="5" max="120">
+          </div>
+          <div class="field">
+            <label>Screensaver Sources</label>
+            <div class="checkbox-group">
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-src-recently_added" ${(r.screensaverSources || []).includes('recently_added') ? 'checked' : ''}>
+                Recently Added Movies
+              </label>
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-src-recently_added_tv" ${(r.screensaverSources || []).includes('recently_added_tv') ? 'checked' : ''}>
+                Recently Added TV
+              </label>
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-src-coming_soon" ${(r.screensaverSources || []).includes('coming_soon') ? 'checked' : ''}>
+                Coming Soon (TMDB)
+              </label>
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-src-trending" ${(r.screensaverSources || []).includes('trending') ? 'checked' : ''}>
+                Popular &amp; Trending (TMDB)
+              </label>
+              <label class="check-label">
+                <input type="checkbox" disabled>
+                Favorites <span class="coming-soon-tag">coming soon</span>
+              </label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Screensaver Display Elements</label>
+            <div class="checkbox-group">
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-el-runtime" ${(r.screensaverElements || []).includes('runtime') ? 'checked' : ''}>
+                Runtime
+              </label>
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-el-rating" ${(r.screensaverElements || []).includes('rating') ? 'checked' : ''}>
+                Star Rating
+              </label>
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-el-contentRating" ${(r.screensaverElements || []).includes('contentRating') ? 'checked' : ''}>
+                Content Rating
+              </label>
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-el-overview" ${(r.screensaverElements || []).includes('overview') ? 'checked' : ''}>
+                Overview
+              </label>
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-el-credits" ${(r.screensaverElements || []).includes('credits') ? 'checked' : ''}>
+                Director &amp; Cast
+              </label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Auto-Switch to Sports</label>
+            <select id="r-${slug}-autoSwitchSports">
+              <option value="off"${!r.autoSwitchSports ? ' selected' : ''}>Off</option>
+              <option value="on"${r.autoSwitchSports ? ' selected' : ''}>On</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tracked Teams</label>
+            <div class="team-pills" id="r-${slug}-team-pills">
+              ${(r.trackedTeams || []).map(t => `<span class="team-pill">${t}<span class="remove-team" onclick="removeTrackedTeam('${slug}','${t}')">&times;</span></span>`).join('')}
+            </div>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="r-${slug}-addTeam" placeholder="Team name (e.g. Lakers, Eagles)" style="flex:1">
+              <button class="btn btn-sm" onclick="addTrackedTeam('${slug}')">Add</button>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sm" onclick="saveRoom('${slug}')">Save Room</button>
+            ${slugs.length > 1 ? `<button class="btn btn-sm btn-danger" onclick="deleteRoom('${slug}')">Delete</button>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleRoomEdit(slug) {
+  const el = document.getElementById('edit-' + slug);
+  if (el) el.classList.toggle('open');
+}
+
+function toggleAddRoom() {
+  document.getElementById('add-room-form').classList.toggle('open');
+}
+
+async function saveGlobal() {
+  const global = {};
+  for (const f of GLOBAL_FIELDS) {
+    global[f] = document.getElementById('g-' + f).value;
+  }
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ global }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      config = data.config;
+      populateGlobal();
+      toast('Global settings saved', 'success');
+    } else {
+      toast(data.error || 'Save failed', 'error');
+    }
+  } catch (err) {
+    toast('Network error', 'error');
+  }
+}
+
+async function saveRoom(slug) {
+  const fields = ['name','theme','bannerText','plexPlayerName','haEntity','trailerMode'];
+  const data = {};
+  for (const f of fields) {
+    const el = document.getElementById(`r-${slug}-${f}`);
+    if (el) data[f] = el.value;
+  }
+  // Trailer delay
+  const trailerDelayEl = document.getElementById(`r-${slug}-trailerDelay`);
+  if (trailerDelayEl) data.trailerDelay = parseInt(trailerDelayEl.value) || 30;
+  // Screensaver interval
+  const intervalEl = document.getElementById(`r-${slug}-screensaverInterval`);
+  if (intervalEl) data.screensaverInterval = parseInt(intervalEl.value) || 15;
+  // Screensaver sources
+  const sourceKeys = ['recently_added', 'recently_added_tv', 'coming_soon', 'trending'];
+  data.screensaverSources = sourceKeys.filter(key => {
+    const cb = document.getElementById(`r-${slug}-src-${key}`);
+    return cb && cb.checked;
+  });
+  // Screensaver display elements
+  const elementKeys = ['runtime', 'rating', 'contentRating', 'overview', 'credits'];
+  data.screensaverElements = elementKeys.filter(key => {
+    const cb = document.getElementById(`r-${slug}-el-${key}`);
+    return cb && cb.checked;
+  });
+  // Sports settings
+  const autoSwitchEl = document.getElementById(`r-${slug}-autoSwitchSports`);
+  if (autoSwitchEl) data.autoSwitchSports = autoSwitchEl.value === 'on';
+  // Tracked teams from pills
+  const pillsContainer = document.getElementById(`r-${slug}-team-pills`);
+  if (pillsContainer) {
+    data.trackedTeams = Array.from(pillsContainer.querySelectorAll('.team-pill')).map(p =>
+      p.textContent.replace('×', '').trim()
+    );
+  }
+  try {
+    const res = await fetch(`/api/rooms/${slug}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (result.ok) {
+      config.rooms[slug] = result.room;
+      populateRooms();
+      toast(`${data.name || slug} saved`, 'success');
+    } else {
+      toast(result.error || 'Save failed', 'error');
+    }
+  } catch (err) {
+    toast('Network error', 'error');
+  }
+}
+
+async function deleteRoom(slug) {
+  if (!confirm(`Delete room "${slug}"? This cannot be undone.`)) return;
+  try {
+    const res = await fetch(`/api/rooms/${slug}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (result.ok) {
+      delete config.rooms[slug];
+      populateRooms();
+      toast('Room deleted', 'success');
+    } else {
+      toast(result.error || 'Delete failed', 'error');
+    }
+  } catch (err) {
+    toast('Network error', 'error');
+  }
+}
+
+async function addRoom() {
+  const slug = document.getElementById('new-slug').value.trim().toLowerCase();
+  const name = document.getElementById('new-name').value.trim();
+  if (!slug) return toast('Slug is required', 'error');
+  if (!/^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$/.test(slug)) {
+    return toast('Slug must be 2-30 chars, lowercase + hyphens', 'error');
+  }
+  try {
+    const res = await fetch('/api/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug, name: name || undefined }),
+    });
+    const result = await res.json();
+    if (result.ok) {
+      config.rooms[slug] = result.room;
+      populateRooms();
+      document.getElementById('new-slug').value = '';
+      document.getElementById('new-name').value = '';
+      toggleAddRoom();
+      toast(`Room "${result.room.name}" created`, 'success');
+    } else {
+      toast(result.error || 'Create failed', 'error');
+    }
+  } catch (err) {
+    toast('Network error', 'error');
+  }
+}
+
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+async function testTmdbKey() {
+  const btn = document.getElementById('tmdb-test-btn');
+  const result = document.getElementById('tmdb-test-result');
+  const key = document.getElementById('g-tmdbApiKey').value;
+  btn.disabled = true; btn.textContent = 'Testing...';
+  result.className = ''; result.textContent = '';
+  try {
+    const res = await fetch('/api/tmdb/test?key=' + encodeURIComponent(key));
+    if (!res.ok) {
+      result.className = 'fail';
+      result.textContent = '\u2717 Server error (HTTP ' + res.status + ')';
+      btn.disabled = false; btn.textContent = 'Test';
+      return;
+    }
+    const data = await res.json();
+    result.className = data.ok ? 'ok' : 'fail';
+    result.textContent = data.ok ? '\u2713 ' + data.message : '\u2717 ' + data.error;
+  } catch (err) {
+    console.error('TMDB test error:', err);
+    result.className = 'fail';
+    result.textContent = '\u2717 ' + (err.message || 'Network error');
+  }
+  btn.disabled = false; btn.textContent = 'Test';
+}
+
+async function testPlexConnection() {
+  const btn = document.getElementById('plex-test-btn');
+  const result = document.getElementById('plex-test-result');
+  btn.disabled = true; btn.textContent = 'Testing...';
+  result.className = ''; result.textContent = '';
+  try {
+    const res = await fetch('/api/plex/test');
+    if (!res.ok) {
+      result.className = 'fail';
+      result.textContent = '\u2717 Server error (HTTP ' + res.status + ')';
+      btn.disabled = false; btn.textContent = 'Test';
+      return;
+    }
+    const data = await res.json();
+    result.className = data.ok ? 'ok' : 'fail';
+    result.textContent = data.ok ? '\u2713 Connected to ' + data.serverName : '\u2717 ' + data.error;
+  } catch (err) {
+    result.className = 'fail';
+    result.textContent = '\u2717 ' + (err.message || 'Network error');
+  }
+  btn.disabled = false; btn.textContent = 'Test';
+}
+
+async function testHaConnection() {
+  const btn = document.getElementById('ha-test-btn');
+  const result = document.getElementById('ha-test-result');
+  btn.disabled = true; btn.textContent = 'Testing...';
+  result.className = ''; result.textContent = '';
+  try {
+    const res = await fetch('/api/ha/test');
+    if (!res.ok) {
+      result.className = 'fail';
+      result.textContent = '\u2717 Server error (HTTP ' + res.status + ')';
+      btn.disabled = false; btn.textContent = 'Test';
+      return;
+    }
+    const data = await res.json();
+    result.className = data.ok ? 'ok' : 'fail';
+    result.textContent = data.ok ? '\u2713 ' + data.message : '\u2717 ' + data.error;
+  } catch (err) {
+    result.className = 'fail';
+    result.textContent = '\u2717 ' + (err.message || 'Network error');
+  }
+  btn.disabled = false; btn.textContent = 'Test';
+}
+
+function addTrackedTeam(slug) {
+  const input = document.getElementById(`r-${slug}-addTeam`);
+  const team = input.value.trim();
+  if (!team) return;
+  const pills = document.getElementById(`r-${slug}-team-pills`);
+  const pill = document.createElement('span');
+  pill.className = 'team-pill';
+  pill.innerHTML = `${team}<span class="remove-team" onclick="removeTrackedTeam('${slug}','${team}')">&times;</span>`;
+  pills.appendChild(pill);
+  input.value = '';
+}
+
+function removeTrackedTeam(slug, team) {
+  const pills = document.getElementById(`r-${slug}-team-pills`);
+  if (!pills) return;
+  for (const pill of pills.querySelectorAll('.team-pill')) {
+    if (pill.textContent.replace('×', '').trim() === team) {
+      pill.remove();
+      break;
+    }
+  }
+}
+
+function populateSportsRoomSelect() {
+  const sel = document.getElementById('sports-room-select');
+  if (!sel || !config) return;
+  sel.innerHTML = Object.keys(config.rooms).map(slug =>
+    `<option value="${slug}">${config.rooms[slug].name || slug}</option>`
+  ).join('');
+}
+
+const SPORT_CATEGORIES = {
+  mlb: ['mlb'], soccer: ['soccer'], nba: ['nba'], nfl: ['nfl'], nhl: ['nhl'], ufc: ['ufc']
+};
+let _activeTab = 'all';
+
+async function loadLiveGames() {
+  const container = document.getElementById('live-games-list');
+  const tabsEl = document.getElementById('sport-tabs');
+  container.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;letter-spacing:1px">Loading...</div>';
+  tabsEl.innerHTML = '';
+  try {
+    const res = await fetch('/api/sports/live');
+    const games = await res.json();
+    window._liveGames = games;
+    if (!games.length) {
+      container.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;letter-spacing:1px">No games found right now.</div>';
+      return;
+    }
+    // Count games per category
+    const counts = {};
+    for (const g of games) {
+      const cat = Object.keys(SPORT_CATEGORIES).find(k => SPORT_CATEGORIES[k].includes(g.sport)) || g.sport;
+      counts[cat] = (counts[cat] || 0) + 1;
+    }
+    // Render tabs
+    const tabs = ['all', ...Object.keys(SPORT_CATEGORIES)];
+    tabsEl.innerHTML = tabs.map(t => {
+      const cnt = t === 'all' ? games.length : (counts[t] || 0);
+      if (t !== 'all' && cnt === 0) return '';
+      return `<div class="sport-tab${_activeTab === t ? ' active' : ''}" onclick="filterSport('${t}')">${t.toUpperCase()}<span class="tab-count">(${cnt})</span></div>`;
+    }).join('');
+    renderFilteredGames();
+  } catch (err) {
+    container.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px">Failed to load games</div>';
+  }
+}
+
+function filterSport(sport) {
+  _activeTab = sport;
+  // Update tab active states
+  document.querySelectorAll('.sport-tab').forEach(el => {
+    el.classList.toggle('active', el.textContent.toLowerCase().startsWith(sport));
+  });
+  renderFilteredGames();
+}
+
+function renderFilteredGames() {
+  const container = document.getElementById('live-games-list');
+  const games = window._liveGames || [];
+  const filtered = _activeTab === 'all' ? games : games.filter(g => {
+    const cats = SPORT_CATEGORIES[_activeTab];
+    return cats ? cats.includes(g.sport) : g.sport === _activeTab;
+  });
+  if (!filtered.length) {
+    container.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;letter-spacing:1px">No games in this category.</div>';
+    return;
+  }
+  container.innerHTML = filtered.map((g) => {
+    const idx = games.indexOf(g);
+    const statusCls = g.isLive ? 'live' : g.status === 'post' ? 'post' : 'pre';
+    const statusText = g.isLive ? 'LIVE' : g.status === 'post' ? 'FINAL' : 'UPCOMING';
+    return `
+      <div class="sport-game-card">
+        <div class="sport-game-info">
+          <div><span class="sport-badge ${statusCls}">${statusText}</span><span class="sport-badge">${g.sport.toUpperCase()}</span></div>
+          <div class="sport-game-teams">${g.homeTeam?.name || '?'} ${g.homeTeam?.score || 0} — ${g.awayTeam?.score || 0} ${g.awayTeam?.name || '?'}</div>
+          <div class="sport-game-detail">${g.periodText || ''} ${g.venue ? '· ' + g.venue : ''}</div>
+        </div>
+        <button class="btn btn-sm" onclick="pushGame(${idx})">Push</button>
+      </div>
+    `;
+  }).join('');
+}
+
+async function pushGame(idx) {
+  const game = window._liveGames?.[idx];
+  if (!game) return;
+  const room = document.getElementById('sports-room-select').value;
+  if (!room) return toast('Select a room first', 'error');
+  try {
+    const res = await fetch(`/api/sports/push/${room}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game }),
+    });
+    const data = await res.json();
+    if (data.ok) toast(`Pushed to ${room}`, 'success');
+    else toast(data.error || 'Push failed', 'error');
+  } catch (err) {
+    toast('Network error', 'error');
+  }
+}
+
+async function stopSportsMode() {
+  const room = document.getElementById('sports-room-select').value;
+  if (!room) return toast('Select a room first', 'error');
+  try {
+    const res = await fetch(`/api/sports/stop/${room}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) toast(`Sports stopped for ${room}`, 'success');
+    else toast(data.error || 'Stop failed', 'error');
+  } catch (err) {
+    toast('Network error', 'error');
+  }
+}
+
+loadConfig();
+</script>
+</body>
+</html>
