@@ -626,7 +626,7 @@ function populateSportsRoomSelect() {
 }
 
 const SPORT_CATEGORIES = {
-  mlb: ['mlb'], soccer: ['soccer'], nba: ['nba'], nfl: ['nfl'], nhl: ['nhl'], ufc: ['ufc']
+  baseball: ['mlb'], soccer: ['soccer'], nba: ['nba'], nfl: ['nfl'], nhl: ['nhl'], ufc: ['ufc']
 };
 let _activeTab = 'all';
 
@@ -686,10 +686,11 @@ function renderFilteredGames() {
     const idx = games.indexOf(g);
     const statusCls = g.isLive ? 'live' : g.status === 'post' ? 'post' : 'pre';
     const statusText = g.isLive ? 'LIVE' : g.status === 'post' ? 'FINAL' : 'UPCOMING';
+    const sportLabel = g.league && g.league !== g.sport.toUpperCase() ? g.league : g.sport.toUpperCase();
     return `
       <div class="sport-game-card">
         <div class="sport-game-info">
-          <div><span class="sport-badge ${statusCls}">${statusText}</span><span class="sport-badge">${g.sport.toUpperCase()}</span></div>
+          <div><span class="sport-badge ${statusCls}">${statusText}</span><span class="sport-badge">${sportLabel}</span></div>
           <div class="sport-game-teams">${g.homeTeam?.name || '?'} ${g.homeTeam?.score || 0} — ${g.awayTeam?.score || 0} ${g.awayTeam?.name || '?'}</div>
           <div class="sport-game-detail">${g.periodText || ''} ${g.venue ? '· ' + g.venue : ''}</div>
         </div>

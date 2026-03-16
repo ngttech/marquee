@@ -536,6 +536,160 @@ html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani
   font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1.1vw,14px);
   letter-spacing: 4px; color: #facc15; animation: pulse 1.5s ease-in-out infinite;
 }
+/* NHL Score Grid */
+.nhl-score-grid {
+  display: grid; gap: 0; width: 100%; max-width: 500px;
+  border: 1px solid rgba(255,255,255,0.08); overflow: hidden; border-radius: 8px;
+}
+.nhl-sg-cell {
+  padding: 6px 12px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1.1vw,15px); letter-spacing: 2px;
+}
+.nhl-sg-cell:last-child { border-right: none; }
+.nhl-sg-header { color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.02); font-size: clamp(9px,0.8vw,11px); letter-spacing: 3px; }
+.nhl-sg-total { color: #fff; font-weight: 700; background: rgba(255,255,255,0.04); }
+.nhl-sg-team { color: rgba(255,255,255,0.6); text-align: left; padding-left: 14px; font-family: 'Teko', sans-serif; font-size: clamp(12px,1.2vw,16px); letter-spacing: 2px; }
+.nhl-sg-score { color: rgba(255,255,255,0.75); }
+.nhl-sg-active { color: #38bdf8; }
+/* NHL Goalie Panel */
+.nhl-goalies {
+  display: flex; align-items: center; gap: clamp(16px,3vw,32px); justify-content: center; width: 100%;
+}
+.nhl-goalie {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 120px;
+}
+.nhl-goalie-headshot {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid rgba(56,189,248,0.4); object-fit: cover;
+  background: rgba(255,255,255,0.05);
+}
+.nhl-goalie-label {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(8px,0.7vw,10px);
+  letter-spacing: 3px; color: rgba(56,189,248,0.6); text-transform: uppercase;
+}
+.nhl-goalie-name {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.4vw,20px);
+  letter-spacing: 2px; color: rgba(255,255,255,0.9);
+}
+.nhl-goalie-detail {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  color: rgba(255,255,255,0.35); letter-spacing: 1px;
+}
+.nhl-goalie-record {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  color: rgba(255,255,255,0.5); letter-spacing: 1px;
+}
+.nhl-goalie-vs {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,16px);
+  letter-spacing: 4px; color: rgba(255,255,255,0.15);
+}
+/* NHL Last Play */
+.nhl-last-play {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1.1vw,14px);
+  color: rgba(255,255,255,0.35); letter-spacing: 1px; text-align: center; font-style: italic;
+}
+
+/* ═══ SHARED: Leaders Panel ═══ */
+.sport-leaders {
+  display: flex; gap: clamp(12px,2vw,28px); justify-content: center; align-items: flex-start;
+}
+.sport-leader {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px;
+}
+.sport-leader-label {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(8px,0.7vw,10px);
+  letter-spacing: 3px; color: rgba(255,255,255,0.3); text-transform: uppercase;
+}
+.sport-leader-headshot {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 2px solid var(--sport-accent-dim, rgba(255,255,255,0.15)); object-fit: cover;
+  background: rgba(255,255,255,0.05);
+}
+.sport-leader-name {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,17px);
+  letter-spacing: 2px; color: rgba(255,255,255,0.85);
+}
+.sport-leader-stat {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  color: var(--sport-accent, rgba(255,255,255,0.5)); letter-spacing: 1px; font-weight: 600;
+}
+
+/* ═══ SHARED: Info Bar ═══ */
+.sport-info-bar {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+}
+.sport-info-badge {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 4px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  color: rgba(255,255,255,0.45); letter-spacing: 1px;
+}
+.sport-info-badge .badge-icon { font-size: 1.1em; }
+
+/* ═══ SPORT-SPECIFIC: Soccer Form & Cards ═══ */
+.soccer-form-row {
+  display: flex; align-items: center; gap: clamp(16px,3vw,40px); justify-content: center;
+}
+.soccer-form-group {
+  display: flex; align-items: center; gap: 6px;
+}
+.soccer-form-team {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(9px,0.8vw,11px);
+  letter-spacing: 2px; color: rgba(255,255,255,0.4); text-transform: uppercase;
+}
+.soccer-form-badges {
+  display: flex; gap: 3px;
+}
+.soccer-form-badge {
+  width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 10px; letter-spacing: 1px;
+  border-radius: 3px; color: #fff;
+}
+.soccer-form-badge.form-W { background: rgba(74,222,128,0.7); }
+.soccer-form-badge.form-D { background: rgba(255,255,255,0.3); }
+.soccer-form-badge.form-L { background: rgba(248,113,113,0.7); }
+.soccer-cards {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
+}
+.card-event {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  padding: 6px 14px; display: flex; align-items: center; gap: 8px; border-radius: 6px;
+}
+.card-icon { font-size: 14px; }
+.card-text { font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,1vw,13px); font-weight: 600; letter-spacing: 1px; color: rgba(255,255,255,0.6); }
+.card-min { font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,15px); letter-spacing: 2px; }
+.card-min.yellow { color: #facc15; }
+.card-min.red { color: #f87171; }
+
+/* ═══ SPORT-SPECIFIC: NBA Score Grid ═══ */
+.nba-score-grid {
+  display: grid; gap: 0; width: 100%; max-width: 500px;
+  border: 1px solid rgba(255,255,255,0.08); overflow: hidden; border-radius: 8px;
+}
+.nba-sg-cell {
+  padding: 6px 12px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1.1vw,15px); letter-spacing: 2px;
+}
+.nba-sg-cell:last-child { border-right: none; }
+.nba-sg-header { color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.02); font-size: clamp(9px,0.8vw,11px); letter-spacing: 3px; }
+.nba-sg-total { color: #fff; font-weight: 700; background: rgba(255,255,255,0.04); }
+.nba-sg-team { color: rgba(255,255,255,0.6); text-align: left; padding-left: 14px; font-family: 'Teko', sans-serif; font-size: clamp(12px,1.2vw,16px); letter-spacing: 2px; }
+.nba-sg-score { color: rgba(255,255,255,0.75); }
+.nba-sg-active { color: #fb923c; }
+
+/* ═══ SPORT-SPECIFIC: UFC Country/Flag ═══ */
+.ufc-fighter-country {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  color: rgba(255,255,255,0.4); letter-spacing: 1px;
+}
+.ufc-fighter-flag {
+  width: 20px; height: 14px; object-fit: cover; border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
 
 /* ═══ SPORT-SPECIFIC: UFC ═══ */
 .ufc-matchup {
@@ -615,6 +769,71 @@ html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani
 .count-dot.on-balls { background: #4ade80; border-color: #4ade80; }
 .count-dot.on-strikes { background: #f87171; border-color: #f87171; }
 .count-dot.on-outs { background: #facc15; border-color: #facc15; }
+
+/* MLB Linescore Grid */
+.mlb-score-grid {
+  display: grid; gap: 0; width: 100%; max-width: 600px;
+  border: 1px solid rgba(255,255,255,0.08); overflow: hidden; border-radius: 8px;
+}
+.mlb-sg-cell {
+  padding: 5px 8px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(10px,1vw,14px); letter-spacing: 1px;
+}
+.mlb-sg-cell:last-child { border-right: none; }
+.mlb-sg-header { color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.02); font-size: clamp(8px,0.7vw,10px); letter-spacing: 2px; }
+.mlb-sg-total { color: #fff; font-weight: 700; background: rgba(255,255,255,0.04); }
+.mlb-sg-team { color: rgba(255,255,255,0.6); text-align: left; padding-left: 10px; font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1.1vw,15px); letter-spacing: 2px; }
+.mlb-sg-score { color: rgba(255,255,255,0.75); }
+.mlb-sg-active { color: #f9a825; }
+.mlb-sg-dash { color: rgba(255,255,255,0.15); }
+
+/* MLB Batter/Pitcher Matchup */
+.mlb-matchup {
+  display: flex; align-items: center; gap: clamp(16px,3vw,32px);
+  justify-content: center; width: 100%;
+}
+.mlb-player {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 120px;
+}
+.mlb-player-headshot {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid rgba(249,168,37,0.4); object-fit: cover;
+  background: rgba(255,255,255,0.05);
+}
+.mlb-player-label {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(8px,0.7vw,10px);
+  letter-spacing: 3px; color: rgba(249,168,37,0.6); text-transform: uppercase;
+}
+.mlb-player-name {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.4vw,20px);
+  letter-spacing: 2px; color: rgba(255,255,255,0.9);
+}
+.mlb-player-detail {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  color: rgba(255,255,255,0.35); letter-spacing: 1px;
+}
+.mlb-player-summary {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  color: rgba(255,255,255,0.5); letter-spacing: 1px; text-align: center;
+}
+.mlb-vs {
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,16px);
+  letter-spacing: 4px; color: rgba(255,255,255,0.15);
+}
+
+/* MLB Info Bar */
+.mlb-info-bar {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+}
+.mlb-info-badge {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 4px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(10px,0.9vw,13px);
+  color: rgba(255,255,255,0.45); letter-spacing: 1px;
+}
+.mlb-info-badge .badge-icon { font-size: 1.1em; }
 
 /* ═══ ANIMATIONS ═══ */
 /* ═══ CROSSFADE ═══ */
@@ -1151,6 +1370,33 @@ function teamLogoHtml(team, cssClass) {
   return team.abbreviation || '?';
 }
 
+function buildLeadersHtml(leaders) {
+  if (!leaders?.length) return '';
+  let html = '<div class="sport-leaders">';
+  for (const l of leaders) {
+    html += `<div class="sport-leader">
+      <div class="sport-leader-label">${l.displayName || l.category}</div>
+      ${l.athlete.headshot ? `<img class="sport-leader-headshot" src="${l.athlete.headshot}" onerror="this.style.display='none'">` : ''}
+      <div class="sport-leader-name">${l.athlete.shortName || l.athlete.name}</div>
+      <div class="sport-leader-stat">${l.displayValue}</div>
+    </div>`;
+  }
+  return html + '</div>';
+}
+
+function buildInfoBarHtml(s) {
+  let badges = '';
+  if (s.odds) badges += `<div class="sport-info-badge"><span class="badge-icon">📊</span>${s.odds.details || ''}</div>`;
+  if (s.tickets?.summary) badges += `<div class="sport-info-badge"><span class="badge-icon">🎟</span>${s.tickets.summary}</div>`;
+  if (s.broadcast) badges += `<div class="sport-info-badge"><span class="badge-icon">📺</span>${s.broadcast}</div>`;
+  if (s.attendance) badges += `<div class="sport-info-badge"><span class="badge-icon">👥</span>${Number(s.attendance).toLocaleString()}</div>`;
+  return badges ? `<div class="sport-info-bar">${badges}</div>` : '';
+}
+
+function buildVenueText(s) {
+  return [s.venue, s.venueCity, s.venueState].filter(Boolean).join(' · ');
+}
+
 function renderSportsSoccer(s) {
   const el = document.getElementById('display');
   const bannerText = s.bannerText || 'Live Match';
@@ -1167,8 +1413,19 @@ function renderSportsSoccer(s) {
   const possession = s.possession || {};
   const shots = s.shots || {};
   const shotsOT = s.shotsOnTarget || {};
+  const fouls = s.fouls || {};
+  const corners = s.corners || {};
   const goals = (s.goals || []).slice(0, 5);
-  const statusText = s.isLive ? 'LIVE GAME' : (s.statusText || 'MATCH');
+  const cards = (s.cards || []).slice(0, 5);
+  const statusText = s.isLive ? 'LIVE GAME' : (s.status === 'post' ? 'FINAL' : 'MATCH');
+
+  // Form badges builder
+  function formBadges(formStr) {
+    if (!formStr) return '';
+    return formStr.split('').map(ch => `<div class="soccer-form-badge form-${ch}">${ch}</div>`).join('');
+  }
+
+  const venueText = buildVenueText(s);
 
   el.innerHTML = `
     <div class="np-wrap" style="background:#000">
@@ -1190,6 +1447,10 @@ function renderSportsSoccer(s) {
             <span style="font-family:'Rajdhani',sans-serif;font-size:clamp(12px,1.2vw,16px);font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.5)">${s.periodText || s.clock || ''}</span>
             ${s.league || s.competition ? `<span class="sports-venue">${s.league || s.competition}</span>` : ''}
           </div>
+          ${(s.homeForm || s.awayForm) ? `<div class="soccer-form-row">
+            <div class="soccer-form-group"><span class="soccer-form-team">${home.abbreviation || home.name || ''}</span><div class="soccer-form-badges">${formBadges(s.homeForm)}</div></div>
+            <div class="soccer-form-group"><span class="soccer-form-team">${away.abbreviation || away.name || ''}</span><div class="soccer-form-badges">${formBadges(s.awayForm)}</div></div>
+          </div>` : ''}
           <div class="sports-scoreboard">
             <div class="sports-team">
               <div class="sports-logo home-crest">${teamLogoHtml(home)}</div>
@@ -1200,7 +1461,6 @@ function renderSportsSoccer(s) {
               <div class="sports-score">
                 <span>${home.score || 0}</span><span class="sports-score-dash">–</span><span>${away.score || 0}</span>
               </div>
-              ${s.venue ? `<div class="sports-venue">${s.venue}</div>` : ''}
             </div>
             <div class="sports-team">
               <div class="sports-logo away-crest">${teamLogoHtml(away)}</div>
@@ -1208,9 +1468,9 @@ function renderSportsSoccer(s) {
               <div class="sports-team-record">${away.record || ''}</div>
             </div>
           </div>
-          ${(possession.home || shots.home || goals.length) ? `
+          ${(possession.home || shots.home || goals.length || fouls.home || corners.home || cards.length) ? `
           <div class="sports-stats-footer">
-            ${(possession.home || shots.home) ? `<div class="stat-row">
+            ${(possession.home || shots.home || fouls.home || corners.home) ? `<div class="stat-row">
               ${possession.home ? `<div class="stat-item">
                 <div class="stat-bar"><div class="stat-fill-home" style="width:${parseInt(possession.home)||50}%"></div><div class="stat-fill-away" style="width:${parseInt(possession.away)||50}%"></div></div>
                 <div class="stat-values"><span class="stat-val home">${possession.home}</span><span class="stat-label">Possession</span><span class="stat-val away">${possession.away}</span></div>
@@ -1223,11 +1483,24 @@ function renderSportsSoccer(s) {
                 <div class="stat-bar"><div class="stat-fill-home" style="width:${Math.round(parseInt(shotsOT.home)/(parseInt(shotsOT.home)+parseInt(shotsOT.away)||1)*100)}%"></div><div class="stat-fill-away" style="width:${Math.round(parseInt(shotsOT.away)/(parseInt(shotsOT.home)+parseInt(shotsOT.away)||1)*100)}%"></div></div>
                 <div class="stat-values"><span class="stat-val home">${shotsOT.home}</span><span class="stat-label">On Target</span><span class="stat-val away">${shotsOT.away}</span></div>
               </div>` : ''}
+              ${fouls.home ? `<div class="stat-item">
+                <div class="stat-bar"><div class="stat-fill-home" style="width:${Math.round(parseInt(fouls.home)/(parseInt(fouls.home)+parseInt(fouls.away)||1)*100)}%"></div><div class="stat-fill-away" style="width:${Math.round(parseInt(fouls.away)/(parseInt(fouls.home)+parseInt(fouls.away)||1)*100)}%"></div></div>
+                <div class="stat-values"><span class="stat-val home">${fouls.home}</span><span class="stat-label">Fouls</span><span class="stat-val away">${fouls.away}</span></div>
+              </div>` : ''}
+              ${corners.home ? `<div class="stat-item">
+                <div class="stat-bar"><div class="stat-fill-home" style="width:${Math.round(parseInt(corners.home)/(parseInt(corners.home)+parseInt(corners.away)||1)*100)}%"></div><div class="stat-fill-away" style="width:${Math.round(parseInt(corners.away)/(parseInt(corners.home)+parseInt(corners.away)||1)*100)}%"></div></div>
+                <div class="stat-values"><span class="stat-val home">${corners.home}</span><span class="stat-label">Corners</span><span class="stat-val away">${corners.away}</span></div>
+              </div>` : ''}
             </div>` : ''}
             ${goals.length ? `<div class="soccer-recent-goals">
               ${goals.map(g => `<div class="goal-event"><div class="goal-icon">⚽</div><div class="goal-text">${g.player}</div><div class="goal-min">${g.minute}</div></div>`).join('')}
             </div>` : ''}
+            ${cards.length ? `<div class="soccer-cards">
+              ${cards.map(c => `<div class="card-event"><div class="card-icon">${c.type === 'red' ? '🟥' : '🟨'}</div><div class="card-text">${c.player}</div><div class="card-min ${c.type}">${c.minute}</div></div>`).join('')}
+            </div>` : ''}
           </div>` : ''}
+          ${venueText ? `<div class="sports-venue">${venueText}</div>` : ''}
+          ${buildInfoBarHtml(s)}
         </div>
       </div>
     </div>
@@ -1312,6 +1585,9 @@ function renderSportsNFL(s) {
             <div class="nfl-score-grid">${gridHtml}</div>
             ${s.yardLine ? `<div class="nfl-possession"><span class="possession-arrow">▶ </span>${s.yardLine}</div>` : ''}
           </div>
+          ${buildLeadersHtml(s.leaders)}
+          ${(() => { const v = [s.venue, s.venueCity, s.venueState].filter(Boolean).join(' · '); return v ? `<div class="sports-venue">${v}</div>` : ''; })()}
+          ${buildInfoBarHtml(s)}
         </div>
       </div>
     </div>
@@ -1325,6 +1601,7 @@ function renderSportsNBA(s) {
   const away = s.awayTeam || {};
   const hStats = s.teamStats?.home || {};
   const aStats = s.teamStats?.away || {};
+  const qs = s.quarterScores || { home: [], away: [] };
 
   document.documentElement.style.setProperty('--b-color', '#fb923c');
   document.documentElement.style.setProperty('--b-glow', 'rgba(251,146,60,0.4)');
@@ -1333,7 +1610,42 @@ function renderSportsNBA(s) {
   document.documentElement.style.setProperty('--sport-accent-dim', 'rgba(251,146,60,0.15)');
   document.documentElement.style.setProperty('--sport-glow', 'rgba(251,146,60,0.1)');
 
-  const statusText = s.isLive ? 'LIVE GAME' : (s.statusText || 'GAME');
+  const statusText = s.isLive ? 'LIVE GAME' : (s.status === 'post' ? 'FINAL' : 'GAME');
+
+  // Build quarter score grid (handles OT periods)
+  const totalPeriods = Math.max(4, qs.home.length, qs.away.length);
+  let qGridHtml = '';
+  if (qs.home.length || qs.away.length) {
+    const cols = totalPeriods + 2; // team + periods + total
+    qGridHtml += `<div class="nba-score-grid" style="grid-template-columns: auto repeat(${totalPeriods}, 1fr) auto">`;
+    // Header
+    qGridHtml += '<div class="nba-sg-cell nba-sg-header nba-sg-team"></div>';
+    for (let q = 1; q <= totalPeriods; q++) {
+      const label = q <= 4 ? `Q${q}` : (q === 5 ? 'OT' : `${q-4}OT`);
+      const active = s.period === q ? ' nba-sg-active' : '';
+      qGridHtml += `<div class="nba-sg-cell nba-sg-header${active}">${label}</div>`;
+    }
+    qGridHtml += '<div class="nba-sg-cell nba-sg-header nba-sg-total">T</div>';
+    // Home row
+    qGridHtml += `<div class="nba-sg-cell nba-sg-team">${home.abbreviation || home.name || 'HOME'}</div>`;
+    for (let q = 0; q < totalPeriods; q++) {
+      const val = q < qs.home.length ? qs.home[q] : '—';
+      const active = s.period === q + 1 ? ' nba-sg-active' : '';
+      qGridHtml += `<div class="nba-sg-cell nba-sg-score${active}">${val}</div>`;
+    }
+    qGridHtml += `<div class="nba-sg-cell nba-sg-total">${home.score || 0}</div>`;
+    // Away row
+    qGridHtml += `<div class="nba-sg-cell nba-sg-team">${away.abbreviation || away.name || 'AWAY'}</div>`;
+    for (let q = 0; q < totalPeriods; q++) {
+      const val = q < qs.away.length ? qs.away[q] : '—';
+      const active = s.period === q + 1 ? ' nba-sg-active' : '';
+      qGridHtml += `<div class="nba-sg-cell nba-sg-score${active}">${val}</div>`;
+    }
+    qGridHtml += `<div class="nba-sg-cell nba-sg-total">${away.score || 0}</div>`;
+    qGridHtml += '</div>';
+  }
+
+  const venueText = buildVenueText(s);
 
   el.innerHTML = `
     <div class="np-wrap" style="background:#000">
@@ -1371,16 +1683,14 @@ function renderSportsNBA(s) {
               <div class="sports-team-record">${away.record || ''}</div>
             </div>
           </div>
-          ${(hStats.fieldGoalPct || s.venue) ? `
+          ${qGridHtml}
+          ${(hStats.fieldGoalPct) ? `
           <div class="sports-stats-footer">
             <div class="nba-stats-row">
               <div class="nba-team-stats">
                 ${hStats.fieldGoalPct ? `<div class="nba-stat-line"><div class="nba-stat-name">FG%</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill home-fill" style="width:${parseFloat(hStats.fieldGoalPct)||50}%"></div></div><div class="nba-stat-val">${hStats.fieldGoalPct}</div></div>` : ''}
                 ${hStats.threePointFieldGoalPct ? `<div class="nba-stat-line"><div class="nba-stat-name">3PT%</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill home-fill" style="width:${parseFloat(hStats.threePointFieldGoalPct)||50}%"></div></div><div class="nba-stat-val">${hStats.threePointFieldGoalPct}</div></div>` : ''}
                 ${hStats.rebounds ? `<div class="nba-stat-line"><div class="nba-stat-name">Rebounds</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill home-fill" style="width:${Math.round(parseInt(hStats.rebounds)/(parseInt(hStats.rebounds)+parseInt(aStats.rebounds||0)||1)*100)}%"></div></div><div class="nba-stat-val">${hStats.rebounds}</div></div>` : ''}
-              </div>
-              <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
-                ${s.venue ? `<div style="font-size:clamp(8px,0.7vw,10px);letter-spacing:3px;color:rgba(255,255,255,0.2);text-transform:uppercase;font-family:'Rajdhani',sans-serif;text-align:center">${s.venue}</div>` : ''}
               </div>
               <div class="nba-team-stats right-stats">
                 ${aStats.fieldGoalPct ? `<div class="nba-stat-line" style="flex-direction:row-reverse"><div class="nba-stat-name" style="text-align:right">FG%</div><div class="nba-stat-bar-wrap"><div class="nba-stat-fill away-fill" style="width:${parseFloat(aStats.fieldGoalPct)||50}%"></div></div><div class="nba-stat-val">${aStats.fieldGoalPct}</div></div>` : ''}
@@ -1389,6 +1699,9 @@ function renderSportsNBA(s) {
               </div>
             </div>
           </div>` : ''}
+          ${buildLeadersHtml(s.leaders)}
+          ${venueText ? `<div class="sports-venue">${venueText}</div>` : ''}
+          ${buildInfoBarHtml(s)}
         </div>
       </div>
     </div>
@@ -1441,6 +1754,7 @@ function renderSportsUFC(s) {
               <div class="fighter-avatar red-corner">${home.logo ? `<img src="${home.logo}" style="width:80%;height:80%;object-fit:contain;border-radius:50%" onerror="this.outerHTML='🥋'">` : '🥋'}</div>
               <div class="fighter-name">${redName}</div>
               <div class="fighter-record">${redRecord}</div>
+              ${(fighters.red?.flag || fighters.red?.country) ? `<div class="ufc-fighter-country">${fighters.red.flag ? `<img class="ufc-fighter-flag" src="${fighters.red.flag}" onerror="this.style.display='none'">` : ''}${fighters.red.country || ''}</div>` : ''}
               <div class="ufc-corner-badge red">Red Corner</div>
             </div>
             <div class="ufc-vs-block">
@@ -1451,6 +1765,7 @@ function renderSportsUFC(s) {
               <div class="fighter-avatar blue-corner">${away.logo ? `<img src="${away.logo}" style="width:80%;height:80%;object-fit:contain;border-radius:50%" onerror="this.outerHTML='🥊'">` : '🥊'}</div>
               <div class="fighter-name">${blueName}</div>
               <div class="fighter-record">${blueRecord}</div>
+              ${(fighters.blue?.flag || fighters.blue?.country) ? `<div class="ufc-fighter-country">${fighters.blue.flag ? `<img class="ufc-fighter-flag" src="${fighters.blue.flag}" onerror="this.style.display='none'">` : ''}${fighters.blue.country || ''}</div>` : ''}
               <div class="ufc-corner-badge blue">Blue Corner</div>
             </div>
           </div>
@@ -1468,8 +1783,10 @@ function renderSportsUFC(s) {
                 <div class="ufc-stat-vals"><span class="ufc-stat-r">${fightStats.takedowns.red}</span><span class="ufc-stat-b">${fightStats.takedowns.blue}</span></div>
               </div>` : ''}
             </div>` : ''}
-            ${s.venue ? `<div class="sports-venue">${s.venue}</div>` : ''}
-          </div>` : ''}
+            ${(() => { const v = [s.venue, s.venueCity, s.venueState].filter(Boolean).join(' · '); return v ? `<div class="sports-venue">${v}</div>` : ''; })()}
+          </div>` : `
+          ${(() => { const v = [s.venue, s.venueCity, s.venueState].filter(Boolean).join(' · '); return v ? `<div class="sports-venue">${v}</div>` : ''; })()}`}
+          ${s.broadcast ? `<div class="sport-info-bar"><div class="sport-info-badge"><span class="badge-icon">📺</span>${s.broadcast}</div></div>` : ''}
         </div>
       </div>
     </div>
@@ -1483,6 +1800,10 @@ function renderSportsMLB(s) {
   const away = s.awayTeam || {};
   const bases = s.bases || {};
   const count = s.count || {};
+  const iScores = s.inningScores || { home: [], away: [] };
+  const tStats = s.teamStats || { home: {}, away: {} };
+  const batter = s.batter || {};
+  const pitcher = s.pitcher || {};
 
   document.documentElement.style.setProperty('--b-color', '#f9a825');
   document.documentElement.style.setProperty('--b-glow', 'rgba(249,168,37,0.4)');
@@ -1493,13 +1814,93 @@ function renderSportsMLB(s) {
 
   const inningText = s.inning ? `${s.isTop ? 'Top' : 'Bot'} ${s.inning}${['st','nd','rd'][s.inning-1]||'th'}` : s.periodText || '';
   const inningArrow = s.isTop ? '▲' : '▼';
-  const statusText = s.isLive ? 'LIVE GAME' : (s.statusText || 'GAME');
+  const statusText = s.isLive ? 'LIVE GAME' : (s.status === 'post' ? 'FINAL' : 'GAME');
 
   function dots(count, max, cls) {
     let h = '';
     for (let i = 0; i < max; i++) h += `<div class="count-dot${i < count ? ' ' + cls : ''}"></div>`;
     return h;
   }
+
+  // Build linescore grid
+  const totalInnings = Math.max(9, iScores.home.length, iScores.away.length);
+  const currentInning = s.inning || 0;
+  let gridCols = `auto repeat(${totalInnings}, 1fr) auto auto auto`;
+  let gridHtml = '';
+  // Header row
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-header mlb-sg-team"></div>`;
+  for (let i = 1; i <= totalInnings; i++) {
+    const isActive = s.isLive && i === currentInning;
+    gridHtml += `<div class="mlb-sg-cell mlb-sg-header${isActive ? ' mlb-sg-active' : ''}">${i}</div>`;
+  }
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-header mlb-sg-total">R</div>`;
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-header mlb-sg-total">H</div>`;
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-header mlb-sg-total">E</div>`;
+  // Away row (away bats first)
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-team">${away.abbreviation || 'AWAY'}</div>`;
+  for (let i = 0; i < totalInnings; i++) {
+    const val = i < iScores.away.length ? iScores.away[i] : '';
+    const isActive = s.isLive && (i + 1) === currentInning && s.isTop;
+    const dash = val === '' ? '<span class="mlb-sg-dash">-</span>' : val;
+    gridHtml += `<div class="mlb-sg-cell mlb-sg-score${isActive ? ' mlb-sg-active' : ''}">${dash}</div>`;
+  }
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-total">${away.score || 0}</div>`;
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-total">${tStats.away.H || '-'}</div>`;
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-total">${tStats.away.E || '-'}</div>`;
+  // Home row
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-team">${home.abbreviation || 'HOME'}</div>`;
+  for (let i = 0; i < totalInnings; i++) {
+    const val = i < iScores.home.length ? iScores.home[i] : '';
+    const isActive = s.isLive && (i + 1) === currentInning && !s.isTop;
+    const dash = val === '' ? '<span class="mlb-sg-dash">-</span>' : val;
+    gridHtml += `<div class="mlb-sg-cell mlb-sg-score${isActive ? ' mlb-sg-active' : ''}">${dash}</div>`;
+  }
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-total">${home.score || 0}</div>`;
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-total">${tStats.home.H || '-'}</div>`;
+  gridHtml += `<div class="mlb-sg-cell mlb-sg-total">${tStats.home.E || '-'}</div>`;
+
+  // Batter/Pitcher matchup (only if we have names)
+  const hasBatter = batter.name;
+  const hasPitcher = pitcher.name;
+  const matchupHtml = (hasBatter || hasPitcher) ? `
+    <div class="mlb-matchup">
+      ${hasBatter ? `<div class="mlb-player">
+        <div class="mlb-player-label">AT BAT</div>
+        ${batter.headshot ? `<img class="mlb-player-headshot" src="${batter.headshot}" onerror="this.style.display='none'">` : ''}
+        <div class="mlb-player-name">${batter.shortName || batter.name}</div>
+        ${batter.jersey || batter.position ? `<div class="mlb-player-detail">#${batter.jersey || ''} ${batter.position || ''}</div>` : ''}
+        ${batter.summary ? `<div class="mlb-player-summary">${batter.summary}</div>` : ''}
+      </div>` : ''}
+      <div class="mlb-vs">VS</div>
+      ${hasPitcher ? `<div class="mlb-player">
+        <div class="mlb-player-label">PITCHING</div>
+        ${pitcher.headshot ? `<img class="mlb-player-headshot" src="${pitcher.headshot}" onerror="this.style.display='none'">` : ''}
+        <div class="mlb-player-name">${pitcher.shortName || pitcher.name}</div>
+        ${pitcher.jersey || pitcher.position ? `<div class="mlb-player-detail">#${pitcher.jersey || ''} ${pitcher.position || ''}</div>` : ''}
+        ${pitcher.summary ? `<div class="mlb-player-summary">${pitcher.summary}</div>` : ''}
+      </div>` : ''}
+    </div>` : '';
+
+  // Venue line
+  const venueText = [s.venue, s.venueCity, s.venueState].filter(Boolean).join(' · ');
+
+  // Info bar (conditional badges)
+  let infoBadges = '';
+  if (s.weather) {
+    infoBadges += `<div class="mlb-info-badge"><span class="badge-icon">🌡</span>${s.weather.temperature}°F ${s.weather.displayValue}</div>`;
+  }
+  if (s.odds) {
+    infoBadges += `<div class="mlb-info-badge"><span class="badge-icon">📊</span>${s.odds.details || ''}</div>`;
+  }
+  if (s.tickets && s.tickets.summary) {
+    infoBadges += `<div class="mlb-info-badge"><span class="badge-icon">🎟</span>${s.tickets.summary}</div>`;
+  }
+  if (s.notes && s.notes.length) {
+    for (const note of s.notes) {
+      infoBadges += `<div class="mlb-info-badge">${note}</div>`;
+    }
+  }
+  const infoBarHtml = infoBadges ? `<div class="mlb-info-bar">${infoBadges}</div>` : '';
 
   el.innerHTML = `
     <div class="np-wrap" style="background:#000">
@@ -1518,7 +1919,8 @@ function renderSportsMLB(s) {
           </div>
           <div style="display:flex;align-items:center;gap:12px;">
             ${s.isLive ? '<div class="live-indicator"><div class="live-pulse"></div>LIVE</div>' : ''}
-            <div class="mlb-inning-badge"><span class="inning-arrow">${inningArrow}</span>${inningText}</div>
+            ${s.inning ? `<div class="mlb-inning-badge"><span class="inning-arrow">${inningArrow}</span>${inningText}</div>` : ''}
+            ${s.league && s.league !== 'MLB' ? `<span class="sports-venue">${s.league}</span>` : ''}
           </div>
           <div class="sports-scoreboard">
             <div class="sports-team">
@@ -1535,7 +1937,8 @@ function renderSportsMLB(s) {
               <div class="sports-team-record">${away.record || ''}</div>
             </div>
           </div>
-          <div class="sports-stats-footer">
+          <div class="mlb-score-grid" style="grid-template-columns:${gridCols}">${gridHtml}</div>
+          ${s.isLive ? `<div class="sports-stats-footer">
             <div style="display:flex;align-items:center;gap:clamp(20px,4vw,40px)">
               <div class="mlb-diamond">
                 <div></div><div class="base base-second${bases.second ? ' occupied' : ''}"></div><div></div>
@@ -1548,8 +1951,10 @@ function renderSportsMLB(s) {
                 <div class="count-group"><div class="count-label">Outs</div><div class="count-dots">${dots(count.outs||0, 3, 'on-outs')}</div></div>
               </div>
             </div>
-            ${s.venue ? `<div class="sports-venue">${s.venue}</div>` : ''}
-          </div>
+          </div>` : ''}
+          ${matchupHtml}
+          ${venueText ? `<div class="sports-venue">${venueText}</div>` : ''}
+          ${infoBarHtml}
         </div>
       </div>
     </div>
@@ -1561,6 +1966,7 @@ function renderSportsNHL(s) {
   const bannerText = s.bannerText || 'Live Game';
   const home = s.homeTeam || {};
   const away = s.awayTeam || {};
+  const ps = s.periodScores || { home: [], away: [] };
 
   document.documentElement.style.setProperty('--b-color', '#38bdf8');
   document.documentElement.style.setProperty('--b-glow', 'rgba(56,189,248,0.4)');
@@ -1569,7 +1975,64 @@ function renderSportsNHL(s) {
   document.documentElement.style.setProperty('--sport-accent-dim', 'rgba(56,189,248,0.15)');
   document.documentElement.style.setProperty('--sport-glow', 'rgba(56,189,248,0.1)');
 
-  const statusText = s.isLive ? 'LIVE GAME' : (s.statusText || 'GAME');
+  const statusText = s.isLive ? 'LIVE GAME' : (s.status === 'post' ? 'FINAL' : 'GAME');
+
+  // Build period score grid
+  const totalPeriods = Math.max(3, ps.home.length, ps.away.length);
+  let gridHtml = '';
+  if (ps.home.length || ps.away.length) {
+    gridHtml += `<div class="nhl-score-grid" style="grid-template-columns: auto repeat(${totalPeriods}, 1fr) auto">`;
+    // Header
+    gridHtml += '<div class="nhl-sg-cell nhl-sg-header nhl-sg-team"></div>';
+    for (let p = 1; p <= totalPeriods; p++) {
+      const label = p <= 3 ? `${p}` : (p === 4 ? 'OT' : `${p-3}OT`);
+      const active = s.period === p ? ' nhl-sg-active' : '';
+      gridHtml += `<div class="nhl-sg-cell nhl-sg-header${active}">${label}</div>`;
+    }
+    gridHtml += '<div class="nhl-sg-cell nhl-sg-header nhl-sg-total">T</div>';
+    // Home row
+    gridHtml += `<div class="nhl-sg-cell nhl-sg-team">${home.abbreviation || home.name || 'HOME'}</div>`;
+    for (let p = 0; p < totalPeriods; p++) {
+      const val = p < ps.home.length ? ps.home[p] : '—';
+      const active = s.period === p + 1 ? ' nhl-sg-active' : '';
+      gridHtml += `<div class="nhl-sg-cell nhl-sg-score${active}">${val}</div>`;
+    }
+    gridHtml += `<div class="nhl-sg-cell nhl-sg-total">${home.score || 0}</div>`;
+    // Away row
+    gridHtml += `<div class="nhl-sg-cell nhl-sg-team">${away.abbreviation || away.name || 'AWAY'}</div>`;
+    for (let p = 0; p < totalPeriods; p++) {
+      const val = p < ps.away.length ? ps.away[p] : '—';
+      const active = s.period === p + 1 ? ' nhl-sg-active' : '';
+      gridHtml += `<div class="nhl-sg-cell nhl-sg-score${active}">${val}</div>`;
+    }
+    gridHtml += `<div class="nhl-sg-cell nhl-sg-total">${away.score || 0}</div>`;
+    gridHtml += '</div>';
+  }
+
+  // Goalies panel
+  const probables = s.probables || [];
+  let goaliesHtml = '';
+  if (probables.length >= 2) {
+    goaliesHtml = `<div class="nhl-goalies">
+      <div class="nhl-goalie">
+        <div class="nhl-goalie-label">STARTER</div>
+        ${probables[0].headshot ? `<img class="nhl-goalie-headshot" src="${probables[0].headshot}" onerror="this.style.display='none'">` : ''}
+        <div class="nhl-goalie-name">${probables[0].shortName || probables[0].name}</div>
+        ${probables[0].jersey ? `<div class="nhl-goalie-detail">#${probables[0].jersey} G</div>` : ''}
+        ${probables[0].record ? `<div class="nhl-goalie-record">${probables[0].record}</div>` : ''}
+      </div>
+      <div class="nhl-goalie-vs">VS</div>
+      <div class="nhl-goalie">
+        <div class="nhl-goalie-label">STARTER</div>
+        ${probables[1].headshot ? `<img class="nhl-goalie-headshot" src="${probables[1].headshot}" onerror="this.style.display='none'">` : ''}
+        <div class="nhl-goalie-name">${probables[1].shortName || probables[1].name}</div>
+        ${probables[1].jersey ? `<div class="nhl-goalie-detail">#${probables[1].jersey} G</div>` : ''}
+        ${probables[1].record ? `<div class="nhl-goalie-record">${probables[1].record}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  const venueText = buildVenueText(s);
 
   el.innerHTML = `
     <div class="np-wrap" style="background:#000">
@@ -1591,7 +2054,7 @@ function renderSportsNHL(s) {
             <span style="font-family:'Teko',sans-serif;font-size:clamp(14px,1.4vw,18px);font-weight:600;letter-spacing:3px;color:rgba(255,255,255,0.5)">${s.periodText || ''}</span>
             ${s.clock ? `<div class="sports-clock">${s.clock}</div>` : ''}
           </div>
-          ${s.powerPlay ? `<div class="nhl-power-play">POWER PLAY</div>` : ''}
+          ${s.powerPlay ? `<div class="nhl-power-play">⚡ POWER PLAY</div>` : ''}
           <div class="sports-scoreboard">
             <div class="sports-team">
               <div class="sports-logo nhl-home">${home.logo ? `<img src="${home.logo}" onerror="this.outerHTML='🏒'">` : '🏒'}</div>
@@ -1607,10 +2070,12 @@ function renderSportsNHL(s) {
               <div class="sports-team-record">${away.record || ''}</div>
             </div>
           </div>
-          ${s.venue ? `
-          <div class="sports-stats-footer">
-            <div class="sports-venue">${s.venue}</div>
-          </div>` : ''}
+          ${gridHtml}
+          ${goaliesHtml}
+          ${buildLeadersHtml(s.leaders)}
+          ${s.lastPlay ? `<div class="nhl-last-play">"${s.lastPlay}"</div>` : ''}
+          ${venueText ? `<div class="sports-venue">${venueText}</div>` : ''}
+          ${buildInfoBarHtml(s)}
         </div>
       </div>
     </div>
