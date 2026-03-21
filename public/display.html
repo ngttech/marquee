@@ -149,12 +149,12 @@ body.cursor-hidden { cursor: none; }
 }
 .ss-layout {
   position: absolute; bottom: 0; left: 0; right: 0;
-  display: grid; grid-template-columns: 1fr auto;
+  display: grid; grid-template-columns: 1fr auto; gap: 30px;
   align-items: end; padding: 50px 60px;
   z-index: 5;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.ss-text-col { display: flex; flex-direction: column; gap: 12px; }
+.ss-text-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .ss-source-label {
   font-family: 'Cinzel', serif; font-size: clamp(10px,0.9vw,13px);
   font-weight: 600; letter-spacing: 8px; color: var(--b-color);
@@ -193,8 +193,7 @@ body.cursor-hidden { cursor: none; }
 .ss-overview {
   font-family: 'Rajdhani', sans-serif; font-size: clamp(12px,1.2vw,16px);
   font-weight: 400; color: rgba(255,255,255,0.35); letter-spacing: 1px; line-height: 1.4;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  max-width: 60vw;
+  max-width: 100%;
   animation: revealUp 0.8s 0.5s both;
 }
 .ss-credits {
@@ -416,6 +415,8 @@ body.cursor-hidden { cursor: none; }
 }
 .ss-wrap.trailer-active .ss-text-col {
   gap: 6px;
+  max-height: calc(50vh - 100px);
+  overflow: hidden;
   transition: gap 0.4s ease;
 }
 .ss-wrap.trailer-active .trailer-pill {
