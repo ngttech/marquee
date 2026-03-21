@@ -99,6 +99,10 @@ function getRoomPayload(slug) {
     payload.screensaverElements = roomCfg.screensaverElements || ['runtime', 'rating', 'contentRating', 'overview', 'credits'];
     payload.trailerMode = roomCfg.trailerMode || 'off';
     payload.trailerDelay = roomCfg.trailerDelay || 30;
+    payload.screensaverView = roomCfg.screensaverView || 'default';
+    payload.showTopBanner = roomCfg.showTopBanner !== false;
+    payload.showBottomBanner = roomCfg.showBottomBanner || false;
+    payload.bottomBannerText = roomCfg.bottomBannerText || '';
   }
 
   return payload;

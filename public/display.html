@@ -10,6 +10,7 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani', sans-serif; overflow: hidden; }
+body.cursor-hidden { cursor: none; }
 :root {
   --b-color: #c9a84c;
   --b-glow: rgba(201,168,76,0.4);
@@ -151,6 +152,7 @@ html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani
   display: grid; grid-template-columns: 1fr auto;
   align-items: end; padding: 50px 60px;
   z-index: 5;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .ss-text-col { display: flex; flex-direction: column; gap: 12px; }
 .ss-source-label {
@@ -223,6 +225,30 @@ html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani
 }
 .ss-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.3s; }
 .ss-dot.active { background: var(--b-color); width: 20px; border-radius: 3px; }
+.banner-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0; top: auto; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  padding: 14px 40px 11px;
+  border-top: 1px solid var(--b-color); border-bottom: none;
+  background: var(--b-bg);
+  overflow: hidden;
+}
+.banner-bottom .banner-text,
+.banner-bottom .banner-orn { color: var(--b-color); }
+.banner-bottom .banner-text { text-shadow: 0 0 20px var(--b-glow); }
+.ss-dot-nav.has-bottom-banner { bottom: 68px; }
+.ss-progress-bar.has-bottom-banner { bottom: 52px; }
+.ss-poster-view {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5; background: #000;
+}
+.ss-poster-view.has-top-banner { top: 56px; }
+.ss-poster-view.has-bottom-banner { bottom: 52px; }
+.ss-poster-view-img {
+  max-height: 100%; max-width: 100%; aspect-ratio: 2/3; object-fit: cover;
+  animation: revealUp 1s cubic-bezier(0.16,1,0.3,1) both;
+}
 
 /* ═══ NOW PLAYING TV ═══ */
 .tv-layout {
@@ -294,7 +320,7 @@ html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani
   letter-spacing: 2px; margin-top: 4px; font-weight: 600;
 }
 
-/* ═══ TRAILER OVERLAY ═══ */
+/* ═══ TRAILER OVERLAY (fallback for non-screensaver) ═══ */
 .trailer-overlay {
   position: fixed; inset: 0; z-index: 50;
   background: rgba(0,0,0,0.92);
@@ -315,6 +341,98 @@ html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani
 }
 .trailer-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ═══ EMBEDDED TRAILER (screensaver mode) ═══ */
+.ss-trailer-container {
+  position: absolute;
+  left: 4vw; right: 4vw;
+  bottom: 12px;
+  height: 50vh;
+  z-index: 15;
+  overflow: hidden;
+  border-radius: 16px;
+  opacity: 0;
+  transform: translateY(100%);
+  pointer-events: none;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.5s ease 0.1s;
+}
+.ss-trailer-container.has-bottom-banner {
+  bottom: 64px;
+}
+.ss-trailer-container.active {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.ss-trailer-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 -4px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06);
+}
+.ss-trailer-inner iframe {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: none; border-radius: 16px;
+}
+.ss-trailer-close {
+  position: absolute;
+  top: 12px; right: 16px;
+  z-index: 16;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 3px; padding: 6px 16px;
+  cursor: pointer; text-transform: uppercase;
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+.ss-trailer-close:hover {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+/* ── Screensaver transitions when trailer is active ── */
+.ss-wrap.trailer-active .ss-layout {
+  transform: translateY(calc(-100vh + 100%));
+  align-items: start;
+  padding-top: 70px;
+  padding-bottom: 10px;
+}
+.ss-wrap.trailer-active.has-top-banner .ss-layout {
+  padding-top: 80px;
+}
+.ss-wrap.trailer-active .ss-poster-col {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.9);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.ss-wrap.trailer-active .ss-text-col {
+  gap: 6px;
+  transition: gap 0.4s ease;
+}
+.ss-wrap.trailer-active .trailer-pill {
+  opacity: 0; max-height: 0; overflow: hidden;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+.ss-wrap.trailer-active .ss-progress-bar,
+.ss-wrap.trailer-active .ss-dot-nav {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.ss-wrap.trailer-active .ss-progress-fill {
+  animation-play-state: paused;
+}
+.ss-wrap.trailer-active .ss-poster-view-img {
+  opacity: 0; transform: scale(0.9);
+  transition: opacity 0.4s ease, transform 0.5s ease;
+}
 
 /* ═══ THEME EFFECTS ═══ */
 
@@ -988,6 +1106,159 @@ html, body { width: 100%; height: 100%; background: #000; font-family: 'Rajdhani
   background: rgba(200,50,50,0.4);
   box-shadow: 0 0 4px rgba(200,50,50,0.3);
 }
+
+/* ═══ SVG MARQUEE BANNERS ═══ */
+.banner,
+.banner-bottom { overflow: visible; }
+.banner.banner-themed,
+.banner-bottom.banner-themed {
+  display: block;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+.banner-themed .banner-stage {
+  position: relative;
+  width: min(100%, 1560px);
+  margin: 0 auto;
+}
+.banner-themed.is-top .banner-stage { height: var(--banner-stage-height, 188px); }
+.banner-themed.is-bottom .banner-stage { height: var(--banner-stage-height, 108px); }
+.banner-themed .banner-asset-slot,
+.banner-themed .banner-label-wrap {
+  position: absolute;
+  inset: 0;
+}
+.banner-themed .banner-asset-slot svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+.banner-themed .banner-label-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.banner-themed .banner-label {
+  position: relative;
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.banner-themed .banner-label::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  background: linear-gradient(110deg, transparent 18%, rgba(255,255,255,0.08) 40%, rgba(255,255,255,0.92) 50%, rgba(255,255,255,0.08) 60%, transparent 82%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  transform: translateX(-140%);
+  animation: bannerTextSweep 4.8s linear infinite;
+}
+.banner-themed .banner-stage::after {
+  content: '';
+  position: absolute;
+  inset: 10% 12%;
+  background: linear-gradient(108deg, transparent 35%, rgba(255,255,255,0.14) 47%, rgba(255,255,255,0.02) 58%, transparent 68%);
+  transform: translateX(-135%) skewX(-18deg);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: bannerFrameSweep 10s linear infinite;
+}
+@keyframes bannerTextSweep {
+  0%, 14% { transform: translateX(-140%); opacity: 0; }
+  20%, 48% { opacity: 1; }
+  56%, 100% { transform: translateX(140%); opacity: 0; }
+}
+@keyframes bannerFrameSweep {
+  0%, 24% { transform: translateX(-135%) skewX(-18deg); opacity: 0; }
+  30%, 56% { opacity: 1; }
+  66%, 100% { transform: translateX(135%) skewX(-18deg); opacity: 0; }
+}
+@keyframes marqueeBulbPulse {
+  0%, 100% { opacity: 0.28; filter: saturate(0.88); }
+  48% { opacity: 0.35; }
+  50% { opacity: 1; filter: brightness(1.18) saturate(1.2); }
+  64% { opacity: 0.82; }
+}
+@keyframes neonTubeFlicker {
+  0%, 100% { opacity: 1; }
+  90% { opacity: 1; }
+  91% { opacity: 0.72; }
+  92% { opacity: 1; }
+  95% { opacity: 0.82; }
+  96% { opacity: 1; }
+}
+.banner-themed .bulb {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: marqueeBulbPulse 1.15s linear infinite;
+}
+.banner-themed .phase-0 { animation-delay: 0s; }
+.banner-themed .phase-1 { animation-delay: 0.16s; }
+.banner-themed .phase-2 { animation-delay: 0.32s; }
+.banner-themed .phase-3 { animation-delay: 0.48s; }
+.banner-themed .phase-4 { animation-delay: 0.64s; }
+.banner-themed .phase-5 { animation-delay: 0.8s; }
+.banner-themed .neon-tube,
+.banner-themed .neon-arrow {
+  animation: neonTubeFlicker 5.5s ease-in-out infinite;
+}
+[data-banner-theme="artdeco"] { --banner-stage-height: 194px; }
+[data-banner-theme="artdeco"].is-bottom { --banner-stage-height: 98px; }
+[data-banner-theme="artdeco"] .banner-label-wrap { inset: 60px 31% 116px; }
+[data-banner-theme="artdeco"].is-bottom .banner-label-wrap { inset: 20px 25% 18px; }
+[data-banner-theme="artdeco"] .banner-label {
+  color: #f2e1a6;
+  font-size: clamp(30px, 3.1vw, 54px);
+  letter-spacing: clamp(4px, 0.65vw, 12px);
+  text-shadow: 0 0 10px rgba(255,214,131,0.48), 0 0 28px rgba(222,184,73,0.18), 0 2px 8px rgba(0,0,0,0.45);
+}
+[data-banner-theme="artdeco"].is-bottom .banner-label {
+  font-size: clamp(22px, 2.2vw, 38px);
+  letter-spacing: clamp(4px, 0.55vw, 10px);
+}
+[data-banner-theme="artdeco"] .bulb.warm {
+  filter: drop-shadow(0 0 6px rgba(255,186,76,0.75)) drop-shadow(0 0 12px rgba(255,186,76,0.3));
+}
+[data-banner-theme="retroneon"] { --banner-stage-height: 204px; }
+[data-banner-theme="retroneon"].is-bottom { --banner-stage-height: 110px; }
+[data-banner-theme="retroneon"] .banner-label-wrap { inset: 66px 31% 112px; }
+[data-banner-theme="retroneon"].is-bottom .banner-label-wrap { inset: 18px 24% 14px; }
+[data-banner-theme="retroneon"] .banner-label {
+  color: #ff77cc;
+  font-size: clamp(34px, 3.5vw, 60px);
+  letter-spacing: clamp(3px, 0.55vw, 10px);
+  text-shadow: 0 0 5px #fff, 0 0 12px #ff6bd2, 0 0 30px rgba(255,41,160,0.88), 0 0 42px rgba(57,205,255,0.5);
+}
+[data-banner-theme="retroneon"].is-bottom .banner-label {
+  color: #f7d487;
+  font-size: clamp(22px, 2.25vw, 38px);
+  letter-spacing: clamp(4px, 0.55vw, 10px);
+  text-shadow: 0 0 6px rgba(255,224,137,0.45), 0 0 24px rgba(255,92,92,0.18), 0 2px 6px rgba(0,0,0,0.45);
+}
+[data-banner-theme="retroneon"] .bulb.retro {
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.24)) drop-shadow(0 0 18px rgba(255,120,210,0.2));
+}
+[data-theme="artdeco"] .movie-layout { top: 194px; }
+[data-theme="artdeco"] .tv-layout { top: 194px; }
+[data-theme="artdeco"] .ss-poster-view.has-top-banner { top: 194px; }
+[data-theme="artdeco"] .ss-dot-nav.has-bottom-banner { bottom: 114px; }
+[data-theme="artdeco"] .ss-progress-bar.has-bottom-banner { bottom: 98px; }
+[data-theme="artdeco"] .ss-poster-view.has-bottom-banner { bottom: 98px; }
+[data-theme="artdeco"] .sports-layout { top: 194px; }
+[data-theme="retroneon"] .movie-layout { top: 204px; }
+[data-theme="retroneon"] .tv-layout { top: 204px; }
+[data-theme="retroneon"] .ss-poster-view.has-top-banner { top: 204px; }
+[data-theme="retroneon"] .ss-dot-nav.has-bottom-banner { bottom: 126px; }
+[data-theme="retroneon"] .ss-progress-bar.has-bottom-banner { bottom: 110px; }
+[data-theme="retroneon"] .ss-poster-view.has-bottom-banner { bottom: 110px; }
+[data-theme="retroneon"] .sports-layout { top: 204px; }
 </style>
 </head>
 <body>
@@ -1003,9 +1274,15 @@ let clockInterval;
 let currentTheme = 'default';
 let trailerTimer = null;
 let ytPlayer = null;
+let _trailerEmbedded = false;
 let _ytProgressInterval = null;
 let _lastPayloadHash = null;
 let _statusPulseTimer = null;
+const BANNER_ASSETS = {
+  artdeco: { top: '/assets/banners/artdeco-top.svg', bottom: '/assets/banners/artdeco-bottom.svg' },
+  retroneon: { top: '/assets/banners/retroneon-top.svg', bottom: '/assets/banners/retroneon-bottom.svg' },
+};
+const bannerAssetCache = new Map();
 
 // ── Theme definitions ──
 const THEMES = {
@@ -1051,11 +1328,24 @@ const THEMES = {
     bg: 'linear-gradient(135deg,#1a0010,#0d0008,#1a0010)',
     effect: null,
   },
+  artdeco: {
+    color: '#c9a84c',
+    glow: 'rgba(201,168,76,0.5)',
+    bg: 'linear-gradient(135deg,#1a2744,#0e1a30,#1a2744)',
+    effect: 'artdeco',
+  },
+  retroneon: {
+    color: '#ff2d7b',
+    glow: 'rgba(255,45,123,0.5)',
+    bg: 'linear-gradient(135deg,#1a0a12,#0d0508,#1a0a12)',
+    effect: 'retroneon',
+  },
 };
 
 function applyTheme(name) {
   const theme = THEMES[name] || THEMES.default;
   currentTheme = name;
+  document.documentElement.setAttribute('data-theme', name);
   document.documentElement.style.setProperty('--b-color', theme.color);
   document.documentElement.style.setProperty('--b-glow', theme.glow);
   document.documentElement.style.setProperty('--b-bg', theme.bg);
@@ -1069,6 +1359,8 @@ function applyTheme(name) {
     renderSnowflakes(effectsEl);
   } else if (theme.effect === 'bats') {
     renderBats(effectsEl);
+  } else if (theme.effect === 'artdeco' || theme.effect === 'retroneon') {
+    applyThemeBanners(theme.effect);
   }
 }
 
@@ -1103,12 +1395,75 @@ function renderBats(container) {
   }
 }
 
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function getBannerAsset(path) {
+  if (!bannerAssetCache.has(path)) {
+    bannerAssetCache.set(path, fetch(path).then(async res => {
+      if (!res.ok) throw new Error(`Failed to load ${path}`);
+      return res.text();
+    }));
+  }
+  return bannerAssetCache.get(path);
+}
+
+async function injectBannerAsset(slot, path) {
+  const loadToken = `${path}:${Date.now()}:${Math.random()}`;
+  slot.dataset.loadToken = loadToken;
+  try {
+    const svg = await getBannerAsset(path);
+    if (slot.dataset.loadToken !== loadToken) return;
+    slot.innerHTML = svg;
+  } catch (err) {
+    if (slot.dataset.loadToken !== loadToken) return;
+    slot.innerHTML = '';
+    console.error(err);
+  }
+}
+
+function renderSvgBanner(banner, themeName, text, isBottom) {
+  const assetPath = BANNER_ASSETS[themeName]?.[isBottom ? 'bottom' : 'top'];
+  if (!assetPath) return;
+  const safeText = escapeHtml(text);
+  banner.dataset.bannerTheme = themeName;
+  banner.classList.add('banner-themed', isBottom ? 'is-bottom' : 'is-top');
+  banner.innerHTML = `
+    <div class="banner-stage">
+      <div class="banner-asset-slot" aria-hidden="true"></div>
+      <div class="banner-label-wrap">
+        <span class="banner-text banner-label" data-text="${safeText}">${safeText}</span>
+      </div>
+    </div>
+  `;
+  const slot = banner.querySelector('.banner-asset-slot');
+  injectBannerAsset(slot, assetPath);
+}
+
+function applyThemeBanners(effect) {
+  document.querySelectorAll('.banner').forEach(banner => {
+    const text = banner.querySelector('.banner-text')?.textContent || '';
+    renderSvgBanner(banner, effect, text, false);
+  });
+  document.querySelectorAll('.banner-bottom').forEach(banner => {
+    const text = banner.querySelector('.banner-text')?.textContent || '';
+    renderSvgBanner(banner, effect, text, true);
+  });
+}
+
 function payloadHash(state) {
   // Build a lightweight fingerprint of the fields that affect rendering
   const s = state;
   return [s.mode, s.title, s.subtitle, s.slideIndex, s.theme, s.bannerText,
     s.homeTeam?.score, s.awayTeam?.score, s.status, s.clock, s.period, s.periodText,
     s.posterUrl, s.backdropUrl, s.year, s.overview, s.rating,
+    s.screensaverView, s.showTopBanner, s.showBottomBanner, s.bottomBannerText,
   ].join('|');
 }
 
@@ -1156,7 +1511,8 @@ function render(state) {
   if (_ytProgressInterval) { clearInterval(_ytProgressInterval); _ytProgressInterval = null; }
   if (trailerTimer) { clearTimeout(trailerTimer); trailerTimer = null; }
   // Don't close trailer on screensaver slide advances — only close on mode change
-  const trailerActive = document.getElementById('trailer-overlay');
+  const trailerActive = document.getElementById('trailer-overlay') ||
+    document.querySelector('.ss-trailer-container.active');
   if (trailerActive && state.mode === 'screensaver') {
     return; // Skip re-render entirely while trailer is playing over screensaver
   }
@@ -1197,6 +1553,8 @@ function render(state) {
     renderSnowflakes(document.getElementById('effects'));
   } else if (theme.effect === 'bats') {
     renderBats(document.getElementById('effects'));
+  } else if (theme.effect === 'artdeco' || theme.effect === 'retroneon') {
+    applyThemeBanners(theme.effect);
   }
 }
 
@@ -1237,7 +1595,7 @@ function renderNowPlaying(s) {
       <div class="movie-layout">
         <div class="movie-poster-wrap">
           <div class="movie-poster-frame">
-            <img src="${s.posterUrl || '/assets/placeholder.png'}" alt="${s.title || ''}"
+            <img src="${s.posterUrlHd || s.posterUrl || '/assets/placeholder.png'}" alt="${s.title || ''}"
                  onerror="this.onerror=null;this.src='/assets/placeholder.png'">
             <div class="watched-eye">
               <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1282,7 +1640,7 @@ function renderNowPlayingTV(s) {
       </div>
       <div class="tv-layout">
         <div class="tv-poster-col">
-          <img class="tv-poster-img" src="${s.posterUrl || '/assets/placeholder.png'}" alt="${s.showTitle || ''}"
+          <img class="tv-poster-img" src="${s.posterUrlHd || s.posterUrl || '/assets/placeholder.png'}" alt="${s.showTitle || ''}"
                onerror="this.onerror=null;this.src='/assets/placeholder.png'">
         </div>
         <div class="tv-info-col">
@@ -1325,34 +1683,81 @@ function openTrailer(youtubeKey) {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: 'trailer-start', room }));
   }
-  const overlay = document.createElement('div');
-  overlay.className = 'trailer-overlay';
-  overlay.id = 'trailer-overlay';
-  overlay.innerHTML = `
-    <div id="yt-player"></div>
-    <button class="trailer-close" onclick="closeTrailer()">Close</button>
-  `;
-  document.body.appendChild(overlay);
 
-  ytPlayer = new YT.Player('yt-player', {
-    videoId: youtubeKey,
-    playerVars: { autoplay: 1, mute: 1, rel: 0, modestbranding: 1 },
-    events: {
-      onStateChange: (e) => {
-        if (e.data === YT.PlayerState.ENDED) {
-          closeTrailer();
+  // Try embedded mode (screensaver has the container in the DOM)
+  const container = document.getElementById('ss-trailer-container');
+  const inner = document.getElementById('ss-trailer-inner');
+  const ssWrap = document.querySelector('.ss-wrap');
+
+  if (container && inner && ssWrap) {
+    // Embedded trailer inside screensaver layout
+    _trailerEmbedded = true;
+    ssWrap.classList.add('trailer-active');
+    if (ssWrap.querySelector('.banner')) ssWrap.classList.add('has-top-banner');
+    requestAnimationFrame(() => {
+      container.classList.add('active');
+    });
+    const playerDiv = document.createElement('div');
+    playerDiv.id = 'yt-player';
+    inner.innerHTML = '';
+    inner.appendChild(playerDiv);
+    ytPlayer = new YT.Player('yt-player', {
+      width: '100%',
+      height: '100%',
+      videoId: youtubeKey,
+      playerVars: { autoplay: 1, mute: 1, rel: 0, modestbranding: 1 },
+      events: {
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.ENDED) closeTrailer();
         }
       }
-    }
-  });
+    });
+  } else {
+    // Fallback: overlay mode for non-screensaver contexts
+    const overlay = document.createElement('div');
+    overlay.className = 'trailer-overlay';
+    overlay.id = 'trailer-overlay';
+    overlay.innerHTML = `
+      <div id="yt-player"></div>
+      <button class="trailer-close" onclick="closeTrailer()">Close</button>
+    `;
+    document.body.appendChild(overlay);
+    ytPlayer = new YT.Player('yt-player', {
+      videoId: youtubeKey,
+      playerVars: { autoplay: 1, mute: 1, rel: 0, modestbranding: 1 },
+      events: {
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.ENDED) closeTrailer();
+        }
+      }
+    });
+  }
 }
 
 function closeTrailer() {
+  const wasPlaying = !!ytPlayer || _trailerEmbedded || !!document.getElementById('trailer-overlay');
   if (ytPlayer) { ytPlayer.destroy(); ytPlayer = null; }
+
+  // Clean up embedded trailer only if one was actually open
+  if (_trailerEmbedded) {
+    _trailerEmbedded = false;
+    const container = document.getElementById('ss-trailer-container');
+    const ssWrap = document.querySelector('.ss-wrap');
+    if (container) container.classList.remove('active');
+    if (ssWrap) {
+      ssWrap.classList.remove('trailer-active');
+      ssWrap.classList.remove('has-top-banner');
+    }
+    const inner = document.getElementById('ss-trailer-inner');
+    if (inner) setTimeout(() => { inner.innerHTML = ''; }, 700);
+  }
+
+  // Clean up overlay fallback
   const existing = document.getElementById('trailer-overlay');
   if (existing) existing.remove();
-  // Tell server to resume screensaver rotation
-  if (ws && ws.readyState === WebSocket.OPEN) {
+
+  // Only notify server if a trailer was actually playing
+  if (wasPlaying && ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: 'trailer-end', room }));
   }
 }
@@ -2290,44 +2695,85 @@ function renderScreensaver(s) {
   }
 
   function renderScreensaverContent() {
-    el.innerHTML = `
-      <div class="ss-wrap ss-fade-in">
-        <div class="ss-bg-img" style="background-image:url('${bgImage}'); animation: ${kenBurnsAnim} 20s ease-in-out infinite alternate;"></div>
-        <div class="ss-vignette"></div>
-        <div class="ss-bottom-grad"></div>
+    const ssView = s.screensaverView || 'default';
+    const showTop = s.showTopBanner !== false;
+    const showBottom = s.showBottomBanner || false;
+    const bottomText = s.bottomBannerText || '';
+    const bottomCls = showBottom ? ' has-bottom-banner' : '';
+
+    const topBannerHtml = showTop ? `
         <div class="banner">
           <span class="banner-orn">✦ ── ✦</span>
           <span class="banner-text">${ssBannerText}</span>
           <span class="banner-orn">✦ ── ✦</span>
-        </div>
-        <div class="ss-layout">
-          <div class="ss-text-col">
-            <div class="ss-source-label">${sourceLabel}</div>
-            <div class="ss-title">${s.title || ''}</div>
-            ${subtitleHtml}
-            <div class="ss-meta-row">
-              ${s.year ? `<div class="ss-year">${s.year}</div>` : ''}
-              ${genres}
-            </div>
-            ${s.tagline ? `<div class="ss-tagline">${s.tagline}</div>` : ''}
-            ${(showContentRating && s.contentRating) || (showRating && s.rating) || (showRuntime && s.runtime) ? `
-            <div class="ss-badges">
-              ${showContentRating && s.contentRating ? `<div class="b-rating">${s.contentRating}${s.contentRatingDesc ? `<small>${s.contentRatingDesc}</small>` : ''}</div>` : ''}
-              ${showRating && s.rating ? `<div class="b-stars">${buildStars(s.rating)}</div>` : ''}
-              ${showRuntime && s.runtime ? `<div class="ss-runtime">${s.runtime}</div>` : ''}
-            </div>` : ''}
-            ${showOverview && s.overview ? `<div class="ss-overview">${s.overview}</div>` : ''}
-            ${showCredits && (s.director || (s.cast && s.cast.length)) ? `<div class="ss-credits">${s.director ? 'Directed by ' + s.director : ''}${s.director && s.cast && s.cast.length ? ' · ' : ''}${s.cast && s.cast.length ? s.cast.join(', ') : ''}</div>` : ''}
-            ${s.trailerKey && (s.source === 'coming_soon' || s.source === 'trending') ? `<div class="trailer-pill">▶</div>` : ''}
+        </div>` : '';
+
+    const bottomBannerHtml = showBottom ? `
+        <div class="banner-bottom">
+          <span class="banner-orn">✦ ── ✦</span>
+          <span class="banner-text">${bottomText}</span>
+          <span class="banner-orn">✦ ── ✦</span>
+        </div>` : '';
+
+    const progressHtml = `<div class="ss-progress-bar${bottomCls}"><div class="ss-progress-fill" style="animation-duration:${interval}s"></div></div>`;
+    const dotsNavHtml = `<div class="ss-dot-nav${bottomCls}">${dotsHtml}</div>`;
+
+    if (ssView === 'poster') {
+      const posterCls = `ss-poster-view${showTop ? ' has-top-banner' : ''}${showBottom ? ' has-bottom-banner' : ''}`;
+      el.innerHTML = `
+        <div class="ss-wrap ss-fade-in">
+          ${topBannerHtml}
+          <div class="${posterCls}">
+            ${s.posterUrl ? `<img class="ss-poster-view-img" src="${s.posterUrlHd || s.posterUrl}" alt="${s.title || ''}" onerror="this.onerror=null;this.src='/assets/placeholder.png'">` : ''}
           </div>
-          ${s.posterUrl ? `<div class="ss-poster-col"><img class="ss-poster-img" src="${s.posterUrl}" alt="${s.title || ''}" onerror="this.onerror=null;this.src='/assets/placeholder.png'"></div>` : ''}
+          <div class="ss-trailer-container${bottomCls}" id="ss-trailer-container">
+            <div class="ss-trailer-inner" id="ss-trailer-inner"></div>
+            <button class="ss-trailer-close" onclick="closeTrailer()">CLOSE</button>
+          </div>
+          ${bottomBannerHtml}
+          ${progressHtml}
+          ${dotsNavHtml}
         </div>
-        <div class="ss-progress-bar"><div class="ss-progress-fill" style="animation-duration:${interval}s"></div></div>
-        <div class="ss-dot-nav">
-          ${dotsHtml}
+      `;
+    } else {
+      el.innerHTML = `
+        <div class="ss-wrap ss-fade-in">
+          <div class="ss-bg-img" style="background-image:url('${bgImage}'); animation: ${kenBurnsAnim} 20s ease-in-out infinite alternate;"></div>
+          <div class="ss-vignette"></div>
+          <div class="ss-bottom-grad"></div>
+          ${topBannerHtml}
+          <div class="ss-layout">
+            <div class="ss-text-col">
+              <div class="ss-source-label">${sourceLabel}</div>
+              <div class="ss-title">${s.title || ''}</div>
+              ${subtitleHtml}
+              <div class="ss-meta-row">
+                ${s.year ? `<div class="ss-year">${s.year}</div>` : ''}
+                ${genres}
+              </div>
+              ${s.tagline ? `<div class="ss-tagline">${s.tagline}</div>` : ''}
+              ${(showContentRating && s.contentRating) || (showRating && s.rating) || (showRuntime && s.runtime) ? `
+              <div class="ss-badges">
+                ${showContentRating && s.contentRating ? `<div class="b-rating">${s.contentRating}${s.contentRatingDesc ? `<small>${s.contentRatingDesc}</small>` : ''}</div>` : ''}
+                ${showRating && s.rating ? `<div class="b-stars">${buildStars(s.rating)}</div>` : ''}
+                ${showRuntime && s.runtime ? `<div class="ss-runtime">${s.runtime}</div>` : ''}
+              </div>` : ''}
+              ${showOverview && s.overview ? `<div class="ss-overview">${s.overview}</div>` : ''}
+              ${showCredits && (s.director || (s.cast && s.cast.length)) ? `<div class="ss-credits">${s.director ? 'Directed by ' + s.director : ''}${s.director && s.cast && s.cast.length ? ' · ' : ''}${s.cast && s.cast.length ? s.cast.join(', ') : ''}</div>` : ''}
+              ${s.trailerKey && (s.source === 'coming_soon' || s.source === 'trending') ? `<div class="trailer-pill">▶</div>` : ''}
+            </div>
+            ${s.posterUrl ? `<div class="ss-poster-col"><img class="ss-poster-img" src="${s.posterUrl}" alt="${s.title || ''}" onerror="this.onerror=null;this.src='/assets/placeholder.png'"></div>` : ''}
+          </div>
+          <div class="ss-trailer-container${bottomCls}" id="ss-trailer-container">
+            <div class="ss-trailer-inner" id="ss-trailer-inner"></div>
+            <button class="ss-trailer-close" onclick="closeTrailer()">CLOSE</button>
+          </div>
+          ${bottomBannerHtml}
+          ${progressHtml}
+          ${dotsNavHtml}
         </div>
-      </div>
-    `;
+      `;
+    }
 
     // Wire trailer pill click + auto-play for Coming Soon slides
     if (s.trailerKey && (s.source === 'coming_soon' || s.source === 'trending')) {
@@ -2342,6 +2788,17 @@ function renderScreensaver(s) {
 
 // Set page title
 document.title = `Marquee — ${room.replace(/-/g, ' ')}`;
+
+// Auto-hide cursor after 2s of inactivity
+(function() {
+  let cursorTimer;
+  document.body.classList.add('cursor-hidden');
+  document.addEventListener('mousemove', () => {
+    document.body.classList.remove('cursor-hidden');
+    clearTimeout(cursorTimer);
+    cursorTimer = setTimeout(() => document.body.classList.add('cursor-hidden'), 2000);
+  });
+})();
 
 // Connect
 connectWS();

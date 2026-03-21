@@ -281,6 +281,10 @@ h2:first-of-type { margin-top: 16px; }
 const THEME_COLORS = {
   default: '#c9a84c', christmas: '#d4373e', halloween: '#ff8c00',
   ocean: '#00b4d8', royal: '#9b5de5', emerald: '#2ec4b6', rose: '#e8628c',
+  artdeco: '#c9a84c', retroneon: '#ff2d7b',
+};
+const THEME_DISPLAY_NAMES = {
+  artdeco: 'Art Deco', retroneon: 'Retro Neon',
 };
 const THEME_NAMES = Object.keys(THEME_COLORS);
 const GLOBAL_FIELDS = ['tmdbApiKey','plexIp','plexPort','plexToken','haUrl','haToken'];
@@ -313,7 +317,7 @@ function populateRooms() {
     const r = config.rooms[slug];
     const themeColor = THEME_COLORS[r.theme] || THEME_COLORS.default;
     const themeOptions = THEME_NAMES.map(t =>
-      `<option value="${t}"${t === r.theme ? ' selected' : ''}>${t.charAt(0).toUpperCase() + t.slice(1)}</option>`
+      `<option value="${t}"${t === r.theme ? ' selected' : ''}>${THEME_DISPLAY_NAMES[t] || t.charAt(0).toUpperCase() + t.slice(1)}</option>`
     ).join('');
 
     return `
@@ -369,6 +373,30 @@ function populateRooms() {
           <div class="field">
             <label>Screensaver Interval (seconds)</label>
             <input type="number" id="r-${slug}-screensaverInterval" value="${r.screensaverInterval || 15}" min="5" max="120">
+          </div>
+          <div class="field">
+            <label>Screensaver View</label>
+            <select id="r-${slug}-screensaverView">
+              <option value="default"${(r.screensaverView || 'default') === 'default' ? ' selected' : ''}>Default (Backdrop + Metadata)</option>
+              <option value="poster"${r.screensaverView === 'poster' ? ' selected' : ''}>Poster Only</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Screensaver Banners</label>
+            <div class="checkbox-group">
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-showTopBanner" ${r.showTopBanner !== false ? 'checked' : ''}>
+                Show top banner in screensaver
+              </label>
+              <label class="check-label">
+                <input type="checkbox" id="r-${slug}-showBottomBanner" ${r.showBottomBanner ? 'checked' : ''}>
+                Show bottom banner in screensaver
+              </label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Bottom Banner Text</label>
+            <input type="text" id="r-${slug}-bottomBannerText" value="${r.bottomBannerText || ''}" placeholder="e.g. Welcome to the Theater">
           </div>
           <div class="field">
             <label>Screensaver Sources</label>
@@ -466,7 +494,7 @@ async function saveGlobal() {
 }
 
 async function saveRoom(slug) {
-  const fields = ['name','theme','bannerText','plexPlayerName','haEntity','trailerMode'];
+  const fields = ['name','theme','bannerText','plexPlayerName','haEntity','trailerMode','screensaverView','bottomBannerText'];
   const data = {};
   for (const f of fields) {
     const el = document.getElementById(`r-${slug}-${f}`);
@@ -478,6 +506,11 @@ async function saveRoom(slug) {
   // Screensaver interval
   const intervalEl = document.getElementById(`r-${slug}-screensaverInterval`);
   if (intervalEl) data.screensaverInterval = parseInt(intervalEl.value) || 15;
+  // Banner toggles
+  const topBannerEl = document.getElementById(`r-${slug}-showTopBanner`);
+  if (topBannerEl) data.showTopBanner = topBannerEl.checked;
+  const bottomBannerEl = document.getElementById(`r-${slug}-showBottomBanner`);
+  if (bottomBannerEl) data.showBottomBanner = bottomBannerEl.checked;
   // Screensaver sources
   const sourceKeys = ['recently_added', 'recently_added_tv', 'coming_soon', 'trending'];
   data.screensaverSources = sourceKeys.filter(key => {

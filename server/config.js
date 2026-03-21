@@ -43,6 +43,10 @@ const DEFAULT_ROOM = {
   screensaverInterval: 15,
   screensaverSources: ['recently_added', 'coming_soon'],
   screensaverElements: ['runtime', 'rating', 'contentRating', 'overview', 'credits'],
+  screensaverView: 'default',
+  showTopBanner: true,
+  showBottomBanner: false,
+  bottomBannerText: '',
 };
 
 let config = null;

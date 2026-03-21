@@ -140,6 +140,7 @@ async function getRecentlyAddedMovies(plexUrl, plexToken) {
       try { tmdb = await enrichMovie(title, year); } catch {}
 
       const posterUrl = tmdb?.posterUrl || (item.thumb ? `/api/plex-image?path=${encodeURIComponent(item.thumb)}` : null);
+      const posterUrlHd = tmdb?.posterUrlHd || null;
       const backdropUrl = tmdb?.backdropUrl || (item.art ? `/api/plex-image?path=${encodeURIComponent(item.art)}` : null);
 
       results.push({
@@ -154,6 +155,7 @@ async function getRecentlyAddedMovies(plexUrl, plexToken) {
         contentRating: tmdb?.contentRating || item.contentRating || null,
         contentRatingDesc: tmdb?.contentRatingDesc || null,
         posterUrl,
+        posterUrlHd,
         backdropUrl,
         rating: tmdb?.rating || (item.audienceRating ? parseFloat((item.audienceRating / 2).toFixed(1)) : null),
         runtime: tmdb?.runtime || null,
@@ -193,6 +195,7 @@ async function getRecentlyAddedTV(plexUrl, plexToken) {
       try { tmdb = await enrichMovie(showTitle, null); } catch {}
 
       const posterUrl = tmdb?.posterUrl || (item.grandparentThumb ? `/api/plex-image?path=${encodeURIComponent(item.grandparentThumb)}` : null);
+      const posterUrlHd = tmdb?.posterUrlHd || null;
       const backdropUrl = tmdb?.backdropUrl || (item.grandparentArt || item.art ? `/api/plex-image?path=${encodeURIComponent(item.grandparentArt || item.art)}` : null);
 
       results.push({
@@ -207,6 +210,7 @@ async function getRecentlyAddedTV(plexUrl, plexToken) {
         contentRating: item.contentRating || null,
         contentRatingDesc: tmdb?.contentRatingDesc || null,
         posterUrl,
+        posterUrlHd,
         backdropUrl,
         rating: tmdb?.rating || null,
         runtime: null,
