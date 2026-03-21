@@ -56,16 +56,58 @@ router.get('/tmdb/test', async (req, res) => {
   }
 });
 
-// GET /api/plex/test — validate Plex connection
+// GET /api/plex/test — validate Plex connection + show active sessions
 router.get('/plex/test', async (req, res) => {
   try {
-    const { testPlexConnection } = require('../services/plex');
+    const { testPlexConnection, fetchSessions } = require('../services/plex');
     const { getPlexBaseUrl, getConfig } = require('../config');
     const cfg = getConfig().global;
-    const result = await testPlexConnection(getPlexBaseUrl(), cfg.plexToken);
+    const plexBaseUrl = getPlexBaseUrl();
+    const result = await testPlexConnection(plexBaseUrl, cfg.plexToken);
+
+    // On success, also fetch active sessions
+    if (result.ok && plexBaseUrl) {
+      const sessions = await fetchSessions(plexBaseUrl, cfg.plexToken);
+      result.sessions = sessions.map(s => ({
+        playerName: s.Player?.title || 'Unknown',
+        device: s.Player?.device || '',
+        platform: s.Player?.platform || '',
+        state: s.Player?.state || s.state || '',
+        title: s.grandparentTitle
+          ? `${s.grandparentTitle} — ${s.title}`
+          : s.title || 'Unknown',
+      }));
+      result.sessionCount = sessions.length;
+    }
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message || 'Server error' });
+  }
+});
+
+// GET /api/plex/players — list active Plex sessions for player discovery
+router.get('/plex/players', async (req, res) => {
+  try {
+    const { fetchSessions } = require('../services/plex');
+    const { getPlexBaseUrl, getConfig } = require('../config');
+    const cfg = getConfig().global;
+    const plexBaseUrl = getPlexBaseUrl();
+    if (!plexBaseUrl) return res.status(400).json({ error: 'Plex not configured' });
+
+    const sessions = await fetchSessions(plexBaseUrl, cfg.plexToken);
+    const players = sessions.map(s => ({
+      playerName: s.Player?.title || 'Unknown',
+      device: s.Player?.device || '',
+      platform: s.Player?.platform || '',
+      state: s.Player?.state || s.state || '',
+      title: s.grandparentTitle
+        ? `${s.grandparentTitle} — ${s.title}`
+        : s.title || 'Unknown',
+    }));
+    res.json(players);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Server error' });
   }
 });
 
