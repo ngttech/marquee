@@ -10,7 +10,8 @@ const SENSITIVE_FIELDS = ['tmdbApiKey', 'plexToken', 'haToken'];
 const DEFAULT_CONFIG = {
   global: {
     tmdbApiKey: '',
-    plexUrl: '',
+    plexIp: '',
+    plexPort: 32400,
     plexToken: '',
     haUrl: '',
     haToken: '',
@@ -57,6 +58,20 @@ function loadConfig() {
       // Fill missing global fields
       for (const [k, v] of Object.entries(DEFAULT_CONFIG.global)) {
         if (config.global[k] === undefined) config.global[k] = v;
+      }
+      // Migrate plexUrl → plexIp + plexPort
+      if (config.global.plexUrl) {
+        try {
+          const u = new URL(config.global.plexUrl);
+          config.global.plexIp = u.hostname;
+          config.global.plexPort = parseInt(u.port) || 32400;
+        } catch {
+          // Best-effort: treat entire value as IP
+          config.global.plexIp = config.global.plexUrl.replace(/^https?:\/\//, '').replace(/:\d+.*$/, '');
+          config.global.plexPort = 32400;
+        }
+        delete config.global.plexUrl;
+        saveConfig();
       }
       return;
     }
@@ -168,6 +183,12 @@ function getConfiguredRoomSlugs() {
   return Object.keys(getConfig().rooms);
 }
 
+function getPlexBaseUrl() {
+  const c = getConfig();
+  if (!c.global.plexIp) return '';
+  return `http://${c.global.plexIp}:${c.global.plexPort || 32400}`;
+}
+
 function getPlayerRoomMap() {
   const c = getConfig();
   const map = {};
@@ -190,5 +211,6 @@ module.exports = {
   deleteRoomConfig,
   getConfiguredRoomSlugs,
   getPlayerRoomMap,
+  getPlexBaseUrl,
   MASK,
 };

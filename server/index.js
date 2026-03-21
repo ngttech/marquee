@@ -8,6 +8,7 @@ const { getConfiguredRoomSlugs, getRoomConfig } = require('./config');
 const screensaver = require('./services/screensaver');
 const espn = require('./services/espn');
 const ha = require('./services/ha');
+const plexPoller = require('./services/plexPoller');
 const apiRoutes = require('./routes/api');
 const webhookRoutes = require('./routes/webhook');
 
@@ -181,6 +182,20 @@ server.listen(PORT, () => {
     const roomCfg = getRoomConfig(slug);
     if (roomCfg?.haEntity) {
       ha.startPolling(slug);
+    }
+  }
+
+  // Initialize Plex polling service
+  plexPoller.init((slug) => {
+    const payload = getRoomPayload(slug);
+    if (payload) broadcastToRoom(slug, payload);
+  });
+
+  // Start Plex polling for rooms with plexPlayerName configured
+  for (const slug of slugs) {
+    const roomCfg = getRoomConfig(slug);
+    if (roomCfg?.plexPlayerName) {
+      plexPoller.startPolling(slug);
     }
   }
 });

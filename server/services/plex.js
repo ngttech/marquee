@@ -67,11 +67,64 @@ function parseWebhookPayload(payload) {
   };
 }
 
+async function fetchSessions(plexBaseUrl, plexToken) {
+  if (!plexBaseUrl) return [];
+  try {
+    const headers = { 'Accept': 'application/json' };
+    if (plexToken) headers['X-Plex-Token'] = plexToken;
+    const url = `${plexBaseUrl}/status/sessions`;
+    const res = await fetch(url, { headers });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.MediaContainer?.Metadata || [];
+  } catch (err) {
+    console.warn('[plex] fetchSessions failed:', err.message);
+    return [];
+  }
+}
+
+function parseSessionPayload(session) {
+  const media = session.Media?.[0] || {};
+  const part = media.Part?.[0] || {};
+  const audioStream = part.Stream?.find(s => s.streamType === 2) || {};
+
+  const rawAudio = audioStream.displayTitle || audioStream.codec || null;
+  const audio = resolveAudio(rawAudio);
+  const resolution = normalizeResolution(media.videoResolution);
+
+  return {
+    event: session.state === 'paused' ? 'media.pause' : 'media.play',
+    type: session.type,
+    title: session.title,
+    year: session.year,
+    contentRating: session.contentRating || null,
+    resolution,
+    resClass: resolution === '4K' ? 'uhd' : '',
+    aspectRatio: media.aspectRatio ? parseFloat(media.aspectRatio).toFixed(2) + ' : 1' : null,
+    audioCodec: audio.codec,
+    audioLabel: audio.label,
+    audioClass: audio.cssClass,
+    playerName: session.Player?.title || null,
+    userName: session.User?.title || null,
+    showTitle: session.grandparentTitle || null,
+    seasonNum: session.parentIndex || null,
+    episodeNum: session.index || null,
+    episodeTitle: session.type === 'episode' ? session.title : null,
+    summary: session.summary || null,
+    duration: session.duration || null,
+    viewOffset: session.viewOffset || 0,
+    sessionKey: session.sessionKey || session.ratingKey || null,
+    ratingKey: session.ratingKey || null,
+    state: session.state || 'playing',
+  };
+}
+
 async function getRecentlyAddedMovies(plexUrl, plexToken) {
-  if (!plexUrl || !plexToken) return [];
+  if (!plexUrl) return [];
   try {
     const { enrichMovie, IMG_BASE } = require('./tmdb');
-    const url = `${plexUrl}/library/recentlyAdded?X-Plex-Token=${plexToken}&type=1&unwatched=1`;
+    const tokenParam = plexToken ? `&X-Plex-Token=${plexToken}` : '';
+    const url = `${plexUrl}/library/recentlyAdded?type=1&unwatched=1${tokenParam}`;
     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) return [];
     const data = await res.json();
@@ -117,10 +170,11 @@ async function getRecentlyAddedMovies(plexUrl, plexToken) {
 }
 
 async function getRecentlyAddedTV(plexUrl, plexToken) {
-  if (!plexUrl || !plexToken) return [];
+  if (!plexUrl) return [];
   try {
     const { enrichMovie } = require('./tmdb');
-    const url = `${plexUrl}/library/recentlyAdded?X-Plex-Token=${plexToken}&type=4&unwatched=1`;
+    const tokenParam = plexToken ? `&X-Plex-Token=${plexToken}` : '';
+    const url = `${plexUrl}/library/recentlyAdded?type=4&unwatched=1${tokenParam}`;
     const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) return [];
     const data = await res.json();
@@ -169,10 +223,13 @@ async function getRecentlyAddedTV(plexUrl, plexToken) {
 }
 
 async function testPlexConnection(plexUrl, plexToken) {
-  if (!plexUrl || !plexToken) return { ok: false, error: 'Missing Plex URL or token' };
+  if (!plexUrl) return { ok: false, error: 'Missing Plex IP address' };
   try {
-    const url = `${plexUrl}/identity?X-Plex-Token=${plexToken}`;
-    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    const headers = { 'Accept': 'application/json' };
+    if (plexToken) headers['X-Plex-Token'] = plexToken;
+    const tokenParam = plexToken ? `?X-Plex-Token=${plexToken}` : '';
+    const url = `${plexUrl}/identity${tokenParam}`;
+    const res = await fetch(url, { headers });
     if (!res.ok) return { ok: false, error: `Plex returned HTTP ${res.status}` };
     const data = await res.json();
     const serverName = data.MediaContainer?.friendlyName || 'Unknown';
@@ -182,4 +239,4 @@ async function testPlexConnection(plexUrl, plexToken) {
   }
 }
 
-module.exports = { parseWebhookPayload, getRecentlyAddedMovies, getRecentlyAddedTV, testPlexConnection };
+module.exports = { parseWebhookPayload, parseSessionPayload, fetchSessions, resolveAudio, normalizeResolution, getRecentlyAddedMovies, getRecentlyAddedTV, testPlexConnection };

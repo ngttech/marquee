@@ -2,9 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const { parseWebhookPayload } = require('../services/plex');
-const { enrichMovie, enrichTVShow } = require('../services/tmdb');
 const { getState, setState, getRooms, broadcastToRoom } = require('../state');
 const { getPlayerRoomMap: getConfigPlayerMap } = require('../config');
+const { handlePlexPlay, handlePlexStop, handlePlexPause } = require('../services/plexHandler');
 const screensaver = require('../services/screensaver');
 const espn = require('../services/espn');
 const ha = require('../services/ha');
@@ -52,101 +52,11 @@ router.post('/plex', upload.none(), async (req, res) => {
     const room = resolveRoom(parsed.playerName);
 
     if (parsed.event === 'media.play' || parsed.event === 'media.resume') {
-      // Stop screensaver rotation and ESPN polling
-      screensaver.stopRotation(room);
-      espn.stopPolling(room);
-
-      let state;
-
-      if (parsed.type === 'episode') {
-        // TV episode flow
-        const tmdb = await enrichTVShow(parsed.showTitle, parsed.seasonNum, parsed.episodeNum);
-        const progress = parsed.duration ? Math.round((parsed.viewOffset / parsed.duration) * 100) : 0;
-
-        state = {
-          mode: 'nowplaying-tv',
-          title: parsed.showTitle,
-          showTitle: tmdb?.showTitle || parsed.showTitle,
-          episodeTitle: parsed.episodeTitle || parsed.title,
-          seasonNum: parsed.seasonNum,
-          episodeNum: parsed.episodeNum,
-          overview: tmdb?.episodeOverview || parsed.summary || null,
-          runtime: tmdb?.episodeRuntime || null,
-          network: tmdb?.network || null,
-          contentRating: tmdb?.contentRating || parsed.contentRating,
-          contentRatingDesc: tmdb?.contentRatingDesc || null,
-          audioCodec: parsed.audioCodec,
-          audioLabel: parsed.audioLabel,
-          audioClass: parsed.audioClass,
-          resolution: parsed.resolution,
-          resClass: parsed.resClass,
-          aspectRatio: parsed.aspectRatio,
-          rating: tmdb?.rating || null,
-          posterUrl: tmdb?.posterUrl || null,
-          backdropUrl: tmdb?.backdropUrl || null,
-          trailerKey: tmdb?.trailerKey || null,
-          genres: tmdb?.genres || [],
-          duration: parsed.duration,
-          viewOffset: parsed.viewOffset,
-          progress,
-        };
-      } else {
-        // Movie flow (existing)
-        const tmdb = await enrichMovie(parsed.title, parsed.year);
-
-        state = {
-          mode: 'nowplaying',
-          title: tmdb?.title || parsed.title,
-          year: tmdb?.year || parsed.year,
-          tagline: tmdb?.tagline || null,
-          contentRating: tmdb?.contentRating || parsed.contentRating,
-          contentRatingDesc: tmdb?.contentRatingDesc || null,
-          audioCodec: parsed.audioCodec,
-          audioLabel: parsed.audioLabel,
-          audioClass: parsed.audioClass,
-          resolution: parsed.resolution,
-          resClass: parsed.resClass,
-          aspectRatio: parsed.aspectRatio,
-          rating: tmdb?.rating || null,
-          posterUrl: tmdb?.posterUrl || null,
-          backdropUrl: tmdb?.backdropUrl || null,
-          trailerKey: tmdb?.trailerKey || null,
-          genres: tmdb?.genres || [],
-        };
-      }
-
-      setState(room, state);
-
-      // Broadcast augmented payload
-      try {
-        const { getRoomPayload } = require('../index');
-        const payload = getRoomPayload(room);
-        broadcastToRoom(room, payload || state);
-      } catch {
-        broadcastToRoom(room, state);
-      }
-
-    } else if (parsed.event === 'media.stop' || parsed.event === 'media.pause') {
-      const current = getState(room) || {};
-      const state = {
-        ...current,
-        mode: 'screensaver',
-      };
-      setState(room, state);
-
-      try {
-        const { getRoomPayload } = require('../index');
-        const payload = getRoomPayload(room);
-        broadcastToRoom(room, payload || state);
-      } catch {
-        broadcastToRoom(room, state);
-      }
-
-      // Start screensaver rotation
-      screensaver.startRotation(room).catch(err =>
-        console.error(`[webhook] Failed to start screensaver for ${room}:`, err.message)
-      );
-
+      await handlePlexPlay(room, parsed);
+    } else if (parsed.event === 'media.pause') {
+      handlePlexPause(room, parsed);
+    } else if (parsed.event === 'media.stop') {
+      await handlePlexStop(room);
     }
   } catch (err) {
     console.error('[webhook] Error processing payload:', err);

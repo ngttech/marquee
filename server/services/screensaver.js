@@ -1,6 +1,6 @@
 const { getRecentlyAddedMovies, getRecentlyAddedTV } = require('./plex');
 const { getUpcomingMovies, getTrendingMovies } = require('./tmdb');
-const { getRoomConfig, getConfig } = require('../config');
+const { getRoomConfig, getConfig, getPlexBaseUrl } = require('../config');
 const { getState, setState } = require('../state');
 
 // In-memory state per room
@@ -38,11 +38,12 @@ async function buildPool(slug) {
   console.log(`[screensaver] Building pool for "${slug}" with sources: ${sources.join(', ')}`);
 
   const fetchers = [];
+  const plexBaseUrl = getPlexBaseUrl();
   if (sources.includes('recently_added')) {
-    fetchers.push(getRecentlyAddedMovies(globalCfg.plexUrl, globalCfg.plexToken));
+    fetchers.push(getRecentlyAddedMovies(plexBaseUrl, globalCfg.plexToken));
   }
   if (sources.includes('recently_added_tv')) {
-    fetchers.push(getRecentlyAddedTV(globalCfg.plexUrl, globalCfg.plexToken));
+    fetchers.push(getRecentlyAddedTV(plexBaseUrl, globalCfg.plexToken));
   }
   if (sources.includes('coming_soon')) {
     fetchers.push(getUpcomingMovies());

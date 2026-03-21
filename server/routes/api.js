@@ -6,6 +6,7 @@ const { getMaskedConfig, updateConfig, getRoomConfig, setRoomConfig, deleteRoomC
 const screensaver = require('../services/screensaver');
 const espn = require('../services/espn');
 const ha = require('../services/ha');
+const plexPoller = require('../services/plexPoller');
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$/;
 
@@ -20,6 +21,17 @@ router.get('/config', (req, res) => {
 router.post('/config', (req, res) => {
   try {
     const updated = updateConfig(req.body);
+
+    // Restart Plex polling if IP/port changed
+    if (req.body.global && (req.body.global.plexIp !== undefined || req.body.global.plexPort !== undefined)) {
+      for (const slug of getConfiguredRoomSlugs()) {
+        const roomCfg = getRoomConfig(slug);
+        if (roomCfg?.plexPlayerName) {
+          plexPoller.startPolling(slug);
+        }
+      }
+    }
+
     // Re-read masked for response
     res.json({ ok: true, config: getMaskedConfig() });
   } catch (err) {
@@ -48,9 +60,9 @@ router.get('/tmdb/test', async (req, res) => {
 router.get('/plex/test', async (req, res) => {
   try {
     const { testPlexConnection } = require('../services/plex');
-    const { getConfig } = require('../config');
+    const { getPlexBaseUrl, getConfig } = require('../config');
     const cfg = getConfig().global;
-    const result = await testPlexConnection(cfg.plexUrl, cfg.plexToken);
+    const result = await testPlexConnection(getPlexBaseUrl(), cfg.plexToken);
     res.json(result);
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message || 'Server error' });
@@ -74,11 +86,13 @@ router.get('/plex-image', async (req, res) => {
   try {
     const imgPath = req.query.path;
     if (!imgPath) return res.status(400).json({ error: 'Missing path parameter' });
-    const { getConfig } = require('../config');
+    const { getConfig, getPlexBaseUrl } = require('../config');
     const cfg = getConfig().global;
-    if (!cfg.plexUrl || !cfg.plexToken) return res.status(500).json({ error: 'Plex not configured' });
+    const plexBaseUrl = getPlexBaseUrl();
+    if (!plexBaseUrl) return res.status(500).json({ error: 'Plex not configured' });
 
-    const url = `${cfg.plexUrl}${imgPath}?X-Plex-Token=${cfg.plexToken}`;
+    const tokenParam = cfg.plexToken ? `?X-Plex-Token=${cfg.plexToken}` : '';
+    const url = `${plexBaseUrl}${imgPath}${tokenParam}`;
     const response = await fetch(url);
     if (!response.ok) return res.status(response.status).end();
 
@@ -191,6 +205,13 @@ router.put('/rooms/:slug', (req, res) => {
     ha.stopPolling(slug);
   }
 
+  // Start/stop Plex polling when plexPlayerName changes
+  if (updated.plexPlayerName) {
+    plexPoller.startPolling(slug);
+  } else {
+    plexPoller.stopPolling(slug);
+  }
+
   res.json({ ok: true, slug, room: updated });
 });
 
@@ -250,7 +271,9 @@ router.post('/display/:room', (req, res) => {
 router.get('/sports/live', async (req, res) => {
   try {
     const games = await espn.fetchAllLiveGames();
-    res.json(games);
+    // Filter out finished games — only show upcoming and in-progress
+    const active = games.filter(g => g.status !== 'post');
+    res.json(active);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
