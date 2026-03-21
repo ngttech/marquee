@@ -168,7 +168,7 @@ body.cursor-hidden { cursor: none; }
   animation: revealUp 0.8s 0.1s both;
 }
 .ss-meta-row {
-  display: flex; align-items: center; gap: 20px;
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   animation: revealUp 0.8s 0.25s both;
 }
 .ss-year { font-family: 'Bebas Neue', sans-serif; font-size: clamp(16px,1.8vw,22px); letter-spacing: 4px; color: rgba(255,255,255,0.45); }
@@ -2649,7 +2649,7 @@ function renderApp(s) {
 function renderScreensaver(s) {
   const el = document.getElementById('display');
   const bgImage = s.backdropUrl || s.posterUrl || '';
-  const genres = (s.genres || []).map(g => `<div class="ss-genre-pill">${g}</div>`).join('');
+  const genres = (s.genres || []).slice(0, 3).map(g => `<div class="ss-genre-pill">${g}</div>`).join('');
 
   // Configurable element visibility
   const elems = s.screensaverElements || [];
