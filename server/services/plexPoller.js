@@ -17,13 +17,18 @@ function init(callback) {
 function startPolling(slug) {
   stopPolling(slug);
 
-  const roomCfg = getRoomConfig(slug);
-  if (!roomCfg?.plexPlayerName) return;
+  // Initial check — don't start polling if no player name configured
+  const initialCfg = getRoomConfig(slug);
+  if (!initialCfg?.plexPlayerName) return;
 
   const pollInterval = 3000; // 3 seconds
 
   async function poll() {
     try {
+      // Re-read config each poll so changes take effect immediately
+      const roomCfg = getRoomConfig(slug);
+      if (!roomCfg?.plexPlayerName) return;
+
       const plexBaseUrl = getPlexBaseUrl();
       if (!plexBaseUrl) return;
 

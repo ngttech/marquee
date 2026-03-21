@@ -217,6 +217,10 @@ h2:first-of-type { margin-top: 16px; }
         <button class="btn btn-sm" id="plex-test-btn" onclick="testPlexConnection()">Test</button>
         <span id="plex-test-result" style="font-size:13px; letter-spacing:1px;"></span>
       </div>
+      <div id="plex-sessions-list" style="margin-top:8px;"></div>
+      <div style="margin-top:6px;font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;line-height:1.5;">
+        Play something on your Plex player, then click Test to see active device names you can use in room settings.
+      </div>
     </div>
     <div class="field">
       <label>Home Assistant URL</label>
@@ -338,7 +342,14 @@ function populateRooms() {
           </div>
           <div class="field">
             <label>Plex Player Name</label>
-            <input type="text" id="r-${slug}-plexPlayerName" value="${r.plexPlayerName || ''}" placeholder="e.g. SHIELD Android TV">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" id="r-${slug}-plexPlayerName" value="${r.plexPlayerName || ''}" placeholder="e.g. SHIELD Android TV" style="flex:1;">
+              <button class="btn btn-sm" onclick="detectPlayers('${slug}')">Detect</button>
+            </div>
+            <div id="detect-${slug}" style="margin-top:6px;"></div>
+            <div style="margin-top:4px;font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:0.5px;line-height:1.5;">
+              Play something on Plex, then click Detect to find your player name.
+            </div>
           </div>
           <div class="field">
             <label>Home Assistant Entity</label>
@@ -580,8 +591,10 @@ async function testTmdbKey() {
 async function testPlexConnection() {
   const btn = document.getElementById('plex-test-btn');
   const result = document.getElementById('plex-test-result');
+  const sessionsList = document.getElementById('plex-sessions-list');
   btn.disabled = true; btn.textContent = 'Testing...';
   result.className = ''; result.textContent = '';
+  sessionsList.innerHTML = '';
   try {
     const res = await fetch('/api/plex/test');
     if (!res.ok) {
@@ -591,13 +604,65 @@ async function testPlexConnection() {
       return;
     }
     const data = await res.json();
-    result.className = data.ok ? 'ok' : 'fail';
-    result.textContent = data.ok ? '\u2713 Connected to ' + data.serverName : '\u2717 ' + data.error;
+    if (!data.ok) {
+      result.className = 'fail';
+      result.textContent = '\u2717 ' + data.error;
+    } else {
+      const count = data.sessionCount || 0;
+      result.className = 'ok';
+      result.textContent = '\u2713 Connected to ' + data.serverName + ' \u2014 ' + count + ' active session' + (count !== 1 ? 's' : '');
+
+      if (data.sessions && data.sessions.length > 0) {
+        sessionsList.innerHTML = data.sessions.map(s =>
+          `<div style="font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:0.5px;padding:4px 0;">` +
+          `\u25B8 <span style="color:#c9a84c;font-weight:600;">"${s.playerName}"</span>` +
+          ` playing "${s.title}"` +
+          (s.platform ? ` <span style="color:rgba(255,255,255,0.3);">(${s.platform})</span>` : '') +
+          `</div>`
+        ).join('');
+      } else {
+        sessionsList.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;padding:4px 0;">No active sessions. Play something on Plex, then test again to see player names.</div>';
+      }
+    }
   } catch (err) {
     result.className = 'fail';
     result.textContent = '\u2717 ' + (err.message || 'Network error');
   }
   btn.disabled = false; btn.textContent = 'Test';
+}
+
+async function detectPlayers(slug) {
+  const container = document.getElementById('detect-' + slug);
+  container.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:1px;">Scanning...</div>';
+  try {
+    const res = await fetch('/api/plex/players');
+    if (!res.ok) {
+      container.innerHTML = '<div style="font-size:12px;color:#e05050;">Could not reach Plex</div>';
+      return;
+    }
+    const players = await res.json();
+    if (!players.length) {
+      container.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.3);">No active sessions found. Play something on Plex first.</div>';
+      return;
+    }
+    container.innerHTML = players.map(p =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">` +
+      `<button class="btn btn-sm" style="padding:4px 10px;font-size:11px;" onclick="pickPlayer('${slug}','${p.playerName.replace(/'/g, "\\'")}')">Use</button>` +
+      `<span style="font-size:12px;color:rgba(255,255,255,0.6);">` +
+      `<span style="color:#c9a84c;font-weight:600;">${p.playerName}</span>` +
+      ` — ${p.title}` +
+      (p.platform ? ` <span style="color:rgba(255,255,255,0.3);">(${p.platform})</span>` : '') +
+      `</span></div>`
+    ).join('');
+  } catch (err) {
+    container.innerHTML = '<div style="font-size:12px;color:#e05050;">Network error</div>';
+  }
+}
+
+function pickPlayer(slug, playerName) {
+  document.getElementById('r-' + slug + '-plexPlayerName').value = playerName;
+  document.getElementById('detect-' + slug).innerHTML =
+    '<div style="font-size:12px;color:#2ec4b6;padding:4px 0;">\u2713 Set to "' + playerName + '" — click Save Room to apply</div>';
 }
 
 async function testHaConnection() {
