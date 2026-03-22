@@ -1711,6 +1711,10 @@ function openTrailer(youtubeKey) {
       events: {
         onStateChange: (e) => {
           if (e.data === YT.PlayerState.ENDED) closeTrailer();
+        },
+        onError: () => {
+          console.log('[trailer] YouTube error (age-restricted / unavailable) — closing');
+          closeTrailer();
         }
       }
     });
@@ -1730,6 +1734,10 @@ function openTrailer(youtubeKey) {
       events: {
         onStateChange: (e) => {
           if (e.data === YT.PlayerState.ENDED) closeTrailer();
+        },
+        onError: () => {
+          console.log('[trailer] YouTube error (age-restricted / unavailable) — closing');
+          closeTrailer();
         }
       }
     });
