@@ -172,6 +172,13 @@ h2:first-of-type { margin-top: 16px; }
   border-bottom: 1px solid rgba(201,168,76,0.2);
 }
 .wc-date-header:first-child { margin-top: 0; }
+/* Sport backdrop rows */
+.backdrop-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.backdrop-thumb { width: 120px; height: 68px; object-fit: cover; border: 1px solid rgba(255,255,255,0.12); background: #000; flex-shrink: 0; }
+.backdrop-info { flex: 1; }
+.backdrop-label { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 1px; margin-bottom: 8px; }
+.backdrop-actions { display: flex; gap: 8px; align-items: center; }
+.backdrop-upload-btn { cursor: pointer; margin: 0; }
 /* ═══ CHECKBOX GROUP ═══ */
 .checkbox-group {
   display: flex; flex-direction: column; gap: 8px; margin-top: 4px;
@@ -269,6 +276,11 @@ h2:first-of-type { margin-top: 16px; }
   <div id="sport-tabs" class="sport-tabs"></div>
   <div id="live-games-list"></div>
 
+  <!-- Sport Backdrops -->
+  <h2>Sport Backdrops</h2>
+  <div style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin:-8px 0 12px">Upload a background image shown behind each sport's scoreboard. Applies to all displays.</div>
+  <div id="sport-backdrops-list"></div>
+
   <div class="add-room-form" id="add-room-form">
     <div class="field">
       <label>Slug (URL-friendly ID)</label>
@@ -308,8 +320,80 @@ async function loadConfig() {
     populateGlobal();
     populateRooms();
     populateSportsRoomSelect();
+    populateSportBackdrops();
   } catch (err) {
     toast('Failed to load config', 'error');
+  }
+}
+
+const SPORT_BACKDROPS = [
+  { key: 'soccer', label: 'Soccer' },
+  { key: 'nfl', label: 'Football (NFL)' },
+  { key: 'nba', label: 'Basketball (NBA)' },
+  { key: 'mlb', label: 'Baseball (MLB)' },
+  { key: 'nhl', label: 'Hockey (NHL)' },
+  { key: 'ufc', label: 'UFC / MMA' },
+];
+
+function backdropSrc(key) {
+  const custom = config && config.global && config.global.sportBackdrops && config.global.sportBackdrops[key];
+  return custom || `/img/bg-${key}.png`;
+}
+
+function populateSportBackdrops() {
+  const container = document.getElementById('sport-backdrops-list');
+  if (!container) return;
+  container.innerHTML = SPORT_BACKDROPS.map(s => `
+    <div class="backdrop-row">
+      <img class="backdrop-thumb" id="backdrop-thumb-${s.key}" src="${backdropSrc(s.key)}" alt="${s.label}" onerror="this.style.visibility='hidden'">
+      <div class="backdrop-info">
+        <div class="backdrop-label">${s.label}</div>
+        <div class="backdrop-actions">
+          <label class="btn btn-sm backdrop-upload-btn">Upload<input type="file" accept="image/*" style="display:none" onchange="uploadBackdrop('${s.key}', this)"></label>
+          <button class="btn btn-sm btn-danger" onclick="resetBackdrop('${s.key}')">Reset</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function uploadBackdrop(sport, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const res = await fetch(`/api/sports/backdrop/${sport}`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (res.ok && data.url) {
+      if (!config.global.sportBackdrops) config.global.sportBackdrops = {};
+      config.global.sportBackdrops[sport] = data.url;
+      const img = document.getElementById('backdrop-thumb-' + sport);
+      if (img) { img.src = data.url; img.style.visibility = 'visible'; }
+      toast('Backdrop updated', 'success');
+    } else {
+      toast(data.error || 'Upload failed', 'error');
+    }
+  } catch (err) {
+    toast('Network error', 'error');
+  }
+  input.value = '';
+}
+
+async function resetBackdrop(sport) {
+  try {
+    const res = await fetch(`/api/sports/backdrop/${sport}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      if (config.global.sportBackdrops) delete config.global.sportBackdrops[sport];
+      const img = document.getElementById('backdrop-thumb-' + sport);
+      if (img) { img.src = `/img/bg-${sport}.png`; img.style.visibility = 'visible'; }
+      toast('Reset to default', 'success');
+    } else {
+      toast(data.error || 'Reset failed', 'error');
+    }
+  } catch (err) {
+    toast('Network error', 'error');
   }
 }
 

@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 360" fill="none">
+  <defs>
+    <linearGradient id="ad-gold-shell" x1="800" y1="24" x2="800" y2="278" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f5dc87"/>
+      <stop offset="0.18" stop-color="#cfa74c"/>
+      <stop offset="0.5" stop-color="#8d6722"/>
+      <stop offset="0.78" stop-color="#d6b260"/>
+      <stop offset="1" stop-color="#f0d98f"/>
+    </linearGradient>
+    <linearGradient id="ad-gold-line" x1="800" y1="70" x2="800" y2="282" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff2b7"/>
+      <stop offset="0.3" stop-color="#d2a84f"/>
+      <stop offset="0.7" stop-color="#8f6928"/>
+      <stop offset="1" stop-color="#f7e3a3"/>
+    </linearGradient>
+    <linearGradient id="ad-navy" x1="800" y1="66" x2="800" y2="224" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1f4275"/>
+      <stop offset="0.5" stop-color="#14294f"/>
+      <stop offset="1" stop-color="#0e1d39"/>
+    </linearGradient>
+    <radialGradient id="ad-warm-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(800 160) rotate(90) scale(132 640)">
+      <stop offset="0" stop-color="#ffdf87" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffdf87" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="ad-shell-shadow" x="70" y="18" width="1460" height="290" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="ad-crown-glow" x="538" y="0" width="524" height="150" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <symbol id="ad-bulb" viewBox="-10 -10 20 20">
+      <circle cx="0" cy="0" r="8.5" fill="#6f4b11"/>
+      <circle class="bulb warm-core" cx="0" cy="0" r="6.3" fill="#f3b33f"/>
+      <circle cx="-2.1" cy="-2.1" r="1.9" fill="#fff6d9" fill-opacity="0.88"/>
+    </symbol>
+  </defs>
+
+  <g filter="url(#ad-crown-glow)">
+    <path d="M610 124C653 82 717 51 800 45C883 51 947 82 990 124" stroke="#d9b25f" stroke-width="4"/>
+    <path d="M628 124C669 89 724 68 800 62C876 68 931 89 972 124" stroke="#8f6c29" stroke-width="13" stroke-linecap="round"/>
+    <path d="M628 124C669 89 724 68 800 62C876 68 931 89 972 124" stroke="#ead185" stroke-width="5" stroke-linecap="round"/>
+    <path d="M671 126C707 99 751 83 800 78C849 83 893 99 929 126" stroke="#2956ab" stroke-width="18" stroke-linecap="round"/>
+    <path d="M671 126C707 99 751 83 800 78C849 83 893 99 929 126" stroke="#0f2148" stroke-width="8" stroke-linecap="round"/>
+    <path d="M726 128L800 54L874 128" stroke="#d8b061" stroke-width="7" stroke-linecap="round"/>
+    <g stroke="#d8b061" stroke-linecap="round">
+      <path d="M800 61V128" stroke-width="6"/>
+      <path d="M771 71L788 126" stroke-width="4"/>
+      <path d="M829 71L812 126" stroke-width="4"/>
+      <path d="M744 85L778 126" stroke-width="3"/>
+      <path d="M856 85L822 126" stroke-width="3"/>
+      <path d="M718 99L770 128" stroke-width="3"/>
+      <path d="M882 99L830 128" stroke-width="3"/>
+    </g>
+  </g>
+
+  <g filter="url(#ad-shell-shadow)">
+    <path d="M113 177C226 130 460 92 800 92C1140 92 1374 130 1487 177L1469 248C1342 224 1125 209 800 209C475 209 258 224 131 248L113 177Z" fill="url(#ad-gold-shell)"/>
+    <path d="M113 177C226 130 460 92 800 92C1140 92 1374 130 1487 177" stroke="#ffe39a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M131 248C258 224 475 209 800 209C1125 209 1342 224 1469 248" stroke="#5d3b10" stroke-width="6" stroke-linecap="round"/>
+    <path d="M138 180C244 138 467 104 800 104C1133 104 1356 138 1462 180L1450 236C1323 214 1114 200 800 200C486 200 277 214 150 236L138 180Z" fill="url(#ad-gold-line)" fill-opacity="0.32"/>
+    <path d="M163 177C272 139 484 113 800 113C1116 113 1328 139 1437 177L1427 225C1311 205 1108 190 800 190C492 190 289 205 173 225L163 177Z" fill="url(#ad-navy)"/>
+    <path d="M163 177C272 139 484 113 800 113C1116 113 1328 139 1437 177L1427 225C1311 205 1108 190 800 190C492 190 289 205 173 225L163 177Z" stroke="#f0d485" stroke-width="3"/>
+    <path d="M509 147H1091L1169 169L1091 191H509L431 169L509 147Z" fill="#102449" stroke="#e3c472" stroke-width="3"/>
+    <path d="M531 151H1069L1136 169L1069 187H531L464 169L531 151Z" stroke="#d5af61" stroke-width="2" opacity="0.85"/>
+    <rect x="597" y="145" width="406" height="48" rx="2" fill="url(#ad-warm-glow)" opacity="0.65"/>
+
+    <g stroke="#d7b05d" stroke-width="3" opacity="0.95">
+      <path d="M198 121H330L368 153V203H184V153L198 121Z"/>
+      <path d="M1270 121H1402L1416 153V203H1232V153L1270 121Z"/>
+      <path d="M214 198L274 135L334 198"/>
+      <path d="M1266 198L1326 135L1386 198"/>
+      <path d="M184 154L368 154"/>
+      <path d="M1232 154L1416 154"/>
+    </g>
+    <g stroke="#7d5b22" stroke-width="9" stroke-linecap="round" opacity="0.9">
+      <path d="M268 126C233 146 211 171 203 202"/>
+      <path d="M276 126C311 146 333 171 341 202"/>
+      <path d="M1332 126C1297 146 1275 171 1267 202"/>
+      <path d="M1340 126C1375 146 1397 171 1405 202"/>
+    </g>
+    <g stroke="#d8b15f" stroke-width="3" opacity="0.8">
+      <path d="M241 134C223 144 211 164 206 187"/>
+      <path d="M302 134C320 144 332 164 337 187"/>
+      <path d="M1298 134C1280 144 1268 164 1263 187"/>
+      <path d="M1359 134C1377 144 1389 164 1394 187"/>
+    </g>
+  </g>
+
+  <g fill="#f0ca73" opacity="0.9">
+    <circle class="bulb warm phase-0" cx="158" cy="153" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="198" cy="148" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="238" cy="144" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="278" cy="140" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="318" cy="137" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="358" cy="133" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="398" cy="130" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="438" cy="127" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="478" cy="124" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="518" cy="122" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="558" cy="119" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="598" cy="117" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="638" cy="115" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="678" cy="114" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="718" cy="113" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="758" cy="112" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="800" cy="112" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="842" cy="112" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="882" cy="113" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="922" cy="114" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="962" cy="115" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="1002" cy="117" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="1042" cy="119" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="1082" cy="122" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="1122" cy="124" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="1162" cy="127" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="1202" cy="130" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="1242" cy="133" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="1282" cy="137" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="1322" cy="140" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="1362" cy="144" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="1402" cy="148" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="1442" cy="153" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="158" cy="247" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="198" cy="242" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="238" cy="238" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="278" cy="234" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="318" cy="231" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="358" cy="228" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="398" cy="225" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="438" cy="223" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="478" cy="221" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="518" cy="219" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="558" cy="217" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="598" cy="215" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="638" cy="214" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="678" cy="213" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="718" cy="212" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="758" cy="211" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="800" cy="211" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="842" cy="211" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="882" cy="212" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="922" cy="213" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="962" cy="214" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="1002" cy="215" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="1042" cy="217" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="1082" cy="219" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="1122" cy="221" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="1162" cy="223" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="1202" cy="225" r="6.3"/>
+    <circle class="bulb warm phase-0" cx="1242" cy="228" r="6.3"/>
+    <circle class="bulb warm phase-1" cx="1282" cy="231" r="6.3"/>
+    <circle class="bulb warm phase-2" cx="1322" cy="234" r="6.3"/>
+    <circle class="bulb warm phase-3" cx="1362" cy="238" r="6.3"/>
+    <circle class="bulb warm phase-4" cx="1402" cy="242" r="6.3"/>
+    <circle class="bulb warm phase-5" cx="1442" cy="247" r="6.3"/>
+  </g>
+
+  <path d="M174 255C308 233 507 219 800 219C1093 219 1292 233 1426 255" stroke="#f6df9c" stroke-width="3" stroke-linecap="round" opacity="0.75"/>
+</svg>

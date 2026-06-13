@@ -4,7 +4,7 @@ const express = require('express');
 const path = require('path');
 const { WebSocketServer } = require('ws');
 const { addClient, removeClient, getState, initRooms, broadcastToRoom } = require('./state');
-const { getConfiguredRoomSlugs, getRoomConfig } = require('./config');
+const { getConfiguredRoomSlugs, getRoomConfig, getConfig, DATA_DIR } = require('./config');
 const screensaver = require('./services/screensaver');
 const espn = require('./services/espn');
 const ha = require('./services/ha');
@@ -32,6 +32,9 @@ app.use('/webhook', webhookRoutes);
 
 // Serve static files from public/
 app.use(express.static(PUBLIC_DIR));
+
+// Serve user-uploaded assets (e.g. sport backdrops) from the persistent data dir
+app.use('/uploads', express.static(path.join(DATA_DIR, 'uploads')));
 
 // Settings route — serve settings.html
 app.get('/settings', (req, res) => {
@@ -71,6 +74,7 @@ function getRoomPayload(slug) {
       'sports-nhl': 'Live Game',
     };
     payload.bannerText = SPORT_BANNERS[state.mode] || 'Live';
+    payload.sportBackdrops = getConfig().global.sportBackdrops || {};
   }
 
   // Augment YouTube/app payloads with appropriate banner text

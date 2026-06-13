@@ -1549,6 +1549,17 @@ function render(state) {
     renderScreensaver(state);
   }
 
+  // Apply a custom per-sport backdrop if one was uploaded in settings; otherwise
+  // the .sports-atmosphere CSS class keeps the bundled /img/bg-<sport>.png default.
+  if (state.mode && state.mode.startsWith('sports-')) {
+    const sport = state.mode.replace('sports-', '');
+    const url = state.sportBackdrops && state.sportBackdrops[sport];
+    if (url) {
+      const atmosphere = document.querySelector('.sports-atmosphere');
+      if (atmosphere) atmosphere.style.backgroundImage = `url('${url}')`;
+    }
+  }
+
   // Re-apply effects after render (banner was re-created)
   const theme = THEMES[currentTheme] || THEMES.default;
   if (theme.effect === 'snow') {

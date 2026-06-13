@@ -15,6 +15,7 @@ const DEFAULT_CONFIG = {
     plexToken: '',
     haUrl: '',
     haToken: '',
+    sportBackdrops: {},
   },
   rooms: {
     theater: {
@@ -63,6 +64,8 @@ function loadConfig() {
       for (const [k, v] of Object.entries(DEFAULT_CONFIG.global)) {
         if (config.global[k] === undefined) config.global[k] = v;
       }
+      // Fresh per-config object so endpoint writes never alias DEFAULT_CONFIG
+      config.global.sportBackdrops = { ...(config.global.sportBackdrops || {}) };
       // Migrate plexUrl → plexIp + plexPort
       if (config.global.plexUrl) {
         try {
@@ -217,4 +220,5 @@ module.exports = {
   getPlayerRoomMap,
   getPlexBaseUrl,
   MASK,
+  DATA_DIR,
 };

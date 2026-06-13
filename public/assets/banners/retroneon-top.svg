@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 370" fill="none">
+  <defs>
+    <linearGradient id="rn-red-shell" x1="800" y1="36" x2="800" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff6464"/>
+      <stop offset="0.12" stop-color="#d62a2a"/>
+      <stop offset="0.48" stop-color="#7c0d11"/>
+      <stop offset="0.72" stop-color="#5f070d"/>
+      <stop offset="1" stop-color="#d73333"/>
+    </linearGradient>
+    <linearGradient id="rn-chrome" x1="800" y1="68" x2="800" y2="242" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4d4d53"/>
+      <stop offset="0.22" stop-color="#f7f7f8"/>
+      <stop offset="0.5" stop-color="#7d7d84"/>
+      <stop offset="0.78" stop-color="#fafafa"/>
+      <stop offset="1" stop-color="#4d4d53"/>
+    </linearGradient>
+    <linearGradient id="rn-panel" x1="800" y1="120" x2="800" y2="215" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#111327"/>
+      <stop offset="1" stop-color="#050612"/>
+    </linearGradient>
+    <filter id="rn-shadow" x="82" y="34" width="1436" height="278" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#rn-shadow)">
+    <path d="M116 175C217 134 451 103 800 103C1149 103 1383 134 1484 175L1466 253C1349 229 1127 213 800 213C473 213 251 229 134 253L116 175Z" fill="url(#rn-red-shell)"/>
+    <path d="M122 164C222 126 453 96 800 96C1147 96 1378 126 1478 164" stroke="#ffb9b9" stroke-width="4" stroke-linecap="round"/>
+    <path d="M134 186C240 151 462 127 800 127C1138 127 1360 151 1466 186" stroke="#6ed9ff" stroke-width="6" stroke-linecap="round" opacity="0.95"/>
+    <path d="M131 204C244 171 465 149 800 149C1135 149 1356 171 1469 204" stroke="#ffcf54" stroke-width="4" stroke-linecap="round"/>
+    <path d="M133 225C247 195 468 176 800 176C1132 176 1353 195 1467 225" stroke="#5ed5ff" stroke-width="6" stroke-linecap="round"/>
+    <path d="M519 120H1081L1146 170L1081 220H519L454 170L519 120Z" fill="url(#rn-panel)" stroke="#d0d3dc" stroke-width="5"/>
+    <path d="M518 120H1082L1104 144H1142L1081 220H519L458 144H496L518 120Z" stroke="url(#rn-chrome)" stroke-width="14" stroke-linejoin="round"/>
+    <path d="M520 121H1080L1140 170L1080 219H520L460 170L520 121Z" stroke="#1c1f2b" stroke-width="2"/>
+    <path d="M604 93C649 60 713 42 800 40C887 42 951 60 996 93" stroke="#8b919c" stroke-width="18" stroke-linecap="round"/>
+    <path d="M604 93C649 60 713 42 800 40C887 42 951 60 996 93" stroke="#f2f2f4" stroke-width="5" stroke-linecap="round"/>
+    <path d="M629 97C669 67 726 50 800 48C874 50 931 67 971 97" stroke="#ff4444" stroke-width="26" stroke-linecap="round"/>
+    <path d="M649 97C686 72 736 58 800 56C864 58 914 72 951 97" stroke="#31ff60" stroke-width="16" stroke-linecap="round"/>
+    <path d="M672 97C704 78 746 68 800 66C854 68 896 78 928 97" stroke="#4ec7ff" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <g>
+    <circle class="bulb retro phase-0" cx="154" cy="151" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-1" cx="191" cy="146" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-2" cx="228" cy="141" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-3" cx="265" cy="137" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-4" cx="302" cy="133" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-5" cx="339" cy="129" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-0" cx="376" cy="125" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-1" cx="413" cy="122" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-2" cx="450" cy="119" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-3" cx="487" cy="116" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-4" cx="524" cy="114" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-5" cx="561" cy="112" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-0" cx="598" cy="111" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-1" cx="635" cy="110" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-2" cx="672" cy="109" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-3" cx="709" cy="108" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-4" cx="746" cy="108" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-5" cx="783" cy="108" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-0" cx="820" cy="108" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-1" cx="857" cy="108" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-2" cx="894" cy="109" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-3" cx="931" cy="110" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-4" cx="968" cy="111" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-5" cx="1005" cy="112" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-0" cx="1042" cy="114" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-1" cx="1079" cy="116" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-2" cx="1116" cy="119" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-3" cx="1153" cy="122" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-4" cx="1190" cy="125" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-5" cx="1227" cy="129" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-0" cx="1264" cy="133" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-1" cx="1301" cy="137" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-2" cx="1338" cy="141" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-3" cx="1375" cy="146" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-4" cx="1412" cy="151" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-2" cx="154" cy="248" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-3" cx="191" cy="244" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-4" cx="228" cy="240" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-5" cx="265" cy="236" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-0" cx="302" cy="232" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-1" cx="339" cy="229" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-2" cx="376" cy="226" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-3" cx="413" cy="223" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-4" cx="450" cy="221" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-5" cx="487" cy="219" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-0" cx="524" cy="217" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-1" cx="561" cy="215" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-2" cx="598" cy="214" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-3" cx="635" cy="213" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-4" cx="672" cy="212" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-5" cx="709" cy="211" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-0" cx="746" cy="211" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-1" cx="783" cy="211" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-2" cx="820" cy="211" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-3" cx="857" cy="211" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-4" cx="894" cy="212" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-5" cx="931" cy="213" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-0" cx="968" cy="214" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-1" cx="1005" cy="215" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-2" cx="1042" cy="217" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-3" cx="1079" cy="219" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-4" cx="1116" cy="221" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-5" cx="1153" cy="223" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-0" cx="1190" cy="226" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-1" cx="1227" cy="229" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-2" cx="1264" cy="232" r="6.5" fill="#2eff6d"/>
+    <circle class="bulb retro phase-3" cx="1301" cy="236" r="6.5" fill="#ff4a4a"/>
+    <circle class="bulb retro phase-4" cx="1338" cy="240" r="6.5" fill="#ffd85f"/>
+    <circle class="bulb retro phase-5" cx="1375" cy="244" r="6.5" fill="#53d3ff"/>
+    <circle class="bulb retro phase-0" cx="1412" cy="248" r="6.5" fill="#2eff6d"/>
+  </g>
+
+  <path class="neon-tube blue" d="M661 160C696 133 742 119 800 118C858 119 904 133 939 160" stroke="#44d7ff" stroke-width="7" stroke-linecap="round"/>
+</svg>

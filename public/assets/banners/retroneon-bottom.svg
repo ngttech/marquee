@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 170" fill="none">
+  <defs>
+    <linearGradient id="rnb-shell" x1="800" y1="10" x2="800" y2="160" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fa6464"/>
+      <stop offset="0.22" stop-color="#b91919"/>
+      <stop offset="0.75" stop-color="#5f070c"/>
+      <stop offset="1" stop-color="#9f1111"/>
+    </linearGradient>
+    <linearGradient id="rnb-chrome" x1="800" y1="24" x2="800" y2="152" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4d4d53"/>
+      <stop offset="0.22" stop-color="#f7f7f8"/>
+      <stop offset="0.5" stop-color="#7d7d84"/>
+      <stop offset="0.78" stop-color="#fafafa"/>
+      <stop offset="1" stop-color="#4d4d53"/>
+    </linearGradient>
+    <linearGradient id="rnb-center" x1="800" y1="32" x2="800" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6b1010"/>
+      <stop offset="1" stop-color="#2b0707"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M35 84H435L492 26H1108L1165 84H1565" stroke="url(#rnb-chrome)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M35 84H435L492 26H1108L1165 84H1565" stroke="#2d313d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M20 42H370L425 84L370 126H20" fill="url(#rnb-shell)" stroke="#7e7e87" stroke-width="4"/>
+  <path d="M1230 42H1580L1580 126H1230L1175 84L1230 42Z" fill="url(#rnb-shell)" stroke="#7e7e87" stroke-width="4"/>
+  <path d="M350 84L430 26H1170L1250 84L1170 142H430L350 84Z" fill="url(#rnb-center)" stroke="url(#rnb-chrome)" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M370 84L438 36H1162L1230 84L1162 132H438L370 84Z" stroke="#1a1d28" stroke-width="2"/>
+  <path class="neon-arrow" d="M124 84H202" stroke="#4ddcff" stroke-width="7" stroke-linecap="round"/>
+  <path class="neon-arrow" d="M1394 84H1472" stroke="#4ddcff" stroke-width="7" stroke-linecap="round"/>
+  <path class="neon-arrow" d="M124 84L96 58" stroke="#4ddcff" stroke-width="7" stroke-linecap="round"/>
+  <path class="neon-arrow" d="M124 84L96 110" stroke="#4ddcff" stroke-width="7" stroke-linecap="round"/>
+  <path class="neon-arrow" d="M1472 84L1500 58" stroke="#4ddcff" stroke-width="7" stroke-linecap="round"/>
+  <path class="neon-arrow" d="M1472 84L1500 110" stroke="#4ddcff" stroke-width="7" stroke-linecap="round"/>
+  <path d="M40 30H294" stroke="url(#rnb-chrome)" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+  <path d="M40 138H294" stroke="url(#rnb-chrome)" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+  <path d="M1306 30H1560" stroke="url(#rnb-chrome)" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+  <path d="M1306 138H1560" stroke="url(#rnb-chrome)" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+</svg>

@@ -1,7 +1,10 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
 const router = express.Router();
 const { getState, setState, getRooms, broadcastToRoom, initRooms, deleteState } = require('../state');
-const { getMaskedConfig, updateConfig, getRoomConfig, setRoomConfig, deleteRoomConfig, getConfiguredRoomSlugs } = require('../config');
+const { getConfig, getMaskedConfig, updateConfig, getRoomConfig, setRoomConfig, deleteRoomConfig, getConfiguredRoomSlugs, DATA_DIR } = require('../config');
 
 const screensaver = require('../services/screensaver');
 const espn = require('../services/espn');
@@ -9,6 +12,61 @@ const ha = require('../services/ha');
 const plexPoller = require('../services/plexPoller');
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$/;
+
+// ── Sport backdrop uploads ──
+const BACKDROP_SPORTS = ['soccer', 'nfl', 'nba', 'mlb', 'nhl', 'ufc'];
+const BACKDROP_DIR = path.join(DATA_DIR, 'uploads', 'backdrops');
+const backdropUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      try { fs.mkdirSync(BACKDROP_DIR, { recursive: true }); cb(null, BACKDROP_DIR); }
+      catch (err) { cb(err); }
+    },
+    filename: (req, file, cb) => {
+      const ext = (path.extname(file.originalname) || '.png').toLowerCase().replace(/[^.a-z0-9]/g, '');
+      cb(null, `${req.params.sport}-${Date.now()}${ext || '.png'}`);
+    },
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!BACKDROP_SPORTS.includes(req.params.sport)) return cb(new Error('Invalid sport'));
+    const isImage = /^image\//.test(file.mimetype) ||
+      /\.(png|jpe?g|webp|gif|avif)$/i.test(file.originalname || '');
+    if (!isImage) return cb(new Error('File must be an image'));
+    cb(null, true);
+  },
+});
+
+// Remove every stored custom file for a sport (filenames are `<sport>-<ts>.<ext>`)
+function clearBackdropFiles(sport, except) {
+  try {
+    if (!fs.existsSync(BACKDROP_DIR)) return;
+    for (const f of fs.readdirSync(BACKDROP_DIR)) {
+      if (f.startsWith(`${sport}-`) && f !== except) {
+        try { fs.unlinkSync(path.join(BACKDROP_DIR, f)); } catch { /* ignore */ }
+      }
+    }
+  } catch { /* ignore */ }
+}
+
+// Persist a sport's backdrop URL (or remove it when url is falsy)
+function setSportBackdrop(sport, url) {
+  const backdrops = { ...(getConfig().global.sportBackdrops || {}) };
+  if (url) backdrops[sport] = url; else delete backdrops[sport];
+  updateConfig({ global: { sportBackdrops: backdrops } });
+}
+
+// Live-update any display currently showing this sport
+function broadcastSportBackdrop(sport) {
+  let getRoomPayload;
+  try { ({ getRoomPayload } = require('../index')); } catch { return; }
+  for (const slug of getConfiguredRoomSlugs()) {
+    if (getState(slug)?.mode === `sports-${sport}`) {
+      const payload = getRoomPayload(slug);
+      if (payload) broadcastToRoom(slug, payload);
+    }
+  }
+}
 
 // ── Config endpoints ──
 
@@ -329,6 +387,31 @@ router.get('/sports/worldcup', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// POST /api/sports/backdrop/:sport — upload a custom backdrop image for a sport
+router.post('/sports/backdrop/:sport', (req, res) => {
+  backdropUpload.single('file')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    const { sport } = req.params;
+    if (!BACKDROP_SPORTS.includes(sport)) return res.status(400).json({ error: 'Invalid sport' });
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    clearBackdropFiles(sport, req.file.filename); // keep only the new file
+    const url = `/uploads/backdrops/${req.file.filename}`;
+    setSportBackdrop(sport, url);
+    broadcastSportBackdrop(sport);
+    res.json({ url });
+  });
+});
+
+// DELETE /api/sports/backdrop/:sport — revert a sport to its bundled default backdrop
+router.delete('/sports/backdrop/:sport', (req, res) => {
+  const { sport } = req.params;
+  if (!BACKDROP_SPORTS.includes(sport)) return res.status(400).json({ error: 'Invalid sport' });
+  clearBackdropFiles(sport);
+  setSportBackdrop(sport, null);
+  broadcastSportBackdrop(sport);
+  res.json({ ok: true });
 });
 
 // POST /api/sports/push/:room — manually push a game to a room
