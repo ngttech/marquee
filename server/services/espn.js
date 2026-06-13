@@ -167,6 +167,7 @@ function normalizeGame(sportKey, event) {
   const baseSport = sportMode.replace('sports-', '');
 
   const buildTeam = (c) => ({
+    id: c.team?.id || '',
     name: c.team?.displayName || c.team?.name || 'TBD',
     abbreviation: c.team?.abbreviation || '',
     logo: c.team?.logo || '',
@@ -209,6 +210,9 @@ function normalizeGame(sportKey, event) {
       'soccer-libertadores': 'Copa Libertadores',
     };
     game.league = SOCCER_LEAGUE_NAMES[sportKey] || 'Soccer';
+    // World Cup round slug ('group-stage', 'round-of-16', 'final', ...) — drives
+    // group-table vs knockout enrichment downstream. See WC_ROUND_LABELS.
+    if (sportKey === 'soccer-worldcup') game.roundSlug = event.season?.slug || '';
     // Goals from scoring plays
     game.goals = (comp.details || [])
       .filter(d => d.type?.text === 'Goal' || d.scoringPlay)
@@ -562,6 +566,211 @@ async function fetchWorldCupGames() {
   return games;
 }
 
+// ── World Cup standings (group tables) ──
+// Different host path than ESPN_BASE: /apis/v2/ (no /site/). ?level=3 ensures the
+// full group depth is returned.
+const ESPN_STANDINGS_URL =
+  'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings?level=3';
+const STANDINGS_CACHE_TTL = 120000; // 120s — only changes when a match ends
+let standingsCache = { groups: [], time: 0 };
+
+// Map a stats[] array (name → displayValue/value) to a flat lookup
+function statMap(stats) {
+  const m = {};
+  for (const s of stats || []) m[s.name] = { value: s.value, display: s.displayValue };
+  return m;
+}
+
+async function fetchWorldCupStandings() {
+  const now = Date.now();
+  if (standingsCache.time && now - standingsCache.time < STANDINGS_CACHE_TTL) {
+    return standingsCache.groups;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(ESPN_STANDINGS_URL, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const groups = (data.children || []).map(g => {
+      const entries = g.standings?.entries || [];
+      const teams = entries.map(e => {
+        const st = statMap(e.stats);
+        const num = (k) => parseInt(st[k]?.value ?? st[k]?.display ?? 0) || 0;
+        return {
+          id: e.team?.id || '',
+          name: e.team?.displayName || e.team?.name || 'TBD',
+          abbreviation: e.team?.abbreviation || '',
+          logo: e.team?.logos?.[0]?.href || e.team?.logo || '',
+          rank: num('rank'),
+          played: num('gamesPlayed'),
+          wins: num('wins'),
+          draws: num('ties'),
+          losses: num('losses'),
+          goalsFor: num('pointsFor'),
+          goalsAgainst: num('pointsAgainst'),
+          goalDiff: st['pointDifferential']?.display || String(num('pointDifferential')),
+          points: num('points'),
+        };
+      }).sort((a, b) => (a.rank || 99) - (b.rank || 99));
+      const name = g.name || g.shortName || '';
+      const letter = (name.match(/Group\s+([A-Z])/i) || [])[1] || name.replace(/Group\s*/i, '');
+      return { letter, name: name || `Group ${letter}`, teams };
+    }).filter(g => g.teams.length);
+
+    standingsCache = { groups, time: now };
+    return groups;
+  } catch (err) {
+    console.warn('[espn] World Cup standings fetch failed:', err.message,
+      `— keeping ${standingsCache.groups.length} cached groups`);
+    return standingsCache.groups;
+  }
+}
+
+// Find the group whose teams include either of the two team ids (fallback: name).
+function findGroupForTeams(groups, home, away) {
+  const ids = [home?.id, away?.id].filter(Boolean);
+  const names = [home?.name, away?.name].filter(Boolean).map(n => n.toLowerCase());
+  return groups.find(g =>
+    g.teams.some(t =>
+      (t.id && ids.includes(t.id)) || (t.name && names.includes(t.name.toLowerCase()))
+    )
+  ) || null;
+}
+
+// ── World Cup knockout bracket ──
+// Built from the games we already fetch; round comes from each game's roundSlug
+// (event.season.slug). Group-stage games are excluded.
+const WC_ROUND_LABELS = {
+  'round-of-32': 'Round of 32',
+  'round-of-16': 'Round of 16',
+  'quarterfinals': 'Quarterfinals',
+  'semifinals': 'Semifinals',
+  '3rd-place-match': 'Third-Place Match',
+  'third-place': 'Third-Place Match',
+  'final': 'Final',
+};
+const WC_ROUND_ORDER = [
+  'round-of-32', 'round-of-16', 'quarterfinals', 'semifinals', '3rd-place-match', 'third-place', 'final',
+];
+
+function bracketEntry(g) {
+  return {
+    gameId: g.gameId,
+    name: g.competition,
+    date: g.date,
+    status: g.status,
+    isLive: g.isLive,
+    roundSlug: g.roundSlug,
+    round: WC_ROUND_LABELS[g.roundSlug] || '',
+    homeTeam: g.homeTeam,
+    awayTeam: g.awayTeam,
+  };
+}
+
+async function fetchWorldCupBracket() {
+  const games = await fetchWorldCupGames();
+  const rounds = {};
+  for (const g of games) {
+    if (!WC_ROUND_LABELS[g.roundSlug]) continue; // skip group stage
+    (rounds[g.roundSlug] = rounds[g.roundSlug] || []).push(bracketEntry(g));
+  }
+  // Ordered list of populated rounds, matches sorted by date
+  return WC_ROUND_ORDER
+    .filter(slug => rounds[slug]?.length)
+    .map(slug => ({
+      slug,
+      label: WC_ROUND_LABELS[slug],
+      matches: rounds[slug].sort((a, b) => Date.parse(a.date || 0) - Date.parse(b.date || 0)),
+    }));
+}
+
+// ── World Cup top scorers (Golden Boot) ──
+// Candidate endpoint — return [] on any failure so the UI hides the panel.
+const ESPN_SCORERS_URL =
+  'https://site.web.api.espn.com/apis/common/v3/sports/soccer/fifa.world/statistics/byathlete?sort=offensive.totalGoals&category=offensive';
+const SCORERS_CACHE_TTL = 300000; // 5min
+let scorersCache = { players: [], time: 0 };
+
+async function fetchWorldCupScorers() {
+  const now = Date.now();
+  if (scorersCache.time && now - scorersCache.time < SCORERS_CACHE_TTL) {
+    return scorersCache.players;
+  }
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(ESPN_SCORERS_URL, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const athletes = data.athletes || data.statistics?.athletes || [];
+    const players = athletes.map(a => {
+      const ath = a.athlete || a;
+      // goals live in a categories/stats array — search for a goals stat
+      let goals = 0;
+      const cats = a.categories || ath.categories || [];
+      for (const c of cats) {
+        const stats = c.stats || c.totals || [];
+        for (const s of stats) {
+          if (/goal/i.test(s.name || s.displayName || '') && !/assist|against|conceded/i.test(s.name || s.displayName || '')) {
+            goals = parseInt(s.value ?? s.displayValue ?? 0) || goals;
+          }
+        }
+      }
+      return {
+        player: ath.displayName || ath.fullName || 'Unknown',
+        team: ath.team?.abbreviation || ath.teamName || a.team?.abbreviation || '',
+        goals,
+      };
+    }).filter(p => p.goals > 0)
+      .sort((a, b) => b.goals - a.goals)
+      .slice(0, 12)
+      .map((p, i) => ({ rank: i + 1, ...p }));
+
+    scorersCache = { players, time: now };
+    return players;
+  } catch (err) {
+    console.warn('[espn] World Cup scorers fetch failed:', err.message);
+    return scorersCache.players; // last good, or []
+  }
+}
+
+// Attach group table / knockout context to a live World Cup game (mutates + returns).
+async function enrichWorldCupGame(game) {
+  if (!game || game.sportKey !== 'soccer-worldcup') return game;
+  const isKnockout = !!WC_ROUND_LABELS[game.roundSlug];
+
+  if (isKnockout) {
+    game.round = WC_ROUND_LABELS[game.roundSlug];
+  } else {
+    const groups = await fetchWorldCupStandings();
+    game.group = findGroupForTeams(groups, game.homeTeam, game.awayTeam);
+  }
+
+  // Next-match preview: soonest upcoming fixture featuring either team
+  try {
+    const all = await fetchWorldCupGames();
+    const ids = [game.homeTeam?.id, game.awayTeam?.id].filter(Boolean);
+    const upcoming = all
+      .filter(g => g.gameId !== game.gameId && g.status === 'pre')
+      .filter(g => ids.includes(g.homeTeam?.id) || ids.includes(g.awayTeam?.id))
+      .sort((a, b) => Date.parse(a.date || 0) - Date.parse(b.date || 0))[0];
+    if (upcoming) {
+      game.nextMatch = {
+        home: upcoming.homeTeam?.name, away: upcoming.awayTeam?.name,
+        date: upcoming.date, round: WC_ROUND_LABELS[upcoming.roundSlug] || '',
+      };
+    }
+  } catch (e) { /* non-fatal */ }
+
+  return game;
+}
+
 function startGamePolling(slug, gameId) {
   stopPolling(slug);
 
@@ -591,6 +800,7 @@ function startGamePolling(slug, gameId) {
       }
 
       // Game still active — update state with fresh data
+      await enrichWorldCupGame(game);
       const { getState, setState } = require('../state');
       const current = getState(slug) || {};
       const mode = `sports-${game.sport}`;
@@ -618,7 +828,8 @@ function stopPolling(slug) {
   }
 }
 
-function pushGameToRoom(slug, gameData) {
+async function pushGameToRoom(slug, gameData) {
+  await enrichWorldCupGame(gameData);
   const { getState, setState } = require('../state');
   const current = getState(slug) || {};
   const mode = `sports-${gameData.sport}`;
@@ -643,4 +854,7 @@ function pushGameToRoom(slug, gameData) {
   }
 }
 
-module.exports = { init, fetchAllLiveGames, fetchWorldCupGames, pushGameToRoom, startGamePolling, stopPolling };
+module.exports = {
+  init, fetchAllLiveGames, fetchWorldCupGames, pushGameToRoom, startGamePolling, stopPolling,
+  fetchWorldCupStandings, fetchWorldCupBracket, fetchWorldCupScorers,
+};

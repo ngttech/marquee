@@ -389,6 +389,69 @@ router.get('/sports/worldcup', async (req, res) => {
   }
 });
 
+// GET /api/sports/worldcup/standings — group tables (8 groups, live stats)
+router.get('/sports/worldcup/standings', async (req, res) => {
+  try {
+    res.json(await espn.fetchWorldCupStandings());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/sports/worldcup/bracket — knockout rounds (Round of 32 → Final)
+router.get('/sports/worldcup/bracket', async (req, res) => {
+  try {
+    res.json(await espn.fetchWorldCupBracket());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/sports/worldcup/scorers — Golden Boot leaderboard (may be empty early)
+router.get('/sports/worldcup/scorers', async (req, res) => {
+  try {
+    res.json(await espn.fetchWorldCupScorers());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/sports/worldcup/panel/:room — push a standalone WC info panel to a room
+// body: { panel: 'bracket' | 'scorers' | 'group', group?: 'A' }
+router.post('/sports/worldcup/panel/:room', async (req, res) => {
+  const { room } = req.params;
+  const { panel, group } = req.body || {};
+  try {
+    let state;
+    if (panel === 'bracket') {
+      state = { mode: 'wc-bracket', bannerText: 'Road to the Final', bracket: await espn.fetchWorldCupBracket() };
+    } else if (panel === 'scorers') {
+      state = { mode: 'wc-scorers', bannerText: 'Golden Boot Race', scorers: await espn.fetchWorldCupScorers() };
+    } else if (panel === 'group') {
+      const groups = await espn.fetchWorldCupStandings();
+      const g = groups.find(x => x.letter === group) || groups[0];
+      if (!g) return res.status(404).json({ error: 'No group standings available' });
+      state = { mode: 'wc-group', bannerText: g.name, group: g };
+    } else {
+      return res.status(400).json({ error: 'Invalid panel — expected bracket | scorers | group' });
+    }
+
+    // Take over the screen: stop game polling + screensaver rotation, then push
+    espn.stopPolling(room);
+    try { screensaver.stopRotation(room); } catch { /* ignore */ }
+    setState(room, state);
+    try {
+      const { getRoomPayload } = require('../index');
+      broadcastToRoom(room, getRoomPayload(room) || state);
+    } catch {
+      broadcastToRoom(room, state);
+    }
+    res.json({ ok: true, room, panel });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/sports/backdrop/:sport — upload a custom backdrop image for a sport
 router.post('/sports/backdrop/:sport', (req, res) => {
   backdropUpload.single('file')(req, res, (err) => {
@@ -415,13 +478,13 @@ router.delete('/sports/backdrop/:sport', (req, res) => {
 });
 
 // POST /api/sports/push/:room — manually push a game to a room
-router.post('/sports/push/:room', (req, res) => {
+router.post('/sports/push/:room', async (req, res) => {
   const { room } = req.params;
   const { game } = req.body || {};
   if (!game || !game.sport) {
     return res.status(400).json({ error: 'Missing game data with sport field' });
   }
-  espn.pushGameToRoom(room, game);
+  await espn.pushGameToRoom(room, game);
   res.json({ ok: true });
 });
 

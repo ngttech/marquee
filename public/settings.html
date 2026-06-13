@@ -276,6 +276,23 @@ h2:first-of-type { margin-top: 16px; }
   <div id="sport-tabs" class="sport-tabs"></div>
   <div id="live-games-list"></div>
 
+  <!-- World Cup info panels -->
+  <div style="font-size:13px;color:#c9a84c;letter-spacing:2px;margin:16px 0 8px;text-transform:uppercase;font-family:'Bebas Neue',sans-serif">World Cup Panels</div>
+  <div class="btn-row" style="flex-wrap:wrap;gap:8px;align-items:center">
+    <button class="btn btn-sm" onclick="pushWcPanel('bracket')">Bracket</button>
+    <button class="btn btn-sm" onclick="pushWcPanel('scorers')">Top Scorers</button>
+    <select id="wc-group-select" style="width:auto;min-width:120px">
+      <option value="">Group…</option>
+      <option value="A">Group A</option><option value="B">Group B</option>
+      <option value="C">Group C</option><option value="D">Group D</option>
+      <option value="E">Group E</option><option value="F">Group F</option>
+      <option value="G">Group G</option><option value="H">Group H</option>
+      <option value="I">Group I</option><option value="J">Group J</option>
+      <option value="K">Group K</option><option value="L">Group L</option>
+    </select>
+    <button class="btn btn-sm" onclick="pushWcPanel('group', document.getElementById('wc-group-select').value)">Show Group</button>
+  </div>
+
   <!-- Sport Backdrops -->
   <h2>Sport Backdrops</h2>
   <div style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin:-8px 0 12px">Upload a background image shown behind each sport's scoreboard. Applies to all displays.</div>
@@ -971,6 +988,24 @@ async function pushGame(idx) {
     });
     const data = await res.json();
     if (data.ok) toast(`Pushed to ${room}`, 'success');
+    else toast(data.error || 'Push failed', 'error');
+  } catch (err) {
+    toast('Network error', 'error');
+  }
+}
+
+async function pushWcPanel(panel, group) {
+  const room = document.getElementById('sports-room-select').value;
+  if (!room) return toast('Select a room first', 'error');
+  if (panel === 'group' && !group) return toast('Pick a group first', 'error');
+  try {
+    const res = await fetch(`/api/sports/worldcup/panel/${room}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ panel, group }),
+    });
+    const data = await res.json();
+    if (data.ok) toast(`${panel === 'group' ? 'Group ' + group : panel} pushed to ${room}`, 'success');
     else toast(data.error || 'Push failed', 'error');
   } catch (err) {
     toast('Network error', 'error');

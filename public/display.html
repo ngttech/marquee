@@ -564,6 +564,79 @@ body.cursor-hidden { cursor: none; }
   color: var(--sport-accent, #fff);
 }
 
+/* ── World Cup: group standings table (inline under a match + full-screen panel) ── */
+.wc-standings {
+  width: 100%; border-collapse: collapse; margin-top: clamp(8px,1.2vh,14px);
+  font-family: 'Rajdhani', sans-serif; color: rgba(255,255,255,0.82);
+  animation: revealUp 0.8s 0.3s both;
+}
+.wc-standings th {
+  font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-weight: 400;
+  color: var(--sport-accent, #4ade80); text-align: center;
+  font-size: clamp(11px,1vw,15px); padding: clamp(4px,0.8vh,9px) 4px;
+  border-bottom: 1px solid rgba(74,222,128,0.25);
+}
+.wc-standings td {
+  text-align: center; font-size: clamp(13px,1.3vw,19px); font-weight: 600;
+  padding: clamp(4px,0.9vh,10px) 4px; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.wc-standings .wc-pos { width: 2.2em; color: rgba(255,255,255,0.4); }
+.wc-standings .wc-team { text-align: left; }
+.wc-standings .wc-team { display: flex; align-items: center; gap: 8px; }
+.wc-standings th.wc-team { display: table-cell; }
+.wc-crest { width: 1.5em; height: 1.5em; object-fit: contain; vertical-align: middle; }
+.wc-standings .wc-pts { color: #fff; font-weight: 700; }
+.wc-standings .wc-gd { color: rgba(255,255,255,0.55); }
+.wc-row.highlight { background: rgba(74,222,128,0.12); }
+.wc-row.highlight td { color: #fff; }
+.wc-row.highlight .wc-team::after { content: '◀'; color: var(--sport-accent,#4ade80); margin-left: 6px; font-size: 0.7em; }
+.wc-standings.wc-compact td, .wc-standings.wc-compact th { font-size: clamp(11px,1.1vw,16px); padding: clamp(3px,0.6vh,7px) 3px; }
+
+/* knockout round strip + next-match line shown under a live match */
+.wc-round-strip {
+  font-family: 'Bebas Neue', sans-serif; letter-spacing: 4px; font-size: clamp(15px,1.6vw,22px);
+  color: var(--sport-accent, #4ade80); display: flex; align-items: center; gap: 14px;
+  margin-top: clamp(6px,1vh,12px);
+}
+.wc-round-dot { font-size: 0.6em; opacity: 0.6; }
+.wc-next {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1vw,15px); font-weight: 600;
+  color: rgba(255,255,255,0.5); letter-spacing: 1px; margin-top: clamp(4px,0.8vh,10px);
+}
+.wc-next-label {
+  font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; color: var(--sport-accent,#4ade80);
+  margin-right: 6px;
+}
+
+/* full-screen WC panels */
+.wc-panel-card { max-width: clamp(700px,80vw,1100px); }
+.wc-empty {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(16px,1.8vw,24px);
+  color: rgba(255,255,255,0.5); text-align: center; padding: clamp(30px,5vh,60px) 10px;
+}
+.wc-scorers .wc-scorer-team { color: var(--sport-accent,#4ade80); font-family: 'Bebas Neue',sans-serif; letter-spacing: 2px; }
+
+/* bracket: rounds as columns */
+.wc-bracket-card { max-width: 95vw; width: 95vw; }
+.wc-bracket { display: flex; gap: clamp(12px,2vw,28px); width: 100%; overflow-x: auto; padding-bottom: 8px; }
+.wc-bk-col { display: flex; flex-direction: column; justify-content: space-around; gap: clamp(8px,1.2vh,16px); min-width: clamp(150px,15vw,210px); }
+.wc-bk-round {
+  font-family: 'Bebas Neue', sans-serif; letter-spacing: 3px; text-align: center;
+  font-size: clamp(13px,1.2vw,17px); color: var(--sport-accent,#4ade80);
+  padding-bottom: 6px; border-bottom: 1px solid rgba(74,222,128,0.2); margin-bottom: 4px;
+}
+.wc-bk-match {
+  position: relative; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; padding: clamp(7px,1vh,11px) 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.wc-bk-match.live { border-color: var(--sport-accent,#4ade80); background: rgba(74,222,128,0.08); }
+.wc-bk-team { display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: clamp(12px,1.1vw,16px); color: rgba(255,255,255,0.85); }
+.wc-bk-score { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.3vw,18px); color: #fff; min-width: 1em; text-align: right; }
+.wc-bk-date { font-family: 'Rajdhani', sans-serif; font-size: clamp(9px,0.85vw,12px); color: rgba(255,255,255,0.35); letter-spacing: 1px; }
+.wc-bk-live { font-family: 'Bebas Neue', sans-serif; font-size: clamp(9px,0.85vw,12px); letter-spacing: 2px; color: var(--sport-accent,#4ade80); }
+
 /* Per-sport atmosphere backgrounds */
 .soccer-atmosphere { background-image: url('/img/bg-soccer.png'); --sport-tint: rgba(0,18,8,0.5); }
 .nfl-atmosphere { background-image: url('/img/bg-nfl.png'); --sport-tint: rgba(0,6,26,0.5); }
@@ -1541,6 +1614,12 @@ function render(state) {
     renderSportsMLB(state);
   } else if (state.mode === 'sports-nhl') {
     renderSportsNHL(state);
+  } else if (state.mode === 'wc-bracket') {
+    renderWorldCupBracket(state);
+  } else if (state.mode === 'wc-scorers') {
+    renderWorldCupScorers(state);
+  } else if (state.mode === 'wc-group') {
+    renderWorldCupGroupTable(state);
   } else if (state.mode === 'youtube') {
     renderYouTube(state);
   } else if (state.mode === 'app') {
@@ -1823,6 +1902,49 @@ function buildVenueText(s) {
   return [s.venue, s.venueCity, s.venueState].filter(Boolean).join(' · ');
 }
 
+// Shorten a date for next-match / bracket strips: "Jul 4, 3:00 PM"
+function wcDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' +
+    d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+// Build a compact group-standings table, highlighting the two playing teams.
+function wcGroupTableHtml(group, highlightIds, compact) {
+  if (!group || !group.teams?.length) return '';
+  const hi = (highlightIds || []).filter(Boolean).map(String);
+  const rows = group.teams.map(t => {
+    const on = hi.includes(String(t.id));
+    return `<tr class="wc-row${on ? ' highlight' : ''}">
+      <td class="wc-pos">${t.rank || ''}</td>
+      <td class="wc-team">${t.logo ? `<img class="wc-crest" src="${t.logo}" alt="">` : ''}<span>${compact ? (t.abbreviation || t.name) : t.name}</span></td>
+      <td>${t.played}</td><td>${t.wins}</td><td>${t.draws}</td><td>${t.losses}</td>
+      <td class="wc-gd">${t.goalDiff}</td><td class="wc-pts">${t.points}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="wc-standings${compact ? ' wc-compact' : ''}">
+    <thead><tr><th class="wc-pos">#</th><th class="wc-team">${group.name || 'Group'}</th>
+      <th>P</th><th>W</th><th>D</th><th>L</th><th class="wc-gd">GD</th><th class="wc-pts">PTS</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+}
+
+// Inline World Cup context shown under a live match: group table or knockout strip.
+function buildWcContextHtml(s) {
+  let html = '';
+  if (s.group) {
+    html += wcGroupTableHtml(s.group, [s.homeTeam?.id, s.awayTeam?.id], true);
+  } else if (s.round) {
+    html += `<div class="wc-round-strip"><span class="wc-round-dot">◆</span>${s.round}<span class="wc-round-dot">◆</span></div>`;
+  }
+  if (s.nextMatch && (s.nextMatch.home || s.nextMatch.away)) {
+    const n = s.nextMatch;
+    html += `<div class="wc-next"><span class="wc-next-label">Next</span> ${n.home || 'TBD'} vs ${n.away || 'TBD'}${n.date ? ` · ${wcDate(n.date)}` : ''}${n.round ? ` · ${n.round}` : ''}</div>`;
+  }
+  return html;
+}
+
 function renderSportsSoccer(s) {
   const el = document.getElementById('display');
   const bannerText = s.bannerText || 'Live Match';
@@ -1925,12 +2047,91 @@ function renderSportsSoccer(s) {
               ${cards.map(c => `<div class="card-event"><div class="card-icon">${c.type === 'red' ? '🟥' : '🟨'}</div><div class="card-text">${c.player}</div><div class="card-min ${c.type}">${c.minute}</div></div>`).join('')}
             </div>` : ''}
           </div>` : ''}
+          ${buildWcContextHtml(s)}
           ${venueText ? `<div class="sports-venue">${venueText}</div>` : ''}
           ${buildInfoBarHtml(s)}
         </div>
       </div>
     </div>
   `;
+}
+
+// Shared soccer/World-Cup green palette + banner shell for full-screen WC panels.
+function wcPanelSetup() {
+  document.documentElement.style.setProperty('--b-color', '#4ade80');
+  document.documentElement.style.setProperty('--b-glow', 'rgba(74,222,128,0.4)');
+  document.documentElement.style.setProperty('--b-bg', 'linear-gradient(135deg,#001a08,#000d04,#001a08)');
+  document.documentElement.style.setProperty('--sport-accent', '#4ade80');
+  document.documentElement.style.setProperty('--sport-glow', 'rgba(74,222,128,0.1)');
+}
+function wcPanelShell(bannerText, inner) {
+  return `
+    <div class="np-wrap" style="background:#000">
+      <div class="sports-atmosphere soccer-atmosphere"></div>
+      <div class="banner">
+        <span class="banner-orn" style="color:#4ade80">◆ ── ◆</span>
+        <span class="banner-text" style="color:#4ade80">${bannerText}</span>
+        <span class="banner-orn" style="color:#4ade80">◆ ── ◆</span>
+      </div>
+      <div class="sports-layout">${inner}</div>
+    </div>`;
+}
+
+// Full-screen single group table (panel pushed from settings).
+function renderWorldCupGroupTable(s) {
+  wcPanelSetup();
+  const el = document.getElementById('display');
+  const inner = `<div class="sports-card wc-panel-card">${wcGroupTableHtml(s.group, [], false)}</div>`;
+  el.innerHTML = wcPanelShell(s.bannerText || (s.group?.name || 'Group Standings'), inner);
+}
+
+// Full-screen knockout bracket — rounds as columns, on-screen teams' path highlighted.
+function renderWorldCupBracket(s) {
+  wcPanelSetup();
+  const el = document.getElementById('display');
+  const rounds = s.bracket || [];
+  let inner;
+  if (!rounds.length) {
+    inner = `<div class="sports-card wc-panel-card"><div class="wc-empty">Bracket not set yet — knockout rounds begin after the group stage.</div></div>`;
+  } else {
+    const cols = rounds.map(r => {
+      const matches = r.matches.map(m => {
+        const h = m.homeTeam || {}, a = m.awayTeam || {};
+        const decided = m.status !== 'pre';
+        const liveCls = m.isLive ? ' live' : '';
+        return `<div class="wc-bk-match${liveCls}">
+          <div class="wc-bk-team"><span class="wc-bk-name">${h.name || 'TBD'}</span><span class="wc-bk-score">${decided ? (h.score ?? '') : ''}</span></div>
+          <div class="wc-bk-team"><span class="wc-bk-name">${a.name || 'TBD'}</span><span class="wc-bk-score">${decided ? (a.score ?? '') : ''}</span></div>
+          ${m.isLive ? '<div class="wc-bk-live">LIVE</div>' : (m.date && m.status === 'pre' ? `<div class="wc-bk-date">${wcDate(m.date)}</div>` : '')}
+        </div>`;
+      }).join('');
+      return `<div class="wc-bk-col"><div class="wc-bk-round">${r.label}</div>${matches}</div>`;
+    }).join('');
+    inner = `<div class="sports-card wc-panel-card wc-bracket-card"><div class="wc-bracket">${cols}</div></div>`;
+  }
+  el.innerHTML = wcPanelShell(s.bannerText || 'Road to the Final', inner);
+}
+
+// Full-screen Golden Boot leaderboard.
+function renderWorldCupScorers(s) {
+  wcPanelSetup();
+  const el = document.getElementById('display');
+  const players = s.scorers || [];
+  let inner;
+  if (!players.length) {
+    inner = `<div class="sports-card wc-panel-card"><div class="wc-empty">No scoring data yet — check back once goals start flying.</div></div>`;
+  } else {
+    const rows = players.map(p => `<tr class="wc-row">
+      <td class="wc-pos">${p.rank}</td>
+      <td class="wc-team"><span>${p.player}</span></td>
+      <td class="wc-scorer-team">${p.team || ''}</td>
+      <td class="wc-pts">${p.goals}</td>
+    </tr>`).join('');
+    inner = `<div class="sports-card wc-panel-card"><table class="wc-standings wc-scorers">
+      <thead><tr><th class="wc-pos">#</th><th class="wc-team">Player</th><th class="wc-scorer-team">Team</th><th class="wc-pts">⚽</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+  }
+  el.innerHTML = wcPanelShell(s.bannerText || 'Golden Boot Race', inner);
 }
 
 function renderSportsNFL(s) {
