@@ -631,11 +631,23 @@ body.cursor-hidden { cursor: none; }
   display: flex; flex-direction: column; gap: 4px;
 }
 .wc-bk-match.live { border-color: var(--sport-accent,#4ade80); background: rgba(74,222,128,0.08); }
-.wc-bk-team { display: flex; justify-content: space-between; align-items: center; gap: 8px;
+.wc-bk-match.current { border-color: var(--sport-accent,#4ade80); background: rgba(74,222,128,0.16);
+  box-shadow: 0 0 0 1px var(--sport-accent,#4ade80), 0 0 24px var(--sport-glow,rgba(74,222,128,0.25)); }
+.wc-bk-team { display: flex; align-items: center; gap: 8px;
   font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: clamp(12px,1.1vw,16px); color: rgba(255,255,255,0.85); }
-.wc-bk-score { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.3vw,18px); color: #fff; min-width: 1em; text-align: right; }
+.wc-bk-flag { width: 1.4em; height: 1.4em; object-fit: contain; flex: 0 0 auto; }
+.wc-bk-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wc-bk-score { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.3vw,18px); color: #fff; min-width: 1em; text-align: right; flex: 0 0 auto; }
 .wc-bk-date { font-family: 'Rajdhani', sans-serif; font-size: clamp(9px,0.85vw,12px); color: rgba(255,255,255,0.35); letter-spacing: 1px; }
 .wc-bk-live { font-family: 'Bebas Neue', sans-serif; font-size: clamp(9px,0.85vw,12px); letter-spacing: 2px; color: var(--sport-accent,#4ade80); }
+/* compact inline bracket shown under a live knockout scoreboard */
+.wc-bracket-compact { margin-top: clamp(8px,1.2vh,14px); gap: clamp(8px,1.2vw,16px); animation: revealUp 0.8s 0.3s both; }
+.wc-bracket-compact .wc-bk-col { min-width: clamp(96px,11vw,150px); gap: 6px; }
+.wc-bracket-compact .wc-bk-round { font-size: clamp(10px,0.9vw,13px); letter-spacing: 2px; padding-bottom: 4px; }
+.wc-bracket-compact .wc-bk-match { padding: 5px 8px; gap: 2px; }
+.wc-bracket-compact .wc-bk-team { font-size: clamp(10px,0.95vw,13px); gap: 6px; }
+.wc-bracket-compact .wc-bk-flag { width: 1.1em; height: 1.1em; }
+.wc-bracket-compact .wc-bk-score { font-size: clamp(11px,1vw,14px); }
 
 /* Per-sport atmosphere backgrounds */
 .soccer-atmosphere { background-image: url('/img/bg-soccer.png'); --sport-tint: rgba(0,18,8,0.5); }
@@ -1578,6 +1590,8 @@ function payloadHash(state) {
     s.group?.teams?.map(t => `${t.id}:${t.rank}:${t.points}:${t.goalDiff}`).join(','),
     s.round, s.nextMatch?.home, s.nextMatch?.date,
     s.bracket?.length, s.scorers?.length,
+    // bracket progression — re-render as teams advance / knockout scores change
+    s.bracket?.flatMap(r => r.matches).map(m => `${m.homeTeam?.id}-${m.awayTeam?.id}-${m.homeTeam?.score}-${m.awayTeam?.score}`).join(','),
   ].join('|');
 }
 
@@ -2014,13 +2028,42 @@ function wcGroupTableHtml(group, highlightIds, compact) {
     <tbody>${rows}</tbody></table>`;
 }
 
-// Inline World Cup context shown under a live match: group table or knockout strip.
+// Build the knockout bracket as round columns. Each team shows its flag (once a real
+// team has advanced into the slot); the current match is highlighted and live matches
+// are marked. `compact` trims names to abbreviations for inline use under a scoreboard.
+function wcBracketHtml(bracket, currentGameId, compact) {
+  const rounds = bracket || [];
+  if (!rounds.length) return '';
+  const teamRow = (t, decided) => `<div class="wc-bk-team">
+      ${t.logo ? `<img class="wc-bk-flag" src="${t.logo}" alt="" onerror="this.style.display='none'">` : '<span class="wc-bk-flag"></span>'}
+      <span class="wc-bk-name">${(compact ? (t.abbreviation || t.name) : t.name) || 'TBD'}</span>
+      <span class="wc-bk-score">${decided ? (t.score ?? '') : ''}</span>
+    </div>`;
+  const cols = rounds.map(r => {
+    const matches = r.matches.map(m => {
+      const h = m.homeTeam || {}, a = m.awayTeam || {};
+      const decided = m.status !== 'pre';
+      const cur = currentGameId && m.gameId === currentGameId ? ' current' : '';
+      const liveCls = m.isLive ? ' live' : '';
+      return `<div class="wc-bk-match${liveCls}${cur}">
+        ${teamRow(h, decided)}${teamRow(a, decided)}
+        ${m.isLive ? '<div class="wc-bk-live">LIVE</div>' : (m.date && m.status === 'pre' ? `<div class="wc-bk-date">${wcDate(m.date)}</div>` : '')}
+      </div>`;
+    }).join('');
+    return `<div class="wc-bk-col"><div class="wc-bk-round">${r.label}</div>${matches}</div>`;
+  }).join('');
+  return `<div class="wc-bracket${compact ? ' wc-bracket-compact' : ''}">${cols}</div>`;
+}
+
+// Inline World Cup context shown under a live match: group table (group stage) or the
+// knockout bracket (playoffs) — never both, since enrichWorldCupGame clears the other.
 function buildWcContextHtml(s) {
   let html = '';
   if (s.group) {
     html += wcGroupTableHtml(s.group, [s.homeTeam?.id, s.awayTeam?.id], true);
   } else if (s.round) {
     html += `<div class="wc-round-strip"><span class="wc-round-dot">◆</span>${s.round}<span class="wc-round-dot">◆</span></div>`;
+    html += wcBracketHtml(s.bracket, s.gameId, true);
   }
   if (s.nextMatch && (s.nextMatch.home || s.nextMatch.away)) {
     const n = s.nextMatch;
@@ -2179,20 +2222,7 @@ function renderWorldCupBracket(s) {
   if (!rounds.length) {
     inner = `<div class="sports-card wc-panel-card"><div class="wc-empty">Bracket not set yet — knockout rounds begin after the group stage.</div></div>`;
   } else {
-    const cols = rounds.map(r => {
-      const matches = r.matches.map(m => {
-        const h = m.homeTeam || {}, a = m.awayTeam || {};
-        const decided = m.status !== 'pre';
-        const liveCls = m.isLive ? ' live' : '';
-        return `<div class="wc-bk-match${liveCls}">
-          <div class="wc-bk-team"><span class="wc-bk-name">${h.name || 'TBD'}</span><span class="wc-bk-score">${decided ? (h.score ?? '') : ''}</span></div>
-          <div class="wc-bk-team"><span class="wc-bk-name">${a.name || 'TBD'}</span><span class="wc-bk-score">${decided ? (a.score ?? '') : ''}</span></div>
-          ${m.isLive ? '<div class="wc-bk-live">LIVE</div>' : (m.date && m.status === 'pre' ? `<div class="wc-bk-date">${wcDate(m.date)}</div>` : '')}
-        </div>`;
-      }).join('');
-      return `<div class="wc-bk-col"><div class="wc-bk-round">${r.label}</div>${matches}</div>`;
-    }).join('');
-    inner = `<div class="sports-card wc-panel-card wc-bracket-card"><div class="wc-bracket">${cols}</div></div>`;
+    inner = `<div class="sports-card wc-panel-card wc-bracket-card">${wcBracketHtml(s.bracket, s.gameId, false)}</div>`;
   }
   el.innerHTML = wcPanelShell(s.bannerText || 'Road to the Final', inner);
 }

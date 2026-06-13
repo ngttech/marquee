@@ -831,11 +831,17 @@ async function enrichSoccerBetting(game) {
 
 // Attach group table / knockout context to a live World Cup game (mutates + returns).
 async function enrichWorldCupGame(game) {
-  if (!game || game.sportKey !== 'soccer-worldcup') return game;
+  if (!game) return game;
+  // Always clear WC context first so switching matches can't carry stale data through
+  // the {...current, ...gameData} merge in setState — e.g. a group table bleeding onto
+  // a knockout match. Same pattern as winProb above (see enrichSoccerBetting).
+  game.group = null; game.round = null; game.nextMatch = null; game.bracket = null;
+  if (game.sportKey !== 'soccer-worldcup') return game;
   const isKnockout = !!WC_ROUND_LABELS[game.roundSlug];
 
   if (isKnockout) {
     game.round = WC_ROUND_LABELS[game.roundSlug];
+    game.bracket = await fetchWorldCupBracket();
   } else {
     const groups = await fetchWorldCupStandings();
     game.group = findGroupForTeams(groups, game.homeTeam, game.awayTeam);
