@@ -147,6 +147,25 @@ function extractBroadcast(comp) {
   return comp.broadcasts?.[0]?.names?.[0] || comp.geoBroadcasts?.[0]?.media?.shortName || '';
 }
 
+// Tournament/league logo from a scoreboard response's top-level leagues[].
+// Same for all events in one response, so extract once per fetch (not per game).
+// Prefer the dark-background variant since cards render on a dark surface.
+function extractLeagueLogo(scoreboard) {
+  const logos = scoreboard?.leagues?.[0]?.logos || [];
+  if (!logos.length) return '';
+  const dark = logos.find(l => (l.rel || []).includes('dark'));
+  return (dark || logos[0]).href || '';
+}
+
+// Resolve a headshot URL for an involved athlete (used for soccer goal/card events).
+// ESPN does not publish soccer player headshots (athlete objects carry no headshot,
+// and the CDN path 404s), so this is empty in practice and the UI falls back to the
+// goal/card icon. Kept so faces appear automatically if a feed ever includes them.
+function athleteHeadshot(ath) {
+  if (!ath) return '';
+  return ath.headshot?.href || ath.headshot || '';
+}
+
 function normalizeGame(sportKey, event) {
   if (!event || !event.competitions?.[0]) return null;
 
@@ -220,6 +239,8 @@ function normalizeGame(sportKey, event) {
         player: d.athletesInvolved?.[0]?.displayName || 'Unknown',
         minute: d.clock?.displayValue || '',
         team: d.team?.displayName || '',
+        teamId: d.team?.id || '',
+        headshot: athleteHeadshot(d.athletesInvolved?.[0]),
       }));
     // Stats
     const stats = {};
@@ -238,6 +259,8 @@ function normalizeGame(sportKey, event) {
         player: d.athletesInvolved?.[0]?.displayName || 'Unknown',
         minute: d.clock?.displayValue || '',
         team: d.team?.displayName || '',
+        teamId: d.team?.id || '',
+        headshot: athleteHeadshot(d.athletesInvolved?.[0]),
         type: d.redCard || d.type?.text?.includes('Red') ? 'red' : 'yellow',
       }));
 
@@ -499,9 +522,13 @@ async function fetchAllLiveGames() {
     const r = results[i];
     if (r.status === 'fulfilled' && r.value?.events) {
       const games = [];
+      const leagueLogo = extractLeagueLogo(r.value);
       for (const event of r.value.events) {
         const game = normalizeGame(sportKey, event);
-        if (game) games.push(game);
+        if (game) {
+          game.leagueLogo = leagueLogo;
+          games.push(game);
+        }
       }
       sportCaches[sportKey] = { games, time: now };
     } else {
@@ -547,9 +574,13 @@ async function fetchWorldCupGames() {
   for (const r of results) {
     if (r.status === 'fulfilled' && r.value?.events) {
       anySuccess = true;
+      const leagueLogo = extractLeagueLogo(r.value);
       for (const event of r.value.events) {
         const game = normalizeGame('soccer-worldcup', event);
-        if (game) byId.set(game.gameId, game); // dedupe overlapping window edges
+        if (game) {
+          game.leagueLogo = leagueLogo;
+          byId.set(game.gameId, game); // dedupe overlapping window edges
+        }
       }
     }
   }

@@ -501,6 +501,15 @@ body.cursor-hidden { cursor: none; }
 @supports not (backdrop-filter: blur(24px)) {
   .sports-card { background: rgba(12,14,20,0.85); }
 }
+.tournament-logo {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%;
+  animation: revealUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+}
+.tournament-logo img {
+  height: clamp(54px, 7vh, 92px); max-width: 70%; object-fit: contain;
+  filter: drop-shadow(0 0 14px var(--sport-glow, rgba(255,255,255,0.08)));
+}
 .sports-card-header {
   display: flex; align-items: center; gap: 16px; width: 100%;
   animation: revealUp 0.6s both;
@@ -592,13 +601,7 @@ body.cursor-hidden { cursor: none; }
 .wc-row.highlight .wc-team::after { content: '◀'; color: var(--sport-accent,#4ade80); margin-left: 6px; font-size: 0.7em; }
 .wc-standings.wc-compact td, .wc-standings.wc-compact th { font-size: clamp(11px,1.1vw,16px); padding: clamp(3px,0.6vh,7px) 3px; }
 
-/* knockout round strip + next-match line shown under a live match */
-.wc-round-strip {
-  font-family: 'Bebas Neue', sans-serif; letter-spacing: 4px; font-size: clamp(15px,1.6vw,22px);
-  color: var(--sport-accent, #4ade80); display: flex; align-items: center; gap: 14px;
-  margin-top: clamp(6px,1vh,12px);
-}
-.wc-round-dot { font-size: 0.6em; opacity: 0.6; }
+/* next-match line shown under a live match */
 .wc-next {
   font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1vw,15px); font-weight: 600;
   color: rgba(255,255,255,0.5); letter-spacing: 1px; margin-top: clamp(4px,0.8vh,10px);
@@ -616,38 +619,30 @@ body.cursor-hidden { cursor: none; }
 }
 .wc-scorers .wc-scorer-team { color: var(--sport-accent,#4ade80); font-family: 'Bebas Neue',sans-serif; letter-spacing: 2px; }
 
-/* bracket: rounds as columns */
-.wc-bracket-card { max-width: 95vw; width: 95vw; }
-.wc-bracket { display: flex; gap: clamp(12px,2vw,28px); width: 100%; overflow-x: auto; padding-bottom: 8px; }
-.wc-bk-col { display: flex; flex-direction: column; justify-content: space-around; gap: clamp(8px,1.2vh,16px); min-width: clamp(150px,15vw,210px); }
-.wc-bk-round {
+/* knockout: just the current round's matchups, as compact flag-vs-flag cards */
+.wc-round-cards { width: 100%; margin-top: clamp(8px,1.2vh,14px); animation: revealUp 0.8s 0.3s both; }
+.wc-rc-head {
   font-family: 'Bebas Neue', sans-serif; letter-spacing: 3px; text-align: center;
-  font-size: clamp(13px,1.2vw,17px); color: var(--sport-accent,#4ade80);
-  padding-bottom: 6px; border-bottom: 1px solid rgba(74,222,128,0.2); margin-bottom: 4px;
+  font-size: clamp(12px,1.1vw,16px); color: var(--sport-accent,#4ade80);
+  padding-bottom: 6px; margin-bottom: 8px; border-bottom: 1px solid rgba(74,222,128,0.2);
 }
-.wc-bk-match {
-  position: relative; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px; padding: clamp(7px,1vh,11px) 12px;
-  display: flex; flex-direction: column; gap: 4px;
+.wc-rc-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(6px,0.8vw,12px); }
+.wc-rc-card {
+  position: relative; display: flex; align-items: center; gap: clamp(6px,0.8vw,10px);
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; padding: clamp(5px,0.8vh,9px) clamp(8px,1vw,14px);
+  font-family: 'Rajdhani', sans-serif; font-weight: 600; color: rgba(255,255,255,0.85);
 }
-.wc-bk-match.live { border-color: var(--sport-accent,#4ade80); background: rgba(74,222,128,0.08); }
-.wc-bk-match.current { border-color: var(--sport-accent,#4ade80); background: rgba(74,222,128,0.16);
+.wc-rc-card.live { border-color: var(--sport-accent,#4ade80); background: rgba(74,222,128,0.08); }
+.wc-rc-card.current { border-color: var(--sport-accent,#4ade80); background: rgba(74,222,128,0.16);
   box-shadow: 0 0 0 1px var(--sport-accent,#4ade80), 0 0 24px var(--sport-glow,rgba(74,222,128,0.25)); }
-.wc-bk-team { display: flex; align-items: center; gap: 8px;
-  font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: clamp(12px,1.1vw,16px); color: rgba(255,255,255,0.85); }
-.wc-bk-flag { width: 1.4em; height: 1.4em; object-fit: contain; flex: 0 0 auto; }
-.wc-bk-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.wc-bk-score { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.3vw,18px); color: #fff; min-width: 1em; text-align: right; flex: 0 0 auto; }
-.wc-bk-date { font-family: 'Rajdhani', sans-serif; font-size: clamp(9px,0.85vw,12px); color: rgba(255,255,255,0.35); letter-spacing: 1px; }
-.wc-bk-live { font-family: 'Bebas Neue', sans-serif; font-size: clamp(9px,0.85vw,12px); letter-spacing: 2px; color: var(--sport-accent,#4ade80); }
-/* compact inline bracket shown under a live knockout scoreboard */
-.wc-bracket-compact { margin-top: clamp(8px,1.2vh,14px); gap: clamp(8px,1.2vw,16px); animation: revealUp 0.8s 0.3s both; }
-.wc-bracket-compact .wc-bk-col { min-width: clamp(96px,11vw,150px); gap: 6px; }
-.wc-bracket-compact .wc-bk-round { font-size: clamp(10px,0.9vw,13px); letter-spacing: 2px; padding-bottom: 4px; }
-.wc-bracket-compact .wc-bk-match { padding: 5px 8px; gap: 2px; }
-.wc-bracket-compact .wc-bk-team { font-size: clamp(10px,0.95vw,13px); gap: 6px; }
-.wc-bracket-compact .wc-bk-flag { width: 1.1em; height: 1.1em; }
-.wc-bracket-compact .wc-bk-score { font-size: clamp(11px,1vw,14px); }
+.wc-rc-team { display: flex; align-items: center; gap: 6px; font-size: clamp(11px,1vw,15px); }
+.wc-rc-team.wc-rc-right { justify-content: flex-end; }
+.wc-rc-flag { width: 1.3em; height: 1.3em; object-fit: contain; flex: 0 0 auto; }
+.wc-rc-abbr { letter-spacing: 0.5px; }
+.wc-rc-score { font-family: 'Bebas Neue', sans-serif; font-size: clamp(14px,1.3vw,18px); color: #fff; letter-spacing: 1px; }
+.wc-rc-vs { font-family: 'Bebas Neue', sans-serif; font-size: clamp(11px,1vw,14px); color: rgba(255,255,255,0.4); }
+.wc-rc-live { color: var(--sport-accent,#4ade80); font-size: 0.7em; animation: livePulse 1.5s infinite; }
 
 /* Per-sport atmosphere backgrounds */
 .soccer-atmosphere { background-image: url('/img/bg-soccer.png'); --sport-tint: rgba(0,18,8,0.5); }
@@ -899,6 +894,31 @@ body.cursor-hidden { cursor: none; }
 .card-min { font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.2vw,15px); letter-spacing: 2px; }
 .card-min.yellow { color: #facc15; }
 .card-min.red { color: #f87171; }
+
+/* Goals + cards grouped under each team (home left / away right) */
+.soccer-events-split {
+  display: flex; gap: clamp(16px,3vw,48px); width: 100%;
+  justify-content: space-between; align-items: flex-start;
+}
+.soccer-events-col {
+  flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0;
+}
+.soccer-events-col.home { align-items: flex-start; }
+.soccer-events-col.away { align-items: flex-end; }
+.soccer-events-col.away .soccer-event-row { flex-direction: row-reverse; }
+.soccer-event-row {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  padding: 5px 12px; display: flex; align-items: center; gap: 8px; border-radius: 6px;
+  max-width: 100%;
+}
+.soccer-event-face {
+  width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+  border: 2px solid var(--sport-accent-dim, rgba(255,255,255,0.15)); background: rgba(255,255,255,0.05);
+}
+.soccer-event-icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
+.soccer-events-neutral {
+  display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; width: 100%;
+}
 
 /* ═══ SPORT-SPECIFIC: NBA Score Grid ═══ */
 .nba-score-grid {
@@ -1667,8 +1687,6 @@ function render(state) {
     renderSportsMLB(state);
   } else if (state.mode === 'sports-nhl') {
     renderSportsNHL(state);
-  } else if (state.mode === 'wc-bracket') {
-    renderWorldCupBracket(state);
   } else if (state.mode === 'wc-scorers') {
     renderWorldCupScorers(state);
   } else if (state.mode === 'wc-group') {
@@ -1928,6 +1946,16 @@ function teamLogoHtml(team, cssClass) {
   return team.abbreviation || '?';
 }
 
+// Tournament/league logo (e.g. World Cup, NBA, MLB) shown centered at the top of
+// every live card. Pulled automatically from ESPN as s.leagueLogo; renders nothing
+// when absent, and hides itself if the image URL fails to load.
+function tournamentLogoHtml(s) {
+  if (!s.leagueLogo) return '';
+  return `<div class="tournament-logo">
+    <img src="${s.leagueLogo}" alt="${s.league || s.competition || 'Tournament'}" onerror="this.parentElement.style.display='none'">
+  </div>`;
+}
+
 function buildLeadersHtml(leaders) {
   if (!leaders?.length) return '';
   let html = '<div class="sport-leaders">';
@@ -2028,42 +2056,40 @@ function wcGroupTableHtml(group, highlightIds, compact) {
     <tbody>${rows}</tbody></table>`;
 }
 
-// Build the knockout bracket as round columns. Each team shows its flag (once a real
-// team has advanced into the slot); the current match is highlighted and live matches
-// are marked. `compact` trims names to abbreviations for inline use under a scoreboard.
-function wcBracketHtml(bracket, currentGameId, compact) {
+// Compact knockout view: just the CURRENT round's matchups as small flag-vs-flag cards,
+// the on-screen match highlighted, live matches marked. Sized like the group table so it
+// sits under the live dashboard without crowding it. Flags fill in as teams advance.
+function wcRoundCardsHtml(bracket, currentGameId) {
   const rounds = bracket || [];
   if (!rounds.length) return '';
-  const teamRow = (t, decided) => `<div class="wc-bk-team">
-      ${t.logo ? `<img class="wc-bk-flag" src="${t.logo}" alt="" onerror="this.style.display='none'">` : '<span class="wc-bk-flag"></span>'}
-      <span class="wc-bk-name">${(compact ? (t.abbreviation || t.name) : t.name) || 'TBD'}</span>
-      <span class="wc-bk-score">${decided ? (t.score ?? '') : ''}</span>
+  const round = rounds.find(r => r.matches.some(m => m.gameId === currentGameId)) || rounds[0];
+  const flag = (t) => t.logo ? `<img class="wc-rc-flag" src="${t.logo}" alt="" onerror="this.style.display='none'">` : '';
+  const cards = round.matches.map(m => {
+    const h = m.homeTeam || {}, a = m.awayTeam || {};
+    const decided = m.status !== 'pre';
+    const cur = m.gameId === currentGameId ? ' current' : '';
+    const live = m.isLive ? ' live' : '';
+    const mid = decided
+      ? `<span class="wc-rc-score">${h.score ?? 0}–${a.score ?? 0}</span>`
+      : `<span class="wc-rc-vs">v</span>`;
+    return `<div class="wc-rc-card${cur}${live}">
+      <span class="wc-rc-team">${flag(h)}<span class="wc-rc-abbr">${h.abbreviation || h.name || 'TBD'}</span></span>
+      ${mid}
+      <span class="wc-rc-team wc-rc-right"><span class="wc-rc-abbr">${a.abbreviation || a.name || 'TBD'}</span>${flag(a)}</span>
+      ${m.isLive ? '<span class="wc-rc-live">●</span>' : ''}
     </div>`;
-  const cols = rounds.map(r => {
-    const matches = r.matches.map(m => {
-      const h = m.homeTeam || {}, a = m.awayTeam || {};
-      const decided = m.status !== 'pre';
-      const cur = currentGameId && m.gameId === currentGameId ? ' current' : '';
-      const liveCls = m.isLive ? ' live' : '';
-      return `<div class="wc-bk-match${liveCls}${cur}">
-        ${teamRow(h, decided)}${teamRow(a, decided)}
-        ${m.isLive ? '<div class="wc-bk-live">LIVE</div>' : (m.date && m.status === 'pre' ? `<div class="wc-bk-date">${wcDate(m.date)}</div>` : '')}
-      </div>`;
-    }).join('');
-    return `<div class="wc-bk-col"><div class="wc-bk-round">${r.label}</div>${matches}</div>`;
   }).join('');
-  return `<div class="wc-bracket${compact ? ' wc-bracket-compact' : ''}">${cols}</div>`;
+  return `<div class="wc-round-cards"><div class="wc-rc-head">${round.label}</div><div class="wc-rc-grid">${cards}</div></div>`;
 }
 
 // Inline World Cup context shown under a live match: group table (group stage) or the
-// knockout bracket (playoffs) — never both, since enrichWorldCupGame clears the other.
+// current round's matchups (playoffs) — never both, since enrichWorldCupGame clears the other.
 function buildWcContextHtml(s) {
   let html = '';
   if (s.group) {
     html += wcGroupTableHtml(s.group, [s.homeTeam?.id, s.awayTeam?.id], true);
   } else if (s.round) {
-    html += `<div class="wc-round-strip"><span class="wc-round-dot">◆</span>${s.round}<span class="wc-round-dot">◆</span></div>`;
-    html += wcBracketHtml(s.bracket, s.gameId, true);
+    html += wcRoundCardsHtml(s.bracket, s.gameId);
   }
   if (s.nextMatch && (s.nextMatch.home || s.nextMatch.away)) {
     const n = s.nextMatch;
@@ -2112,6 +2138,7 @@ function renderSportsSoccer(s) {
       </div>
       <div class="sports-layout">
         <div class="sports-card">
+          ${tournamentLogoHtml(s)}
           <div class="sports-card-header">
             <div class="sc-line"></div>
             <span>${statusText}</span>
@@ -2168,12 +2195,39 @@ function renderSportsSoccer(s) {
                 <div class="stat-values"><span class="stat-val home">${corners.home}</span><span class="stat-label">Corners</span><span class="stat-val away">${corners.away}</span></div>
               </div>` : ''}
             </div>` : ''}
-            ${goals.length ? `<div class="soccer-recent-goals">
-              ${goals.map(g => `<div class="goal-event"><div class="goal-icon">⚽</div><div class="goal-text">${g.player}</div><div class="goal-min">${g.minute}</div></div>`).join('')}
-            </div>` : ''}
-            ${cards.length ? `<div class="soccer-cards">
-              ${cards.map(c => `<div class="card-event"><div class="card-icon">${c.type === 'red' ? '🟥' : '🟨'}</div><div class="card-text">${c.player}</div><div class="card-min ${c.type}">${c.minute}</div></div>`).join('')}
-            </div>` : ''}
+            ${(() => {
+              // Tag each goal/card with the team that owns it, then group under that
+              // team (home left / away right) so it's clear who's on which side.
+              const sideOf = (ev) => {
+                if (ev.teamId && home.id && ev.teamId === home.id) return 'home';
+                if (ev.teamId && away.id && ev.teamId === away.id) return 'away';
+                if (ev.team && home.name && ev.team === home.name) return 'home';
+                if (ev.team && away.name && ev.team === away.name) return 'away';
+                return null;
+              };
+              const events = [
+                ...goals.map(g => ({ ...g, kind: 'goal', icon: '⚽', minClass: 'goal-min' })),
+                ...cards.map(c => ({ ...c, kind: 'card', icon: c.type === 'red' ? '🟥' : '🟨', minClass: `card-min ${c.type}` })),
+              ];
+              if (!events.length) return '';
+              const homeEv = [], awayEv = [], neutralEv = [];
+              for (const ev of events) {
+                const side = sideOf(ev);
+                (side === 'home' ? homeEv : side === 'away' ? awayEv : neutralEv).push(ev);
+              }
+              // Goals first, then cards, within each column.
+              const order = (arr) => [...arr.filter(e => e.kind === 'goal'), ...arr.filter(e => e.kind === 'card')];
+              const face = (ev) => ev.headshot
+                ? `<img class="soccer-event-face" src="${ev.headshot}" onerror="this.outerHTML='<span class=\\'soccer-event-icon\\'>${ev.icon}</span>'">`
+                : `<span class="soccer-event-icon">${ev.icon}</span>`;
+              const row = (ev) => `<div class="soccer-event-row">${face(ev)}<div class="goal-text">${ev.player}</div><div class="${ev.minClass}">${ev.minute}</div></div>`;
+              const splitHtml = (homeEv.length || awayEv.length) ? `<div class="soccer-events-split">
+                <div class="soccer-events-col home">${order(homeEv).map(row).join('')}</div>
+                <div class="soccer-events-col away">${order(awayEv).map(row).join('')}</div>
+              </div>` : '';
+              const neutralHtml = neutralEv.length ? `<div class="soccer-events-neutral">${order(neutralEv).map(row).join('')}</div>` : '';
+              return splitHtml + neutralHtml;
+            })()}
           </div>` : ''}
           ${buildWcContextHtml(s)}
           ${venueText ? `<div class="sports-venue">${venueText}</div>` : ''}
@@ -2211,20 +2265,6 @@ function renderWorldCupGroupTable(s) {
   const el = document.getElementById('display');
   const inner = `<div class="sports-card wc-panel-card">${wcGroupTableHtml(s.group, [], false)}</div>`;
   el.innerHTML = wcPanelShell(s.bannerText || (s.group?.name || 'Group Standings'), inner);
-}
-
-// Full-screen knockout bracket — rounds as columns, on-screen teams' path highlighted.
-function renderWorldCupBracket(s) {
-  wcPanelSetup();
-  const el = document.getElementById('display');
-  const rounds = s.bracket || [];
-  let inner;
-  if (!rounds.length) {
-    inner = `<div class="sports-card wc-panel-card"><div class="wc-empty">Bracket not set yet — knockout rounds begin after the group stage.</div></div>`;
-  } else {
-    inner = `<div class="sports-card wc-panel-card wc-bracket-card">${wcBracketHtml(s.bracket, s.gameId, false)}</div>`;
-  }
-  el.innerHTML = wcPanelShell(s.bannerText || 'Road to the Final', inner);
 }
 
 // Full-screen Golden Boot leaderboard.
@@ -2297,6 +2337,7 @@ function renderSportsNFL(s) {
       </div>
       <div class="sports-layout">
         <div class="sports-card">
+          ${tournamentLogoHtml(s)}
           <div class="sports-card-header">
             <div class="sc-line"></div>
             <span>${statusText}</span>
@@ -2399,6 +2440,7 @@ function renderSportsNBA(s) {
       </div>
       <div class="sports-layout">
         <div class="sports-card">
+          ${tournamentLogoHtml(s)}
           <div class="sports-card-header">
             <div class="sc-line"></div>
             <span>${statusText}</span>
@@ -2481,6 +2523,7 @@ function renderSportsUFC(s) {
       </div>
       <div class="sports-layout">
         <div class="sports-card">
+          ${tournamentLogoHtml(s)}
           <div class="sports-card-header">
             <div class="sc-line"></div>
             <span>${statusText}</span>
@@ -2654,6 +2697,7 @@ function renderSportsMLB(s) {
       </div>
       <div class="sports-layout">
         <div class="sports-card">
+          ${tournamentLogoHtml(s)}
           <div class="sports-card-header">
             <div class="sc-line"></div>
             <span>${statusText}</span>
@@ -2786,6 +2830,7 @@ function renderSportsNHL(s) {
       </div>
       <div class="sports-layout">
         <div class="sports-card">
+          ${tournamentLogoHtml(s)}
           <div class="sports-card-header">
             <div class="sc-line"></div>
             <span>${statusText}</span>
