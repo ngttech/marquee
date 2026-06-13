@@ -61,14 +61,15 @@ function init(callback) {
   console.log('[espn] Initialized with broadcast callback');
 }
 
-async function fetchScoreboard(sportKey) {
+async function fetchScoreboard(sportKey, query) {
   const endpoint = SPORT_ENDPOINTS[sportKey];
   if (!endpoint) return null;
 
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
-    const res = await fetch(`${ESPN_BASE}${endpoint}`, { signal: controller.signal });
+    const qs = query ? `?${query}` : '';
+    const res = await fetch(`${ESPN_BASE}${endpoint}${qs}`, { signal: controller.signal });
     clearTimeout(timeout);
 
     if (res.status === 429) {
@@ -178,6 +179,7 @@ function normalizeGame(sportKey, event) {
     sport: baseSport,
     sportKey,
     gameId: event.id,
+    date: event.date || '',
     status,
     isLive,
     competition: event.name || `${homeComp.team?.displayName} vs ${awayComp.team?.displayName}`,
@@ -518,6 +520,48 @@ function getAllCachedGames() {
   return games;
 }
 
+// ── FIFA World Cup 2026 (Jun 11 – Jul 19) ──
+// The default scoreboard only returns the current matchday, so fetch the whole
+// tournament via ESPN's ?dates=YYYYMMDD-YYYYMMDD range param. Split into windows
+// to stay under any per-request cap; merge + dedupe by gameId.
+const WORLDCUP_DATE_WINDOWS = ['20260611-20260624', '20260625-20260708', '20260709-20260719'];
+const WC_CACHE_TTL = 60000; // 60s — 3 upstream calls per refresh, scores change slowly enough
+let wcCache = { games: [], time: 0 };
+
+async function fetchWorldCupGames() {
+  const now = Date.now();
+  if (wcCache.time && now - wcCache.time < WC_CACHE_TTL) {
+    return wcCache.games;
+  }
+
+  const results = await Promise.allSettled(
+    WORLDCUP_DATE_WINDOWS.map(w => fetchScoreboard('soccer-worldcup', `dates=${w}`))
+  );
+
+  const byId = new Map();
+  let anySuccess = false;
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value?.events) {
+      anySuccess = true;
+      for (const event of r.value.events) {
+        const game = normalizeGame('soccer-worldcup', event);
+        if (game) byId.set(game.gameId, game); // dedupe overlapping window edges
+      }
+    }
+  }
+
+  // If every window failed, keep the last good snapshot rather than wiping it
+  if (!anySuccess) {
+    console.warn(`[espn] World Cup fetch failed for all windows, keeping ${wcCache.games.length} cached games`);
+    return wcCache.games;
+  }
+
+  const games = Array.from(byId.values())
+    .sort((a, b) => Date.parse(a.date || 0) - Date.parse(b.date || 0));
+  wcCache = { games, time: now };
+  return games;
+}
+
 function startGamePolling(slug, gameId) {
   stopPolling(slug);
 
@@ -599,4 +643,4 @@ function pushGameToRoom(slug, gameData) {
   }
 }
 
-module.exports = { init, fetchAllLiveGames, pushGameToRoom, startGamePolling, stopPolling };
+module.exports = { init, fetchAllLiveGames, fetchWorldCupGames, pushGameToRoom, startGamePolling, stopPolling };

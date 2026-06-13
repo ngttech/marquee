@@ -162,6 +162,16 @@ h2:first-of-type { margin-top: 16px; }
 .sport-tab:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.2); }
 .sport-tab.active { color: #c9a84c; border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.08); }
 .sport-tab .tab-count { font-size: 10px; opacity: 0.6; margin-left: 4px; }
+/* World Cup schedule — color-coded past / live / upcoming */
+.sport-game-card.wc-past { border-left: 3px solid rgba(255,255,255,0.12); opacity: 0.55; }
+.sport-game-card.wc-live { border-left: 3px solid #4ade80; background: rgba(74,222,128,0.05); }
+.sport-game-card.wc-upcoming { border-left: 3px solid rgba(201,168,76,0.55); }
+.wc-date-header {
+  font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 3px;
+  text-transform: uppercase; color: #c9a84c; margin: 16px 0 8px; padding-bottom: 4px;
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+}
+.wc-date-header:first-child { margin-top: 0; }
 /* ═══ CHECKBOX GROUP ═══ */
 .checkbox-group {
   display: flex; flex-direction: column; gap: 8px; margin-top: 4px;
@@ -758,9 +768,12 @@ async function loadLiveGames() {
     tabsEl.innerHTML = tabs.map(t => {
       const cnt = t === 'all' ? games.length : (counts[t] || 0);
       if (t !== 'all' && cnt === 0) return '';
-      return `<div class="sport-tab${_activeTab === t ? ' active' : ''}" onclick="filterSport('${t}')">${t.toUpperCase()}<span class="tab-count">(${cnt})</span></div>`;
+      return `<div class="sport-tab${_activeTab === t ? ' active' : ''}" data-tab="${t}" onclick="filterSport('${t}')">${t.toUpperCase()}<span class="tab-count">(${cnt})</span></div>`;
     }).join('');
-    renderFilteredGames();
+    // World Cup has its own data source — always show, never count-gated
+    tabsEl.innerHTML += `<div class="sport-tab${_activeTab === 'worldcup' ? ' active' : ''}" data-tab="worldcup" onclick="filterSport('worldcup')">WORLD CUP</div>`;
+    if (_activeTab === 'worldcup') loadWorldCupGames();
+    else renderFilteredGames();
   } catch (err) {
     container.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px">Failed to load games</div>';
   }
@@ -768,16 +781,18 @@ async function loadLiveGames() {
 
 function filterSport(sport) {
   _activeTab = sport;
-  // Update tab active states
+  // Update tab active states (match on data-tab — text-prefix matching breaks for "world cup")
   document.querySelectorAll('.sport-tab').forEach(el => {
-    el.classList.toggle('active', el.textContent.toLowerCase().startsWith(sport));
+    el.classList.toggle('active', el.dataset.tab === sport);
   });
-  renderFilteredGames();
+  if (sport === 'worldcup') loadWorldCupGames();
+  else renderFilteredGames();
 }
 
 function renderFilteredGames() {
   const container = document.getElementById('live-games-list');
   const games = window._liveGames || [];
+  window._activeGameList = games;
   const filtered = _activeTab === 'all' ? games : games.filter(g => {
     const cats = SPORT_CATEGORIES[_activeTab];
     return cats ? cats.includes(g.sport) : g.sport === _activeTab;
@@ -804,8 +819,63 @@ function renderFilteredGames() {
   }).join('');
 }
 
+async function loadWorldCupGames() {
+  const container = document.getElementById('live-games-list');
+  container.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;letter-spacing:1px">Loading World Cup schedule...</div>';
+  try {
+    const res = await fetch('/api/sports/worldcup');
+    const games = await res.json();
+    window._wcGames = games;
+    if (_activeTab !== 'worldcup') return; // user switched tabs mid-fetch
+    renderWorldCupGames();
+  } catch (err) {
+    if (_activeTab === 'worldcup') container.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px">Failed to load World Cup games</div>';
+  }
+}
+
+function renderWorldCupGames() {
+  const container = document.getElementById('live-games-list');
+  const games = window._wcGames || []; // flat, already sorted ascending by date
+  window._activeGameList = games;
+  if (!games.length) {
+    container.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;letter-spacing:1px">No World Cup games found.</div>';
+    return;
+  }
+  let html = '';
+  let lastDay = '';
+  games.forEach((g, idx) => {
+    const d = g.date ? new Date(g.date) : null;
+    const dayKey = d ? d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) : 'TBD';
+    if (dayKey !== lastDay) {
+      html += `<div class="wc-date-header">${dayKey}</div>`;
+      lastDay = dayKey;
+    }
+    const cls = g.isLive ? 'wc-live' : g.status === 'post' ? 'wc-past' : 'wc-upcoming';
+    const statusCls = g.isLive ? 'live' : g.status === 'post' ? 'post' : 'pre';
+    const statusText = g.isLive ? 'LIVE' : g.status === 'post' ? 'FINAL' : 'UPCOMING';
+    const kickoff = d ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '';
+    const home = g.homeTeam?.name || '?';
+    const away = g.awayTeam?.name || '?';
+    const scoreLine = g.status === 'pre'
+      ? `${home} vs ${away}`
+      : `${home} ${g.homeTeam?.score || 0} — ${g.awayTeam?.score || 0} ${away}`;
+    const detail = [g.status === 'pre' ? kickoff : (g.periodText || kickoff), g.venue].filter(Boolean).join(' · ');
+    html += `
+      <div class="sport-game-card ${cls}">
+        <div class="sport-game-info">
+          <div><span class="sport-badge ${statusCls}">${statusText}</span><span class="sport-badge">${g.league || 'FIFA World Cup'}</span></div>
+          <div class="sport-game-teams">${scoreLine}</div>
+          <div class="sport-game-detail">${detail}</div>
+        </div>
+        <button class="btn btn-sm" onclick="pushGame(${idx})">Push</button>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
 async function pushGame(idx) {
-  const game = window._liveGames?.[idx];
+  const game = (window._activeGameList || window._liveGames)?.[idx];
   if (!game) return;
   const room = document.getElementById('sports-room-select').value;
   if (!room) return toast('Select a room first', 'error');

@@ -321,6 +321,16 @@ router.get('/sports/live', async (req, res) => {
   }
 });
 
+// GET /api/sports/worldcup — full 2026 World Cup schedule (past, live, and upcoming)
+router.get('/sports/worldcup', async (req, res) => {
+  try {
+    const games = await espn.fetchWorldCupGames();
+    res.json(games);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/sports/push/:room — manually push a game to a room
 router.post('/sports/push/:room', (req, res) => {
   const { room } = req.params;
