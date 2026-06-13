@@ -740,6 +740,95 @@ async function fetchWorldCupScorers() {
   }
 }
 
+// ── Soccer betting / win probability ──
+// Odds live only in the summary endpoint (the scoreboard returns odds:[null]), and
+// ESPN has no win-probability model for soccer — so we derive win % from the 3-way
+// moneyline (home/draw/away), removing the bookmaker margin so the three sum to 100.
+// Per-gameId cache keeps multiple rooms showing the same match from refetching.
+const SOCCER_BETTING_TTL = 15000;
+const soccerBettingCache = {}; // { [gameId]: { data, time } }
+
+// American moneyline → implied win probability (0–1), or null if unusable.
+function mlToProb(ml) {
+  const n = Number(ml);
+  if (!Number.isFinite(n) || n === 0) return null;
+  return n > 0 ? 100 / (n + 100) : -n / (-n + 100);
+}
+
+// Fetch the summary endpoint for a soccer game, attach win probability + betting
+// odds. Mutates + returns; fully non-fatal so the UI just hides the block on failure.
+async function enrichSoccerBetting(game) {
+  if (!game || game.sport !== 'soccer') return game;
+  // Always define winProb so a game without market data clears any stale value
+  // carried over by the {...current, ...gameData} merge when switching matches.
+  game.winProb = null;
+  if (game.status === 'post') return game; // finished — no live market to show
+  const endpoint = SPORT_ENDPOINTS[game.sportKey];
+  if (!endpoint) return game;
+
+  const now = Date.now();
+  const cached = soccerBettingCache[game.gameId];
+  let data;
+  if (cached && now - cached.time < SOCCER_BETTING_TTL) {
+    data = cached.data;
+  } else {
+    try {
+      const url = `${ESPN_BASE}${endpoint.replace('/scoreboard', '/summary')}?event=${game.gameId}`;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      data = json.pickcenter?.[0] || json.odds?.[0] || null;
+      soccerBettingCache[game.gameId] = { data, time: now };
+    } catch (err) {
+      console.warn(`[espn] Soccer betting fetch failed for ${game.gameId}:`, err.message);
+      return game;
+    }
+  }
+
+  if (!data) return game;
+
+  const ho = data.homeTeamOdds || {};
+  const ao = data.awayTeamOdds || {};
+  const dr = data.drawOdds || {};
+  const pH = mlToProb(ho.moneyLine);
+  const pD = mlToProb(dr.moneyLine);
+  const pA = mlToProb(ao.moneyLine);
+
+  if (pH != null && pD != null && pA != null) {
+    const sum = pH + pD + pA;
+    let home = Math.round((pH / sum) * 100);
+    let draw = Math.round((pD / sum) * 100);
+    let away = Math.round((pA / sum) * 100);
+    // Force the three to total exactly 100 — absorb rounding drift in the largest.
+    const drift = 100 - (home + draw + away);
+    if (drift !== 0) {
+      const max = Math.max(home, draw, away);
+      if (home === max) home += drift;
+      else if (away === max) away += drift;
+      else draw += drift;
+    }
+    game.winProb = { home, draw, away, provider: data.provider?.name || '' };
+  }
+
+  const favorite = ho.favorite ? 'home' : (ao.favorite ? 'away' : null);
+  game.odds = {
+    ...(game.odds || {}),
+    provider: data.provider?.name || game.odds?.provider || '',
+    details: data.details || game.odds?.details || '',
+    spread: data.spread ?? game.odds?.spread ?? '',
+    overUnder: data.overUnder ?? game.odds?.overUnder ?? '',
+    homeML: ho.moneyLine ?? null,
+    drawML: dr.moneyLine ?? null,
+    awayML: ao.moneyLine ?? null,
+    favorite,
+  };
+
+  return game;
+}
+
 // Attach group table / knockout context to a live World Cup game (mutates + returns).
 async function enrichWorldCupGame(game) {
   if (!game || game.sportKey !== 'soccer-worldcup') return game;
@@ -810,6 +899,7 @@ function startGamePolling(slug, gameId) {
 
       // Game still active — update state with fresh data
       await enrichWorldCupGame(game);
+      if (game.sport === 'soccer') await enrichSoccerBetting(game);
       if (roomPollers[slug] !== myPoller) return; // superseded during enrich
       const { getState, setState } = require('../state');
       const current = getState(slug) || {};
@@ -839,6 +929,7 @@ function stopPolling(slug) {
 
 async function pushGameToRoom(slug, gameData) {
   await enrichWorldCupGame(gameData);
+  if (gameData.sport === 'soccer') await enrichSoccerBetting(gameData);
   const { getState, setState } = require('../state');
   const current = getState(slug) || {};
   const mode = `sports-${gameData.sport}`;

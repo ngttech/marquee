@@ -667,6 +667,38 @@ body.cursor-hidden { cursor: none; }
 .stat-values { display: flex; justify-content: space-between; width: 100%; }
 .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: clamp(12px,1.3vw,16px); letter-spacing: 2px; }
 .stat-val.home { color: #4ade80; } .stat-val.away { color: #f87171; }
+/* Win-probability bar (soccer) — 3-segment home/draw/away, derived from moneylines */
+.winprob {
+  width: 100%; max-width: clamp(420px,46vw,600px); margin: clamp(6px,1vh,12px) auto 0;
+  display: flex; flex-direction: column; gap: clamp(5px,0.8vh,9px);
+  animation: revealUp 0.8s 0.2s both;
+}
+.winprob-head {
+  display: flex; align-items: center; gap: 6px; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif; letter-spacing: 3px;
+  font-size: clamp(10px,0.9vw,13px); color: rgba(255,255,255,0.4); text-transform: uppercase;
+}
+.winprob-icon { color: var(--sport-accent, #4ade80); }
+.winprob-provider {
+  font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; font-size: 0.85em;
+  color: rgba(255,255,255,0.25); padding-left: 6px;
+}
+.winprob-bar {
+  display: flex; width: 100%; height: clamp(6px,0.9vh,9px); border-radius: 99px;
+  overflow: hidden; background: rgba(255,255,255,0.06);
+}
+.winprob-seg { height: 100%; transition: width 0.6s ease; }
+.winprob-seg.home { background: #4ade80; }
+.winprob-seg.draw { background: rgba(255,255,255,0.28); }
+.winprob-seg.away { background: #f87171; }
+.winprob-labels { display: flex; justify-content: space-between; width: 100%; }
+.winprob-label {
+  font-family: 'Rajdhani', sans-serif; font-size: clamp(11px,1vw,14px); letter-spacing: 1px;
+}
+.winprob-label b { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
+.winprob-label.home { color: rgba(74,222,128,0.9); }
+.winprob-label.away { color: rgba(248,113,113,0.9); }
+.winprob-label.draw { color: rgba(255,255,255,0.4); }
 .soccer-recent-goals {
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
 }
@@ -1896,9 +1928,54 @@ function buildLeadersHtml(leaders) {
   return html + '</div>';
 }
 
+// Win-probability bar (soccer): 3 segments derived from the 3-way moneyline.
+// Hidden unless enrichSoccerBetting attached s.winProb (finished/non-betting games).
+function buildWinProbHtml(s) {
+  const wp = s.winProb;
+  if (!wp || wp.home == null) return '';
+  const home = s.homeTeam || {}, away = s.awayTeam || {};
+  const hName = home.abbreviation || home.name || 'Home';
+  const aName = away.abbreviation || away.name || 'Away';
+  return `
+    <div class="winprob">
+      <div class="winprob-head">
+        <span class="winprob-icon">✦</span> Win Probability
+        ${wp.provider ? `<span class="winprob-provider">${wp.provider}</span>` : ''}
+      </div>
+      <div class="winprob-bar">
+        <div class="winprob-seg home" style="width:${wp.home}%"></div>
+        <div class="winprob-seg draw" style="width:${wp.draw}%"></div>
+        <div class="winprob-seg away" style="width:${wp.away}%"></div>
+      </div>
+      <div class="winprob-labels">
+        <span class="winprob-label home"><b>${wp.home}%</b> ${hName}</span>
+        <span class="winprob-label draw">Draw <b>${wp.draw}%</b></span>
+        <span class="winprob-label away">${aName} <b>${wp.away}%</b></span>
+      </div>
+    </div>`;
+}
+
+// Format an American moneyline with explicit sign (+105 / -130).
+function fmtMoneyline(m) {
+  if (m == null || m === '') return '';
+  const n = Number(m);
+  return n > 0 ? `+${n}` : `${n}`;
+}
+
 function buildInfoBarHtml(s) {
   let badges = '';
-  if (s.odds) badges += `<div class="sport-info-badge"><span class="badge-icon">📊</span>${s.odds.details || ''}</div>`;
+  if (s.odds) {
+    const o = s.odds;
+    if (o.homeML != null) {
+      // Soccer: rich betting badges (✦ marks the favorite)
+      badges += `<div class="sport-info-badge"><span class="badge-icon">💰</span>ML ${o.favorite === 'home' ? '✦' : ''}H ${fmtMoneyline(o.homeML)} · D ${fmtMoneyline(o.drawML)} · ${o.favorite === 'away' ? '✦' : ''}A ${fmtMoneyline(o.awayML)}</div>`;
+      if (o.details) badges += `<div class="sport-info-badge"><span class="badge-icon">📊</span>${o.details}</div>`;
+      if (o.overUnder) badges += `<div class="sport-info-badge"><span class="badge-icon">⚽</span>O/U ${o.overUnder}</div>`;
+    } else if (o.details) {
+      // Other sports: keep the single legacy odds badge unchanged
+      badges += `<div class="sport-info-badge"><span class="badge-icon">📊</span>${o.details}</div>`;
+    }
+  }
   if (s.tickets?.summary) badges += `<div class="sport-info-badge"><span class="badge-icon">🎟</span>${s.tickets.summary}</div>`;
   if (s.broadcast) badges += `<div class="sport-info-badge"><span class="badge-icon">📺</span>${s.broadcast}</div>`;
   if (s.attendance) badges += `<div class="sport-info-badge"><span class="badge-icon">👥</span>${Number(s.attendance).toLocaleString()}</div>`;
@@ -2023,6 +2100,7 @@ function renderSportsSoccer(s) {
               <div class="sports-team-record">${away.record || ''}</div>
             </div>
           </div>
+          ${buildWinProbHtml(s)}
           ${(possession.home || shots.home || goals.length || fouls.home || corners.home || cards.length) ? `
           <div class="sports-stats-footer">
             ${(possession.home || shots.home || fouls.home || corners.home) ? `<div class="stat-row">
