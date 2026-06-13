@@ -417,15 +417,13 @@ router.get('/sports/worldcup/scorers', async (req, res) => {
 });
 
 // POST /api/sports/worldcup/panel/:room — push a standalone WC info panel to a room
-// body: { panel: 'bracket' | 'scorers' | 'group', group?: 'A' }
+// body: { panel: 'scorers' | 'group', group?: 'A' }
 router.post('/sports/worldcup/panel/:room', async (req, res) => {
   const { room } = req.params;
   const { panel, group } = req.body || {};
   try {
     let state;
-    if (panel === 'bracket') {
-      state = { mode: 'wc-bracket', bannerText: 'Road to the Final', bracket: await espn.fetchWorldCupBracket() };
-    } else if (panel === 'scorers') {
+    if (panel === 'scorers') {
       state = { mode: 'wc-scorers', bannerText: 'Golden Boot Race', scorers: await espn.fetchWorldCupScorers() };
     } else if (panel === 'group') {
       const groups = await espn.fetchWorldCupStandings();
@@ -433,7 +431,7 @@ router.post('/sports/worldcup/panel/:room', async (req, res) => {
       if (!g) return res.status(404).json({ error: 'No group standings available' });
       state = { mode: 'wc-group', bannerText: g.name, group: g };
     } else {
-      return res.status(400).json({ error: 'Invalid panel — expected bracket | scorers | group' });
+      return res.status(400).json({ error: 'Invalid panel — expected scorers | group' });
     }
 
     // Take over the screen: stop game polling + screensaver rotation, then push
