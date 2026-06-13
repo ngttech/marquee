@@ -774,10 +774,19 @@ async function enrichWorldCupGame(game) {
 function startGamePolling(slug, gameId) {
   stopPolling(slug);
 
+  // Token identifying THIS poller. A poll() that awaits a network call may
+  // resolve after the room has been superseded by a newer push or stopped;
+  // comparing against roomPollers[slug] lets the stale poll discard its result
+  // instead of clobbering the current state. Registered before the first poll.
+  const myPoller = { gameId };
+  roomPollers[slug] = myPoller;
+
   async function poll() {
     try {
+      if (roomPollers[slug] !== myPoller) return; // superseded/stopped
       const clientCount = getClientCount(slug);
       const allGames = await fetchAllLiveGames();
+      if (roomPollers[slug] !== myPoller) return; // superseded during fetch
       const game = allGames.find(g => g.gameId === gameId);
 
       console.log(`[espn] Poll for "${slug}" gameId=${gameId} — ${allGames.length} games cached, match: ${game ? game.competition + ' (' + game.status + ')' : 'not found'}, clients: ${clientCount}`);
@@ -801,6 +810,7 @@ function startGamePolling(slug, gameId) {
 
       // Game still active — update state with fresh data
       await enrichWorldCupGame(game);
+      if (roomPollers[slug] !== myPoller) return; // superseded during enrich
       const { getState, setState } = require('../state');
       const current = getState(slug) || {};
       const mode = `sports-${game.sport}`;
@@ -815,8 +825,7 @@ function startGamePolling(slug, gameId) {
   poll();
 
   // 15s interval for live game updates
-  const timer = setInterval(poll, 15000);
-  roomPollers[slug] = { timer, gameId };
+  myPoller.timer = setInterval(poll, 15000);
   console.log(`[espn] Game polling started for "${slug}" gameId=${gameId} (15s interval)`);
 }
 
@@ -848,8 +857,12 @@ async function pushGameToRoom(slug, gameData) {
 
   if (broadcastFn) broadcastFn(slug);
 
-  // Start polling to keep score live and auto-revert when game ends
-  if (gameData.gameId) {
+  // Start polling to keep score live and auto-revert when the game ends.
+  // Skip already-finished ('post') matches: there's nothing live to track, and
+  // polling would immediately hit the "game ended → revert to screensaver"
+  // branch, bouncing a deliberately-pushed past match straight to the
+  // screensaver. A pushed post game stays on screen as a final-score recap.
+  if (gameData.gameId && gameData.status !== 'post') {
     startGamePolling(slug, gameData.gameId);
   }
 }
