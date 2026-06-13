@@ -1539,6 +1539,13 @@ function payloadHash(state) {
     s.homeTeam?.score, s.awayTeam?.score, s.status, s.clock, s.period, s.periodText,
     s.posterUrl, s.backdropUrl, s.year, s.overview, s.rating,
     s.screensaverView, s.showTopBanner, s.showBottomBanner, s.bottomBannerText,
+    // Match identity + World Cup context — without these, switching matches or
+    // attaching/updating the group table would hash identically and skip the render.
+    s.gameId, s.homeTeam?.name, s.awayTeam?.name,
+    s.group?.name,
+    s.group?.teams?.map(t => `${t.id}:${t.rank}:${t.points}:${t.goalDiff}`).join(','),
+    s.round, s.nextMatch?.home, s.nextMatch?.date,
+    s.bracket?.length, s.scorers?.length,
   ].join('|');
 }
 
