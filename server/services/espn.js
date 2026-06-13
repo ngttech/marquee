@@ -247,7 +247,7 @@ function normalizeGame(sportKey, event) {
     for (const s of (homeComp.statistics || [])) { stats[`home_${s.name}`] = s.displayValue; }
     for (const s of (awayComp.statistics || [])) { stats[`away_${s.name}`] = s.displayValue; }
     game.possession = { home: stats.home_possessionPct || '', away: stats.away_possessionPct || '' };
-    game.shots = { home: stats.home_shotsTotal || '0', away: stats.away_shotsTotal || '0' };
+    game.shots = { home: stats.home_totalShots || '0', away: stats.away_totalShots || '0' };
     game.shotsOnTarget = { home: stats.home_shotsOnTarget || '0', away: stats.away_shotsOnTarget || '0' };
     game.fouls = { home: stats.home_foulsCommitted || '', away: stats.away_foulsCommitted || '' };
     game.corners = { home: stats.home_wonCorners || '', away: stats.away_wonCorners || '' };
