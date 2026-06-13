@@ -600,6 +600,8 @@ body.cursor-hidden { cursor: none; }
 .wc-row.highlight td { color: #fff; }
 .wc-row.highlight .wc-team::after { content: '◀'; color: var(--sport-accent,#4ade80); margin-left: 6px; font-size: 0.7em; }
 .wc-standings.wc-compact td, .wc-standings.wc-compact th { font-size: clamp(11px,1.1vw,16px); padding: clamp(3px,0.6vh,7px) 3px; }
+.wc-live-tag { margin-left: 8px; font-size: 0.7em; font-weight: 700; letter-spacing: 0.06em; color: #ff4d4d; text-shadow: 0 0 6px rgba(255,77,77,0.6); animation: wc-live-blink 1.6s ease-in-out infinite; }
+@keyframes wc-live-blink { 50% { opacity: 0.45; } }
 
 /* next-match line shown under a live match */
 .wc-next {
@@ -2141,8 +2143,9 @@ function wcGroupTableHtml(group, highlightIds, compact) {
       <td class="wc-gd">${t.goalDiff}</td><td class="wc-pts">${t.points}</td>
     </tr>`;
   }).join('');
+  const liveTag = group.provisional ? '<span class="wc-live-tag">● LIVE</span>' : '';
   return `<table class="wc-standings${compact ? ' wc-compact' : ''}">
-    <thead><tr><th class="wc-pos">#</th><th class="wc-team">${group.name || 'Group'}</th>
+    <thead><tr><th class="wc-pos">#</th><th class="wc-team">${group.name || 'Group'}${liveTag}</th>
       <th>P</th><th>W</th><th>D</th><th>L</th><th class="wc-gd">GD</th><th class="wc-pts">PTS</th></tr></thead>
     <tbody>${rows}</tbody></table>`;
 }

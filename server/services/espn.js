@@ -672,6 +672,48 @@ function findGroupForTeams(groups, home, away) {
   ) || null;
 }
 
+// Overlay the in-progress score onto the group table so a live result moves the
+// two playing teams provisionally. ESPN's standings endpoint only counts FINISHED
+// matches, so without this the table shows pre-match positions for the whole game
+// (a team winning live stays in its old spot). Applied for status 'in' only —
+// once the match is 'post', ESPN settles the standings itself, so overlaying then
+// would double-count. Mutates + replaces game.group.
+function applyLiveResultToGroup(game) {
+  if (!game.group?.teams?.length || game.status !== 'in') return;
+  const hs = Number(game.homeTeam?.score), as = Number(game.awayTeam?.score);
+  if (!Number.isFinite(hs) || !Number.isFinite(as)) return;
+  const hid = String(game.homeTeam?.id || ''), aid = String(game.awayTeam?.id || '');
+
+  // Clone — findGroupForTeams returns a reference into the shared standingsCache;
+  // mutating it would compound every poll and bleed across rooms in the same group.
+  const teams = game.group.teams.map(t => ({ ...t }));
+  const apply = (t, gf, ga) => {
+    t.played += 1;
+    t.goalsFor += gf;
+    t.goalsAgainst += ga;
+    if (gf > ga) { t.wins += 1; t.points += 3; }
+    else if (gf < ga) { t.losses += 1; }
+    else { t.draws += 1; t.points += 1; }
+    const gd = t.goalsFor - t.goalsAgainst;
+    t.goalDiff = (gd > 0 ? '+' : '') + gd;
+    t.live = true;
+  };
+  for (const t of teams) {
+    if (String(t.id) === hid) apply(t, hs, as);
+    else if (String(t.id) === aid) apply(t, as, hs);
+  }
+
+  // FIFA group order: points → goal difference → goals for → name.
+  teams.sort((a, b) => {
+    const gdA = a.goalsFor - a.goalsAgainst, gdB = b.goalsFor - b.goalsAgainst;
+    return (b.points - a.points) || (gdB - gdA) || (b.goalsFor - a.goalsFor)
+      || String(a.name).localeCompare(String(b.name));
+  });
+  teams.forEach((t, i) => { t.rank = i + 1; });
+
+  game.group = { ...game.group, teams, provisional: true };
+}
+
 // ── World Cup knockout bracket ──
 // Built from the games we already fetch; round comes from each game's roundSlug
 // (event.season.slug). Group-stage games are excluded.
@@ -876,6 +918,7 @@ async function enrichWorldCupGame(game) {
   } else {
     const groups = await fetchWorldCupStandings();
     game.group = findGroupForTeams(groups, game.homeTeam, game.awayTeam);
+    applyLiveResultToGroup(game); // provisional live overlay (status 'in' only)
   }
 
   // Next-match preview: soonest upcoming fixture featuring either team
