@@ -1398,6 +1398,91 @@ body.cursor-hidden { cursor: none; }
 [data-theme="retroneon"] .ss-progress-bar.has-bottom-banner { bottom: 110px; }
 [data-theme="retroneon"] .ss-poster-view.has-bottom-banner { bottom: 110px; }
 [data-theme="retroneon"] .sports-layout { top: 204px; }
+
+/* ═══ MATCHDAY — World Cup identity banner (designed in Claude Design) ═══ */
+[data-theme="matchday"] .sports-layout { top: clamp(64px, 8vh, 120px); }
+.banner.matchday-banner { padding: 0; border-bottom: none; background: none; display: block; overflow: visible; }
+.lm-banner{
+  --lm-h: clamp(64px, 8vh, 120px);
+  --hot1: oklch(0.64 0.25 350);   /* magenta */
+  --hot2: oklch(0.75 0.185 58);   /* orange  */
+  --hot-glow: oklch(0.66 0.24 6 / 0.6);
+  position:relative; width:100%; height:var(--lm-h);
+  display:flex; align-items:stretch; overflow:hidden;
+  font-family:'Rajdhani',sans-serif; color:#fff;
+  background:linear-gradient(180deg, rgba(13,15,21,0.97), rgba(7,9,14,0.98));
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 14px 42px -12px rgba(0,0,0,0.85);
+  isolation:isolate;
+}
+.lm-banner .lm-rail{ position:absolute; top:0; left:0; right:0; height:3px; z-index:5;
+  background:linear-gradient(90deg, var(--hot1) 0%, var(--hot2) 50%, var(--hot1) 100%);
+  box-shadow:0 0 16px var(--hot-glow); }
+.lm-banner .lm-mark{ position:relative; z-index:3; flex:0 0 auto;
+  display:flex; align-items:center; gap:clamp(12px,1.4vw,26px);
+  padding:0 clamp(22px,2.4vw,50px) 0 clamp(14px,1.5vw,30px);
+  background:linear-gradient(180deg, rgba(20,22,30,0.98), rgba(11,13,19,0.99));
+  clip-path:polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%);
+  box-shadow:20px 0 34px -16px rgba(0,0,0,0.9); }
+.lm-banner .lm-mark::before{ content:''; position:absolute; left:0; top:0; bottom:0;
+  width:clamp(4px,.4vw,7px); background:linear-gradient(180deg, var(--hot1), var(--hot2)); }
+.lm-banner .lm-logo{ position:relative; flex:0 0 auto;
+  width:clamp(38px,5vh,70px); height:clamp(38px,5vh,70px); border-radius:12px;
+  background:repeating-linear-gradient(135deg, rgba(255,255,255,0.06) 0 6px, rgba(255,255,255,0.02) 6px 12px);
+  border:1px dashed rgba(255,255,255,0.22); overflow:hidden; }
+.lm-banner .lm-logo:not(:has(img))::after{ content:'LOGO'; position:absolute; inset:0;
+  display:grid; place-items:center; font-family:'Rajdhani',sans-serif; font-weight:600;
+  font-size:clamp(8px,1.1vh,11px); letter-spacing:.2em; color:rgba(255,255,255,0.4); }
+.lm-banner .lm-logo:has(img){ background:none; border-style:solid; border-color:rgba(255,255,255,0.12); }
+.lm-banner .lm-logo img{ width:100%; height:100%; object-fit:contain; display:block; }
+.lm-banner .lm-id{ display:flex; flex-direction:column; justify-content:center; gap:clamp(3px,.7vh,8px); }
+.lm-banner .lm-wc{ font-family:'Bebas Neue',sans-serif; font-size:clamp(20px,3.5vh,48px);
+  line-height:.84; letter-spacing:.02em; color:#fff; white-space:nowrap; }
+.lm-banner .lm-sub{ display:flex; align-items:center; gap:clamp(10px,1.2vw,22px); }
+.lm-banner .lm-badge{ position:relative; display:inline-flex; align-items:center; justify-content:center;
+  transform:skewX(-9deg); border-radius:5px;
+  padding:clamp(1px,.4vh,5px) clamp(6px,.75vw,13px);
+  background:linear-gradient(135deg, var(--hot1), var(--hot2));
+  box-shadow:0 4px 16px -5px var(--hot-glow), inset 0 1px 0 rgba(255,255,255,0.34);
+  animation:lm-badge 3.6s ease-in-out infinite; }
+.lm-banner .lm-badge span{ display:block; transform:skewX(9deg);
+  font-family:'Bebas Neue',sans-serif; font-size:clamp(16px,2.9vh,38px);
+  line-height:.84; letter-spacing:.03em; color:#fff; text-shadow:0 1px 5px rgba(0,0,0,.4); }
+.lm-banner .lm-hostwrap{ display:inline-flex; align-items:center; gap:clamp(5px,.55vw,10px); }
+.lm-banner .lm-hlabel{ font-family:'Rajdhani',sans-serif; font-weight:700;
+  font-size:clamp(7px,.95vh,11px); letter-spacing:.2em; text-transform:uppercase;
+  color:rgba(255,255,255,0.46); }
+.lm-banner .lm-hosts{ display:inline-flex; align-items:center; gap:clamp(3px,.35vw,6px); }
+.lm-banner .lm-hflag{ width:clamp(16px,2vh,27px); height:clamp(11px,1.35vh,18px); border-radius:3px;
+  background-size:cover; background-position:center;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.3), 0 1px 4px rgba(0,0,0,0.5); }
+.lm-banner .lm-hflag.ca{ background-image:url('/assets/matchday/host-ca.png'); background-color:#d52b1e; }
+.lm-banner .lm-hflag.mx{ background-image:url('/assets/matchday/host-mx.png'); background-color:#0c6b3f; }
+.lm-banner .lm-hflag.us{ background-image:url('/assets/matchday/host-us.png'); background-color:#2a3b8f; }
+.lm-banner .lm-ribbon{ position:relative; z-index:1; flex:1 1 auto; min-width:0;
+  display:flex; align-items:center; overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 3%, #000 96%, transparent 100%);
+          mask-image:linear-gradient(90deg, transparent 0, #000 3%, #000 96%, transparent 100%); }
+.lm-banner .lm-track{ display:flex; align-items:center; white-space:nowrap;
+  will-change:transform; animation:lm-scroll 64s linear infinite; }
+.lm-banner .lm-track > *{ margin-right:clamp(15px,1.7vw,34px); }
+.lm-banner .lm-team{ display:inline-flex; flex-direction:column; align-items:center; gap:clamp(3px,.55vh,6px); }
+.lm-banner .lm-emb{ position:relative; flex:0 0 auto;
+  width:clamp(34px,4.4vh,60px); height:clamp(34px,4.4vh,60px);
+  display:flex; align-items:center; justify-content:center; }
+.lm-banner .lm-emb img{ max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain;
+  filter:drop-shadow(0 0 6px color-mix(in srgb, var(--c) 50%, transparent)) drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
+.lm-banner .lm-tn{ font-family:'Rajdhani',sans-serif; font-weight:600;
+  font-size:clamp(8px,1.12vh,13px); letter-spacing:.08em; text-transform:uppercase;
+  color:rgba(255,255,255,0.82); white-space:nowrap; }
+@keyframes lm-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+@keyframes lm-badge{
+  0%,100%{ box-shadow:0 4px 14px -6px var(--hot-glow), inset 0 1px 0 rgba(255,255,255,0.34); }
+  50%{ box-shadow:0 4px 26px -3px var(--hot-glow), inset 0 1px 0 rgba(255,255,255,0.34); } }
+@media (prefers-reduced-motion: reduce){
+  .lm-banner .lm-track{ animation:none !important; }
+  .lm-banner .lm-badge{ animation:none !important; }
+}
 </style>
 </head>
 <body>
@@ -1478,6 +1563,12 @@ const THEMES = {
     glow: 'rgba(255,45,123,0.5)',
     bg: 'linear-gradient(135deg,#1a0a12,#0d0508,#1a0a12)',
     effect: 'retroneon',
+  },
+  matchday: {
+    color: '#ff3d8b',
+    glow: 'rgba(255,61,139,0.5)',
+    bg: 'linear-gradient(135deg,#1a0a14,#0d0509,#1a0a14)',
+    effect: null,
   },
 };
 
@@ -2098,6 +2189,52 @@ function buildWcContextHtml(s) {
   return html;
 }
 
+// ── Matchday (World Cup) banner — designed in Claude Design ──
+// [name, code (local crest filename), accent color]. Crests bundled at /assets/matchday/<code>.png
+const WC_TEAMS = [
+  ['Brazil','bra','#1f9e57'],['Argentina','arg','#6c9bd6'],['France','fra','#2a4a8b'],
+  ['England','eng','#d24b4b'],['Spain','esp','#d23b3b'],['Portugal','por','#2f8f4f'],
+  ['Netherlands','ned','#f0813a'],['Italy','ita','#2f7fd0'],['Germany','ger','#9aa0a6'],
+  ['Belgium','bel','#d4a017'],['Croatia','cro','#d24b4b'],['Uruguay','uru','#6cb8e6'],
+  ['Mexico','mex','#1f8a52'],['USA','usa','#3a5ba8'],['Canada','can','#d24b4b'],
+  ['Japan','jpn','#c0354f'],['Korea','kor','#2f5fae'],['Morocco','mar','#c33b3b'],
+  ['Senegal','sen','#2f9f5a'],['Colombia','col','#e6c93a'],['Switzerland','sui','#d24b4b'],
+  ['Nigeria','nga','#2f9f5a'],['Poland','pol','#d65b6b'],['Australia','aus','#2f9f6a'],
+];
+function matchdayTeamHtml([name, code, c], dup) {
+  // National-team crest, bundled locally — no external (ESPN) dependency.
+  return `<span class="lm-team"${dup ? ' aria-hidden="true"' : ''}><span class="lm-emb" style="--c:${c}"><img src="/assets/matchday/${code}.png" alt=""></span><span class="lm-tn">${name}</span></span>`;
+}
+function buildMatchdayBannerHtml(s) {
+  const logo = `<img src="/assets/matchday/wc-logo.png" alt="">`;
+  const ribbon = WC_TEAMS.map(t => matchdayTeamHtml(t, false)).join('') +
+                 WC_TEAMS.map(t => matchdayTeamHtml(t, true)).join('');
+  return `
+      <div class="banner matchday-banner">
+        <div class="lm-banner">
+          <span class="lm-rail" aria-hidden="true"></span>
+          <div class="lm-mark">
+            <div class="lm-logo" data-slot="event-logo" aria-label="FIFA World Cup 2026 logo">${logo}</div>
+            <div class="lm-id">
+              <span class="lm-wc">FIFA World Cup</span>
+              <span class="lm-sub">
+                <span class="lm-badge"><span>2026</span></span>
+                <span class="lm-hostwrap">
+                  <span class="lm-hlabel">Hosts</span>
+                  <span class="lm-hosts">
+                    <span class="lm-hflag ca" title="Canada"></span>
+                    <span class="lm-hflag mx" title="Mexico"></span>
+                    <span class="lm-hflag us" title="United States"></span>
+                  </span>
+                </span>
+              </span>
+            </div>
+          </div>
+          <div class="lm-ribbon"><div class="lm-track">${ribbon}</div></div>
+        </div>
+      </div>`;
+}
+
 function renderSportsSoccer(s) {
   const el = document.getElementById('display');
   const bannerText = s.bannerText || 'Live Match';
@@ -2131,11 +2268,12 @@ function renderSportsSoccer(s) {
   el.innerHTML = `
     <div class="np-wrap" style="background:#000">
       <div class="sports-atmosphere soccer-atmosphere"></div>
+      ${(s.theme || currentTheme) === 'matchday' ? buildMatchdayBannerHtml(s) : `
       <div class="banner">
         <span class="banner-orn" style="color:#4ade80">◆ ── ◆</span>
         <span class="banner-text" style="color:#4ade80">${bannerText}</span>
         <span class="banner-orn" style="color:#4ade80">◆ ── ◆</span>
-      </div>
+      </div>`}
       <div class="sports-layout">
         <div class="sports-card">
           ${tournamentLogoHtml(s)}

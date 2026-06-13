@@ -965,6 +965,11 @@ function stopPolling(slug) {
 }
 
 async function pushGameToRoom(slug, gameData) {
+  // Kill any poller left running from a prior push. Otherwise pushing a
+  // finished ('post') game — which deliberately skips starting its own poller
+  // below — leaves the previous live game's 15s loop alive, and it clobbers
+  // the pushed past game on its next tick.
+  stopPolling(slug);
   await enrichWorldCupGame(gameData);
   if (gameData.sport === 'soccer') await enrichSoccerBetting(gameData);
   const { getState, setState } = require('../state');

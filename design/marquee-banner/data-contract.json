@@ -1,0 +1,35 @@
+{
+  "_comment": "Sample live-match payload the banner binds to. Real data is pushed over WebSocket every ~15s while a match is live. Fields may be absent (e.g. leagueLogo, round, winProb) — design to degrade gracefully.",
+  "mode": "sports-soccer",
+  "isLive": true,
+  "status": "in",
+  "clock": "67",
+  "periodText": "2nd Half",
+  "league": "FIFA World Cup",
+  "leagueLogo": "https://a.espncdn.com/i/leaguelogos/soccer/500-dark/2310.png",
+  "round": "Round of 16",
+  "venue": "MetLife Stadium",
+  "venueCity": "East Rutherford",
+  "homeTeam": {
+    "id": "660",
+    "name": "United States",
+    "abbreviation": "USA",
+    "logo": "https://a.espncdn.com/i/teamlogos/countries/500/usa.png",
+    "score": 2,
+    "color": "#1a3a6b"
+  },
+  "awayTeam": {
+    "id": "448",
+    "name": "England",
+    "abbreviation": "ENG",
+    "logo": "https://a.espncdn.com/i/teamlogos/countries/500/eng.png",
+    "score": 1,
+    "color": "#cf142b"
+  },
+  "winProb": { "home": 52, "draw": 28, "away": 20 },
+  "_states": {
+    "pre":  { "isLive": false, "status": "pre",  "clock": "",     "periodText": "Today 8:00 PM", "homeScore": null, "awayScore": null },
+    "live": { "isLive": true,  "status": "in",   "clock": "45+2", "periodText": "1st Half" },
+    "post": { "isLive": false, "status": "post", "clock": "",     "periodText": "Full Time" }
+  }
+}
